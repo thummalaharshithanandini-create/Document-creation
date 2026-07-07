@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocGenius AI – Smart Document Generation Platform</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+  
+  <!-- CDNs for exporting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://unpkg.com/docx@8.2.2/build/index.js"></script>
+  
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Generate reports, proposals, invoices, resumes, and question papers instantly using Gemini AI. Brand your documents automatically, use voice input, and export to PDF/Word.">
+  <link rel="stylesheet" href="styles.css?v=3.0">
+</head>
+<body>
+
+  <!-- ================= AUTHENTICATION OVERLAY ================= -->
+  <div class="auth-overlay" id="auth-overlay">
+    
+    <!-- Welcome Screen -->
+    <div class="auth-box active-auth-screen" id="auth-screen-welcome">
+      <span class="material-symbols-outlined auth-logo">auto_awesome_motion</span>
+      <h2 class="auth-title">DocGenius AI</h2>
+      <p class="auth-tagline" id="auth-welcome-tagline">Smart Document Generation Platform</p>
+      
+      <div class="auth-btn-group">
+        <button class="auth-primary-btn" id="welcome-btn-signin">Sign In</button>
+        <button class="auth-secondary-btn" id="welcome-btn-signup">Create Account</button>
+        <button class="auth-link-btn" id="welcome-btn-guest">Continue as Guest</button>
+      </div>
+    </div>
+
+    <!-- Sign In Screen -->
+    <div class="auth-box" id="auth-screen-signin" style="display: none;">
+      <h2 class="auth-title">Welcome Back</h2>
+      <p class="auth-tagline">Login to access your documents</p>
+      
+      <div class="auth-form-group">
+        <div class="calc-input-group">
+          <label class="calc-label">Email Address</label>
+          <input type="email" class="calc-field" id="signin-email" placeholder="e.g. professional@genius.com">
+        </div>
+        <div class="calc-input-group">
+          <label class="calc-label">Password</label>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" class="calc-field" id="signin-password" placeholder="••••••••" style="padding-right: 48px;">
+            <button class="password-toggle-btn" id="signin-pass-toggle" type="button">
+              <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 13px;">
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" id="signin-remember" style="accent-color: var(--primary);"> Remember Me
+          </label>
+          <a href="#" class="auth-accent-link" id="signin-btn-forgot">Forgot Password?</a>
+        </div>
+
+        <button class="calc-btn" id="signin-submit-btn">Sign In</button>
+        <div class="auth-divider"><span>OR CONTINUE WITH</span></div>
+
+        <div class="auth-social-row">
+          <button class="auth-social-btn" id="signin-google" title="Sign in with Google">Google</button>
+          <button class="auth-social-btn" id="signin-apple" title="Sign in with Apple">Apple</button>
+        </div>
+        <button class="auth-secondary-btn" style="margin-top: 16px; height: 44px; font-size: 13.5px;" id="signin-btn-otp-mode">Sign In with Phone OTP</button>
+        <button class="auth-link-btn" style="margin-top: 12px;" id="signin-back">Back to Welcome</button>
+      </div>
+    </div>
+
+    <!-- Sign Up Screen -->
+    <div class="auth-box" id="auth-screen-signup" style="display: none; max-height: 90vh; overflow-y: auto;">
+      <h2 class="auth-title">Create Account</h2>
+      <p class="auth-tagline">Start generating professional documents in seconds</p>
+      
+      <div class="auth-form-group">
+        <div class="calc-input-group">
+          <label class="calc-label">Full Name</label>
+          <input type="text" class="calc-field" id="signup-name" placeholder="e.g. Ramesh Kumar">
+        </div>
+        <div class="calc-input-group">
+          <label class="calc-label">Email Address</label>
+          <input type="email" class="calc-field" id="signup-email" placeholder="e.g. ramesh@genius.com">
+        </div>
+        <div class="calc-input-group">
+          <label class="calc-label">Phone Number</label>
+          <input type="tel" class="calc-field" id="signup-phone" placeholder="e.g. +91 98765 43210">
+        </div>
+        <div class="calc-input-group">
+          <label class="calc-label">Password</label>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" class="calc-field" id="signup-password" placeholder="Min 6 characters" style="padding-right: 48px;">
+            <button class="password-toggle-btn" id="signup-pass-toggle" type="button">
+              <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+            </button>
+          </div>
+          <div class="password-strength-wrapper">
+            <div class="strength-bar" id="strength-bar-1"></div>
+            <div class="strength-bar" id="strength-bar-2"></div>
+            <div class="strength-bar" id="strength-bar-3"></div>
+            <div class="strength-bar" id="strength-bar-4"></div>
+          </div>
+          <div class="strength-label" id="strength-text">Password Strength: None</div>
+        </div>
+        <div class="calc-input-group">
+          <label class="calc-label">Confirm Password</label>
+          <input type="password" class="calc-field" id="signup-confirm-password" placeholder="Repeat password">
+        </div>
+
+        <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; margin-bottom: 20px; line-height: 1.4; cursor: pointer; color: var(--on-surface-variant);">
+          <input type="checkbox" id="signup-terms" style="margin-top: 3px; accent-color: var(--primary);">
+          <span>I accept the <a href="#" class="auth-accent-link" id="btn-show-privacy-terms">Terms of Service and Privacy Policy</a></span>
+        </label>
+
+        <button class="calc-btn" id="signup-submit-btn">Register & Verify</button>
+        <button class="auth-link-btn" style="margin-top: 12px;" id="signup-back">Back to Welcome</button>
+      </div>
+    </div>
+
+    <!-- OTP Verification Screen -->
+    <div class="auth-box" id="auth-screen-otp" style="display: none;">
+      <span class="material-symbols-outlined auth-logo" style="color: var(--secondary);">sms_failed</span>
+      <h2 class="auth-title">Verify Your Account</h2>
+      <p class="auth-tagline" id="otp-destination-text">Enter the 6-digit verification code sent to your email or phone</p>
+      <p class="auth-tagline" style="margin-top: -24px; color: var(--secondary); font-weight: 600;">For demo verification, use code: 123456</p>
+      
+      <div class="auth-form-group">
+        <div class="otp-inputs-row">
+          <input type="text" maxlength="1" class="otp-digit" id="otp-1" autocomplete="off" autofocus>
+          <input type="text" maxlength="1" class="otp-digit" id="otp-2" autocomplete="off">
+          <input type="text" maxlength="1" class="otp-digit" id="otp-3" autocomplete="off">
+          <input type="text" maxlength="1" class="otp-digit" id="otp-4" autocomplete="off">
+          <input type="text" maxlength="1" class="otp-digit" id="otp-5" autocomplete="off">
+          <input type="text" maxlength="1" class="otp-digit" id="otp-6" autocomplete="off">
+        </div>
+
+        <div style="text-align: center; margin-bottom: 20px; font-size: 13.5px;">
+          <span style="color: var(--on-surface-variant);" id="otp-timer-lbl">Resend code in: <strong id="otp-countdown">60s</strong></span>
+          <button class="auth-accent-link" id="otp-resend-btn" style="display: none; background: none; border: none; font-size: 13.5px; font-weight: 600; cursor: pointer;">Resend OTP Code</button>
+        </div>
+
+        <button class="calc-btn" id="otp-submit-btn">Confirm Code</button>
+        <button class="auth-link-btn" style="margin-top: 12px;" id="otp-back">Change Email / Phone</button>
+      </div>
+    </div>
+
+    <!-- Forgot Password Reset Screen -->
+    <div class="auth-box" id="auth-screen-forgot" style="display: none;">
+      <h2 class="auth-title">Reset Password</h2>
+      <p class="auth-tagline">Enter your email and we'll send you an OTP to reset your password</p>
+      
+      <div class="auth-form-group" id="forgot-step-1">
+        <div class="calc-input-group">
+          <label class="calc-label">Email Address</label>
+          <input type="email" class="calc-field" id="forgot-email" placeholder="e.g. client@genius.com">
+        </div>
+        <button class="calc-btn" id="forgot-submit-btn">Send Verification OTP</button>
+        <button class="auth-link-btn" style="margin-top: 12px;" id="forgot-back">Back to Sign In</button>
+      </div>
+
+      <div class="auth-form-group" id="forgot-step-2" style="display: none;">
+        <p class="auth-tagline" style="color: var(--primary); margin-bottom: 12px;">OTP code sent! Enter code and set your new password below.</p>
+        <div class="calc-input-group">
+          <label class="calc-label">6-Digit OTP</label>
+          <input type="text" class="calc-field" id="forgot-otp" placeholder="Enter 6-digit code">
+        </div>
+        <div class="calc-input-group">
+          <label class="calc-label">New Password</label>
+          <input type="password" class="calc-field" id="forgot-new-password" placeholder="Min 6 characters">
+        </div>
+        <button class="calc-btn" id="forgot-reset-btn">Save New Password</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= MAIN APP VIEWPORT ================= -->
+  <div class="app-layout" id="app-layout" style="display: none;">
+    
+    <!-- Collapsible Sidebar (Visible on Desktop/Tablet) -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <span class="material-symbols-outlined sidebar-logo">auto_awesome_motion</span>
+        <span class="sidebar-brand-name">DocGenius AI</span>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <button class="sidebar-item active" data-target="home">
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="sidebar-label">Dashboard</span>
+        </button>
+        
+        <button class="sidebar-item" data-target="generator" id="nav-item-generator">
+          <span class="material-symbols-outlined">description</span>
+          <span class="sidebar-label">AI Generator</span>
+        </button>
+
+        <button class="sidebar-item" data-target="history">
+          <span class="material-symbols-outlined">history</span>
+          <span class="sidebar-label">Documents Log</span>
+        </button>
+
+        <button class="sidebar-item" data-target="brand">
+          <span class="material-symbols-outlined">brush</span>
+          <span class="sidebar-label">Brand Kit</span>
+        </button>
+
+        <button class="sidebar-item" data-target="settings">
+          <span class="material-symbols-outlined">settings</span>
+          <span class="sidebar-label">Settings</span>
+        </button>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <button class="sidebar-toggle-btn" id="sidebar-toggle" title="Collapse Sidebar">
+          <span class="material-symbols-outlined">menu_open</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Workspace -->
+    <div class="main-content">
+      
+      <!-- Top Header App Bar -->
+      <header class="top-app-bar">
+        <div class="header-left">
+          <button class="top-bar-action mobile-menu-btn" id="mobile-drawer-toggle" title="Open Navigation Menu">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          <h1 class="app-title" id="page-header-title">Dashboard</h1>
+        </div>
+        <div class="header-right" style="display: flex; gap: 8px; align-items: center;">
+          
+          <!-- Gemini API Status indicator -->
+          <div id="header-api-badge" class="header-status-badge api-inactive" title="Gemini API Key Connection Status">
+            <span class="material-symbols-outlined" style="font-size: 16px;">key</span>
+            <span id="header-api-text">API Offline (Mock Mode)</span>
+          </div>
+
+          <!-- Brand Status Indicator -->
+          <div id="header-brand-badge" class="header-status-badge brand-inactive" title="Brand Kit Configuration Status">
+            <span class="material-symbols-outlined" style="font-size: 16px;">verified_user</span>
+            <span id="header-brand-text">Generic Branding</span>
+          </div>
+
+          <div class="header-user-status" id="header-user-avatar" title="Manage Profile">U</div>
+          <button class="top-bar-action" id="header-logout-btn" title="Sign Out">
+            <span class="material-symbols-outlined">logout</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Simulated Push Notification Banner -->
+      <div class="notification-banner" id="notif-banner">
+        <span class="material-symbols-outlined notif-icon">info</span>
+        <div style="flex: 1;">
+          <div class="notif-title" id="notif-title-text">Notification</div>
+          <div class="notif-body" id="notif-body-text">Welcome to DocGenius AI!</div>
+        </div>
+        <button class="notif-close" id="notif-close-btn">
+          <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
+        </button>
+      </div>
+
+      <!-- Main Viewport Content Area -->
+      <main class="view-viewport" id="view-viewport">
+        
+        <!-- ================= PAGE 1: DASHBOARD (HOME) ================= -->
+        <section class="page-view active-view" id="view-home">
+          <!-- Welcome Banner -->
+          <div class="welcome-banner">
+            <div>
+              <h2 class="welcome-title" id="home-welcome-name">Hello, Genius!</h2>
+              <p class="welcome-subtitle">Generate reports, invoices, question papers, and branded templates instantly.</p>
+            </div>
+            <!-- Statistics Card -->
+            <div class="stats-summary-card">
+              <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--primary);">Documents Generated</div>
+              <div style="font-family: var(--font-brand); font-size: 26px; font-weight: bold; margin: 4px 0;" id="stats-docs-count">0</div>
+              <div style="height: 4px; background: rgba(0,0,0,0.3); border-radius: 2px; overflow: hidden; margin-top: 6px; width: 100px;">
+                <div style="height: 100%; background: var(--primary); width: 100%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Templates Panel -->
+          <div class="dashboard-section-header">
+            <h3>Quick Start Templates</h3>
+            <p>Select a document type to launch the generator</p>
+          </div>
+          
+          <div class="quick-templates-grid">
+            <div class="template-card" data-category="business" data-type="invoice">
+              <span class="material-symbols-outlined template-icon" style="color: #4CAF50;">receipt_long</span>
+              <h4>GST Invoice</h4>
+              <p>Professional tax bill structure with tables</p>
+            </div>
+            <div class="template-card" data-category="business" data-type="proposal">
+              <span class="material-symbols-outlined template-icon" style="color: #2196F3;">business_center</span>
+              <h4>Business Proposal</h4>
+              <p>Pitch services, budgets, and project scopes</p>
+            </div>
+            <div class="template-card" data-category="business" data-type="quotation">
+              <span class="material-symbols-outlined template-icon" style="color: #FF9800;">request_quote</span>
+              <h4>Sales Quotation</h4>
+              <p>Outline product prices, terms, and discounts</p>
+            </div>
+            <div class="template-card" data-category="education" data-type="question_paper">
+              <span class="material-symbols-outlined template-icon" style="color: #9C27B0;">quiz</span>
+              <h4>Question Paper</h4>
+              <p>Generate academic assessments & tests</p>
+            </div>
+            <div class="template-card" data-category="personal" data-type="resume">
+              <span class="material-symbols-outlined template-icon" style="color: #E91E63;">contact_page</span>
+              <h4>Professional Resume</h4>
+              <p>Stand out with targeted skills and layout</p>
+            </div>
+            <div class="template-card" data-category="business" data-type="meeting_minutes">
+              <span class="material-symbols-outlined template-icon" style="color: #00BCD4;">groups</span>
+              <h4>Meeting Minutes</h4>
+              <p>Summarize logs, tasks, and corporate summaries</p>
+            </div>
+          </div>
+
+          <!-- Recent Documents Log Section -->
+          <div class="dashboard-section-header" style="margin-top: 32px;">
+            <h3>Recent Documents</h3>
+            <p>Access your recently generated and modified documents</p>
+          </div>
+          
+          <div class="recent-documents-box">
+            <table class="history-table" id="dashboard-recent-table" style="display: none;">
+              <thead>
+                <tr>
+                  <th>Document Title</th>
+                  <th>Type</th>
+                  <th>Last Modified</th>
+                  <th>Version</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-recent-tbody">
+                <!-- Injected dynamically -->
+              </tbody>
+            </table>
+            <div class="empty-state-box" id="dashboard-recent-empty">
+              <span class="material-symbols-outlined" style="font-size: 48px; color: var(--outline);">folder_open</span>
+              <p>No documents generated yet. Select a template above or head to the AI Generator to get started!</p>
+              <button class="calc-btn" style="width: auto; padding: 10px 20px; margin-top: 12px;" onclick="switchView('generator')">Open Generator</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 2: AI GENERATOR ================= -->
+        <section class="page-view" id="view-generator">
+          <div class="generator-split-container">
+            
+            <!-- LEFT COLUMN: Generator Controls -->
+            <div class="generator-controls-panel">
+              <h3 class="panel-section-title">Configure Document</h3>
+              
+              <!-- Document Selection Details -->
+              <div class="calc-card" style="margin-bottom: 16px;">
+                <div class="calc-input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <div class="calc-input-group">
+                    <label class="calc-label">Category</label>
+                    <select class="calc-field" id="gen-category">
+                      <option value="business">💼 Business</option>
+                      <option value="education">🎓 Education</option>
+                      <option value="personal">👤 Personal</option>
+                    </select>
+                  </div>
+                  <div class="calc-input-group">
+                    <label class="calc-label">Document Type</label>
+                    <select class="calc-field" id="gen-type">
+                      <!-- Dynamic options populated from category selection -->
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Dynamic Form Fields Area (populated depending on type) -->
+                <div id="gen-dynamic-fields-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
+                  <!-- Dynamic fields injected here -->
+                </div>
+              </div>
+
+              <!-- Main Prompt & Voice input -->
+              <div class="calc-card" style="margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <label class="calc-label" style="margin-bottom: 0;">AI Instructions & Context</label>
+                  <button id="btn-voice-input" class="voice-input-btn" title="Enable Voice Input">
+                    <span class="material-symbols-outlined" id="voice-icon">mic</span>
+                    <span id="voice-status-lbl">Voice Input</span>
+                  </button>
+                </div>
+                <textarea class="calc-field" id="gen-prompt" placeholder="Describe specific details, terms, items, or summaries to customize the generated document..." style="height: 90px; resize: none; line-height: 1.5; font-size: 13.5px;"></textarea>
+              </div>
+
+              <!-- Tone & Branding configurations -->
+              <div class="calc-card" style="margin-bottom: 16px;">
+                <div class="calc-input-row" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; margin-bottom: 12px;">
+                  <div class="calc-input-group">
+                    <label class="calc-label">Writing Tone</label>
+                    <select class="calc-field" id="gen-tone">
+                      <option value="professional">Professional & Technical</option>
+                      <option value="formal">Formal & Corporate</option>
+                      <option value="friendly">Friendly & Creative</option>
+                    </select>
+                  </div>
+                  <div class="calc-input-group">
+                    <label class="calc-label">Language</label>
+                    <select class="calc-field" id="gen-language">
+                      <option value="English">English</option>
+                      <option value="Hindi">Hindi (हिन्दी)</option>
+                      <option value="Telugu">Telugu (తెలుగు)</option>
+                      <option value="Tamil">Tamil (தமிழ்)</option>
+                      <option value="Spanish">Spanish (Español)</option>
+                      <option value="French">French (Français)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; cursor: pointer;">
+                  <input type="checkbox" id="gen-apply-brand" checked style="accent-color: var(--primary);">
+                  <span>Apply Brand Kit layout & headers</span>
+                </label>
+              </div>
+
+              <!-- Core Generate Button -->
+              <button class="calc-btn primary-glowing-btn" id="btn-generate-doc" style="margin-bottom: 24px;">
+                <span class="material-symbols-outlined">auto_awesome</span>
+                <span>Generate Document</span>
+              </button>
+
+              <!-- Edit & AI Assist Utilities Panel -->
+              <div class="assist-utilities-box" id="assist-utilities-box" style="display: none;">
+                <h4 class="util-box-title">AI Editing Assistant</h4>
+                <p class="util-box-description">Perform quick AI modifications on the preview document content.</p>
+                
+                <div class="utility-actions-grid">
+                  <button class="utility-btn" id="btn-util-rewrite">
+                    <span class="material-symbols-outlined">edit_note</span>
+                    <span>Professional Rewrite</span>
+                  </button>
+                  <button class="utility-btn" id="btn-util-summarize">
+                    <span class="material-symbols-outlined">compress</span>
+                    <span>Summarize Document</span>
+                  </button>
+                  <button class="utility-btn" id="btn-util-grammar">
+                    <span class="material-symbols-outlined">spellcheck</span>
+                    <span>Correct Grammar</span>
+                  </button>
+                  <div style="display: flex; gap: 6px; align-items: center; grid-column: span 2;">
+                    <select class="calc-field" id="util-translate-lang" style="height: 38px; font-size: 12px; padding: 0 8px; flex: 1;">
+                      <option value="English">Translate to English</option>
+                      <option value="Hindi">Translate to Hindi</option>
+                      <option value="Telugu">Translate to Telugu</option>
+                      <option value="Tamil">Translate to Tamil</option>
+                      <option value="Spanish">Translate to Spanish</option>
+                      <option value="French">Translate to French</option>
+                    </select>
+                    <button class="utility-btn" id="btn-util-translate" style="height: 38px; margin-top: 0; min-width: 80px; width: auto; font-size: 12px;">Go</button>
+                  </div>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid var(--outline-variant); margin: 16px 0;">
+
+                <!-- One-click Document Type Conversion widget -->
+                <h4 class="util-box-title">One-Click Document Converter</h4>
+                <p class="util-box-description">Convert this document structure into a different format.</p>
+                <div style="display: flex; gap: 8px;">
+                  <select class="calc-field" id="util-convert-target" style="flex: 1; height: 38px; font-size: 12.5px; padding: 0 8px;">
+                    <option value="proposal">Convert to Proposal</option>
+                    <option value="quotation">Convert to Quotation</option>
+                    <option value="invoice">Convert to Invoice</option>
+                    <option value="meeting_minutes">Convert to Meeting Minutes</option>
+                  </select>
+                  <button class="calc-btn" id="btn-util-convert" style="width: auto; padding: 0 16px; height: 38px; font-size: 12.5px; margin-top: 0;">Convert</button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Visual Editor and Interactive A4 Preview -->
+            <div class="generator-preview-panel">
+              
+              <!-- Toolbar panel -->
+              <div class="preview-toolbar-row">
+                <div style="display: flex; gap: 8px;">
+                  <button class="preview-tool-btn" id="btn-save-doc" title="Save Document Draft" disabled>
+                    <span class="material-symbols-outlined">save</span>
+                    <span>Save</span>
+                  </button>
+                  <button class="preview-tool-btn" id="btn-share-doc" title="Generate Shareable Link" disabled>
+                    <span class="material-symbols-outlined">share</span>
+                    <span>Share Link</span>
+                  </button>
+                </div>
+                
+                <div style="display: flex; gap: 8px;">
+                  <button class="preview-export-btn btn-export-pdf" id="btn-export-pdf" title="Export as PDF" disabled>
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                    <span>PDF</span>
+                  </button>
+                  <button class="preview-export-btn btn-export-word" id="btn-export-word" title="Export as Word (.docx)" disabled>
+                    <span class="material-symbols-outlined">description</span>
+                    <span>Word</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- A4 Page Editor Container -->
+              <div class="a4-editor-viewport">
+                <div class="a4-sheet-paper" id="a4-document-paper">
+                  <!-- Header branding zone -->
+                  <div class="document-brand-header" id="doc-brand-header" style="display: none;">
+                    <div class="brand-header-flex">
+                      <div class="brand-header-logo-container">
+                        <img id="doc-brand-logo" src="" alt="Brand Logo" style="display: none;">
+                        <span id="doc-brand-logo-placeholder" class="material-symbols-outlined" style="font-size: 40px; color: var(--primary);">business</span>
+                      </div>
+                      <div class="brand-header-text-block">
+                        <h4 id="doc-brand-name">Company Name</h4>
+                        <p id="doc-brand-tagline">Tagline goes here</p>
+                        <p id="doc-brand-details" class="brand-subtext">Address, Phone, Email</p>
+                      </div>
+                    </div>
+                    <div id="doc-brand-tax-line" class="brand-tax-header-line">GSTIN: -</div>
+                    <hr style="border: none; border-top: 2px solid var(--primary); margin: 12px 0 0 0;">
+                  </div>
+
+                  <!-- Content Area (contenteditable) -->
+                  <div class="document-content-editor" id="document-content-editor" contenteditable="true" placeholder="Click 'Generate Document' to start, or type directly here to write from scratch...">
+                    <!-- Generative content goes here -->
+                  </div>
+
+                  <!-- Footer branding zone -->
+                  <div class="document-brand-footer" id="doc-brand-footer" style="display: none;">
+                    <hr style="border: none; border-top: 1px solid var(--outline-variant); margin: 12px 0 6px 0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--outline);">
+                      <span id="doc-brand-footer-text">Generated via DocGenius AI Platform</span>
+                      <span>Page 1 of 1</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Version Control Side Log (only displays when editing a saved document) -->
+                <div class="version-control-sidebar" id="version-control-sidebar" style="display: none;">
+                  <h4 style="font-family: var(--font-brand); font-size: 13.5px; border-bottom: 1px solid var(--outline-variant); padding-bottom: 8px; margin-bottom: 12px;">Version History</h4>
+                  <div class="version-log-list" id="version-log-list">
+                    <!-- Dynamic version history rows -->
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ================= PAGE 3: SAVED DOCUMENTS LOG ================= -->
+        <section class="page-view" id="view-history">
+          <div class="history-controls-bar" style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
+            <div class="search-container" style="flex: 1; max-width: 400px; margin-bottom: 0;">
+              <span class="material-symbols-outlined search-icon">search</span>
+              <input type="text" class="search-input" id="history-search" placeholder="Search generated documents...">
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <select class="calc-field" id="history-filter-category" style="width: 150px; height: 40px; font-size: 13.5px; padding: 0 8px;">
+                <option value="all">All Categories</option>
+                <option value="business">Business</option>
+                <option value="education">Education</option>
+                <option value="personal">Personal</option>
+              </select>
+              <select class="calc-field" id="history-sort" style="width: 150px; height: 40px; font-size: 13.5px; padding: 0 8px;">
+                <option value="date-desc">Newest First</option>
+                <option value="date-asc">Oldest First</option>
+                <option value="alpha-asc">A to Z</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="recent-documents-box">
+            <table class="history-table" id="history-registry-table" style="display: none;">
+              <thead>
+                <tr>
+                  <th>Document Title</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th>Last Modified</th>
+                  <th>Versions</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="history-registry-tbody">
+                <!-- Injected dynamically -->
+              </tbody>
+            </table>
+            
+            <div class="empty-state-box" id="history-registry-empty">
+              <span class="material-symbols-outlined" style="font-size: 48px; color: var(--outline);">folder_open</span>
+              <p>No documents found matching the criteria. Go to the Generator to create one!</p>
+              <button class="calc-btn" style="width: auto; padding: 10px 20px; margin-top: 12px;" onclick="switchView('generator')">Open Generator</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 4: BRAND KIT ================= -->
+        <section class="page-view" id="view-brand">
+          <div class="brand-kit-two-col">
+            
+            <!-- Left Side: Brand Form -->
+            <div class="calc-card" style="margin-bottom: 0;">
+              <h3 class="card-title" style="color: var(--primary); font-size: 18px; margin-bottom: 6px;">Corporate Identity Settings</h3>
+              <p class="card-description" style="margin-bottom: 20px;">Provide your business details. When branding is enabled, every generated document automatically includes these details in headers and footers.</p>
+              
+              <!-- Logo Upload Area -->
+              <div class="calc-input-group">
+                <label class="calc-label">Company Logo</label>
+                <div class="logo-uploader-zone" id="logo-uploader-zone">
+                  <input type="file" id="logo-file-input" accept="image/*" style="display: none;">
+                  <div class="uploader-prompt" id="logo-uploader-prompt">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--primary); margin-bottom: 8px;">cloud_upload</span>
+                    <span style="font-size: 13.5px; font-weight: 500;">Click or Drag to Upload Image</span>
+                    <span style="font-size: 11px; color: var(--outline); margin-top: 4px;">PNG, JPG or SVG format</span>
+                  </div>
+                  <div class="uploader-preview" id="logo-uploader-preview" style="display: none;">
+                    <img id="logo-preview-img" src="" alt="Brand Preview">
+                    <button class="logo-remove-btn" id="btn-remove-logo" type="button">
+                      <span class="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Brand Text Forms -->
+              <div class="calc-input-group">
+                <label class="calc-label">Company / Personal Name</label>
+                <input type="text" class="calc-field" id="brand-name" placeholder="e.g. Acme Corporation">
+              </div>
+
+              <div class="calc-input-group">
+                <label class="calc-label">Company Tagline / Motto</label>
+                <input type="text" class="calc-field" id="brand-tagline" placeholder="e.g. Elevating Smart Operations">
+              </div>
+
+              <div class="calc-input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                <div class="calc-input-group" style="margin-bottom: 0;">
+                  <label class="calc-label">Contact Email</label>
+                  <input type="email" class="calc-field" id="brand-email" placeholder="e.g. contact@acme.com">
+                </div>
+                <div class="calc-input-group" style="margin-bottom: 0;">
+                  <label class="calc-label">Contact Phone</label>
+                  <input type="tel" class="calc-field" id="brand-phone" placeholder="e.g. +91 99887 76655">
+                </div>
+              </div>
+
+              <div class="calc-input-group">
+                <label class="calc-label">Corporate Address / Office</label>
+                <input type="text" class="calc-field" id="brand-address" placeholder="e.g. Tech Park Road, Sector 5, Bangalore">
+              </div>
+
+              <div class="calc-input-row" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; margin-bottom: 20px;">
+                <div class="calc-input-group" style="margin-bottom: 0;">
+                  <label class="calc-label">Tax Number / GSTIN (Invoices)</label>
+                  <input type="text" class="calc-field" id="brand-tax" placeholder="e.g. 29AAAAA0000A1Z1">
+                </div>
+                <div class="calc-input-group" style="margin-bottom: 0;">
+                  <label class="calc-label">Theme Primary Accent</label>
+                  <input type="color" class="calc-field" id="brand-color" value="#bb86fc" style="height: 40px; padding: 4px; cursor: pointer;">
+                </div>
+              </div>
+
+              <button class="calc-btn" id="btn-save-brand">Save Brand Profile</button>
+            </div>
+
+            <!-- Right Side: Brand Mockup Preview -->
+            <div class="brand-preview-display-pane">
+              <h3 class="panel-section-title" style="margin-top: 0;">Live Header Blueprint</h3>
+              <p style="font-size: 12px; color: var(--on-surface-variant); margin-bottom: 16px;">This is how your branding header will appear at the top of A4 exports.</p>
+              
+              <div class="brand-preview-frame">
+                <div class="brand-header-flex">
+                  <div class="brand-header-logo-container" style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center; width: 60px; height: 60px;">
+                    <img id="blueprint-logo-preview" src="" alt="Blueprint Logo" style="display: none; max-width: 100%; max-height: 100%; object-fit: contain;">
+                    <span id="blueprint-logo-placeholder" class="material-symbols-outlined" style="font-size: 36px; color: var(--primary);">business</span>
+                  </div>
+                  <div class="brand-header-text-block">
+                    <h4 id="blueprint-brand-name" style="margin: 0 0 4px 0; font-family: var(--font-brand); font-size: 16px; color: #fff;">Company Name</h4>
+                    <p id="blueprint-brand-tagline" style="margin: 0 0 4px 0; font-size: 11px; color: var(--outline);">Tagline goes here</p>
+                    <p id="blueprint-brand-details" style="margin: 0; font-size: 9px; color: var(--on-surface-variant); line-height: 1.3;">Address, Phone, Email</p>
+                  </div>
+                </div>
+                <div id="blueprint-brand-tax" style="font-size: 10px; font-weight: 600; color: var(--primary); margin-top: 8px;">GSTIN: -</div>
+                <hr style="border: none; border-top: 2px solid var(--primary); margin: 12px 0 0 0;">
+              </div>
+
+              <div class="calc-card" style="margin-top: 24px; border: 1px dashed var(--outline-variant);">
+                <h4 style="font-family: var(--font-brand); font-size: 14px; margin-bottom: 6px;">💡 Design Guidelines</h4>
+                <p style="font-size: 12px; line-height: 1.5; color: var(--on-surface-variant);">To ensure a clean display, upload a logo with a transparent background. Corporate brand palettes will adjust visual highlights on both document tables and headers automatically.</p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ================= PAGE 5: SYSTEM SETTINGS ================= -->
+        <section class="page-view" id="view-settings">
+          <div class="home-two-col-layout" style="grid-template-columns: 1fr 1fr; gap: 24px;">
+            
+            <!-- Left Column: Gemini API & App Config -->
+            <div class="calc-card" style="margin-bottom: 0;">
+              <h3 class="card-title" style="color: var(--primary); font-size: 16px; margin-bottom: 12px;">Gemini AI Integration</h3>
+              <p class="card-description" style="margin-bottom: 16px;">Configure your API details below to connect DocGenius AI directly to the Google Gemini models. If left blank, the app runs on a simulated offline fallback database.</p>
+              
+              <div class="calc-input-group">
+                <label class="calc-label">Gemini API Key</label>
+                <div style="position: relative; display: flex; align-items: center;">
+                  <input type="password" class="calc-field" id="settings-gemini-key" placeholder="Enter API Key (e.g. AIzaSy...)" style="padding-right: 48px;">
+                  <button class="password-toggle-btn" id="gemini-key-toggle" type="button">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="calc-input-group">
+                <label class="calc-label">Target AI Model</label>
+                <select class="calc-field" id="settings-gemini-model">
+                  <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended - Ultra Fast)</option>
+                  <option value="gemini-2.5-pro">Gemini 2.5 Pro (High Precision & Reasoning)</option>
+                </select>
+              </div>
+
+              <button class="calc-btn" id="btn-save-api-settings" style="margin-bottom: 24px;">Save API Configuration</button>
+
+              <h3 class="card-title" style="color: var(--primary); font-size: 16px; margin-bottom: 12px; margin-top: 24px;">SMTP Email Dispatcher</h3>
+              <p class="card-description" style="margin-bottom: 16px;">Configure SMTP details to send real OTP verification codes to user emails during registration and password recovery. (For Gmail, create and use a Google App Password).</p>
+              
+              <div class="calc-input-group">
+                <label class="calc-label">SMTP Username / Email</label>
+                <input type="email" class="calc-field" id="settings-smtp-user" placeholder="e.g. system@gmail.com">
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-label">SMTP Password / App Password</label>
+                <div style="position: relative; display: flex; align-items: center;">
+                  <input type="password" class="calc-field" id="settings-smtp-pass" placeholder="Enter App Password (16 characters)" style="padding-right: 48px;">
+                  <button class="password-toggle-btn" id="smtp-pass-toggle" type="button">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+                  </button>
+                </div>
+              </div>
+              <div class="calc-input-row" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; margin-bottom: 16px;">
+                <div class="calc-input-group" style="margin-bottom: 0;">
+                  <label class="calc-label">SMTP Server Host</label>
+                  <input type="text" class="calc-field" id="settings-smtp-host" placeholder="smtp.gmail.com" value="smtp.gmail.com">
+                </div>
+                <div class="calc-input-group" style="margin-bottom: 0;">
+                  <label class="calc-label">SMTP Port</label>
+                  <input type="number" class="calc-field" id="settings-smtp-port" placeholder="587" value="587">
+                </div>
+              </div>
+
+              <h3 class="card-title" style="color: var(--primary); font-size: 16px; margin-bottom: 12px; margin-top: 24px;">Firebase Project Connection</h3>
+              <p class="card-description" style="margin-bottom: 16px;">Connect a real Firebase Project to enable official Google Sign-In, Email/Password authentication, and active session state persistence. (Verify you enabled Google Auth provider in Firebase Console).</p>
+              
+              <div class="calc-input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div class="calc-input-group" style="margin-bottom: 0;">
+                  <label class="calc-label">Firebase API Key</label>
+                  <input type="text" class="calc-field" id="settings-fb-key" placeholder="AIzaSy...">
+                </div>
+                <div class="calc-input-group" style="margin-bottom: 0;">
+                  <label class="calc-label">Auth Domain</label>
+                  <input type="text" class="calc-field" id="settings-fb-domain" placeholder="project-id.firebaseapp.com">
+                </div>
+              </div>
+              <div class="calc-input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                <div class="calc-input-group" style="margin-bottom: 0;">
+                  <label class="calc-label">Project ID</label>
+                  <input type="text" class="calc-field" id="settings-fb-project" placeholder="project-id">
+                </div>
+                <div class="calc-input-group" style="margin-bottom: 0;">
+                  <label class="calc-label">App ID</label>
+                  <input type="text" class="calc-field" id="settings-fb-app" placeholder="1:12345:web:abcd">
+                </div>
+              </div>
+
+              <h3 class="card-title" style="color: var(--secondary); font-size: 16px; margin-bottom: 12px;">Voice & Accessibility</h3>
+              <div class="calc-input-group">
+                <label class="calc-label" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="checkbox" id="settings-audio-sound" checked style="accent-color: var(--secondary);">
+                  <span>Enable click audio feedback (haptic beep)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Right Column: User Account Preferences -->
+            <div class="calc-card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <h3 class="card-title" style="color: var(--primary); font-size: 16px; margin-bottom: 12px;">Account Profile</h3>
+                
+                <div class="calc-input-group">
+                  <label class="calc-label">Full Name</label>
+                  <input type="text" class="calc-field" id="profile-name" placeholder="User Name">
+                </div>
+
+                <div class="calc-input-group">
+                  <label class="calc-label">Email Address</label>
+                  <input type="email" class="calc-field" id="profile-email" placeholder="email@address.com">
+                </div>
+
+                <div class="calc-input-group">
+                  <label class="calc-label">Phone Number</label>
+                  <input type="tel" class="calc-field" id="profile-phone" placeholder="Phone Number">
+                </div>
+
+                <button class="calc-btn" id="btn-save-profile" style="margin-bottom: 24px;">Update Profile Details</button>
+              </div>
+
+              <div style="border-top: 1px solid var(--outline-variant); padding-top: 20px;">
+                <h3 class="card-title" style="color: var(--error); font-size: 15px; margin-bottom: 8px;">Danger Zone</h3>
+                <p class="card-description" style="margin-bottom: 12px;">Deleting your account clears all LocalStorage document drafts, versions, and brand kit configurations irreversibly.</p>
+                
+                <button class="calc-btn btn-danger" id="btn-delete-profile-account" style="background: var(--error); color: #fff; width: auto; padding: 10px 20px;">Delete Account Permanently</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Dialog Modal: Privacy Policy & Terms -->
+  <div class="modal-overlay" id="modal-privacy-terms" style="display: none;">
+    <div class="modal-box" style="max-width: 600px;">
+      <h3 style="font-family: var(--font-brand); font-size: 20px; color: var(--primary); margin: 0 0 12px 0;">Terms of Service & Privacy</h3>
+      <div style="font-size: 13px; line-height: 1.6; color: var(--on-surface-variant); max-height: 300px; overflow-y: auto; padding-right: 8px; margin-bottom: 20px;">
+        <h4>1. Data Privacy</h4>
+        <p>DocGenius AI operates primarily client-side. All documents, credentials, API configurations, and custom logos are stored directly in your local browser storage (LocalStorage). No document data is collected or stored on our servers.</p>
+        <h4>2. Gemini API Connections</h4>
+        <p>If you configure a custom Gemini API key, calls to the AI models will be routed directly from your browser to Google Gemini API servers. Your key is stored securely in LocalStorage and is never shared.</p>
+        <h4>3. Usage Terms</h4>
+        <p>This application is provided as a tool for document drafting and layout generation. Users are responsible for reviewing the accuracy and legality of all generated documents, certificates, and invoices.</p>
+      </div>
+      <button class="calc-btn" id="btn-close-privacy">I Understand</button>
+    </div>
+  </div>
+
+  <!-- Dialog Modal: Generic Informational message -->
+  <div class="modal-overlay" id="modal-info-box" style="display: none;">
+    <div class="modal-box" style="max-width: 400px; text-align: center;">
+      <span class="material-symbols-outlined" id="info-box-icon" style="font-size: 48px; color: var(--primary); margin-bottom: 12px;">info</span>
+      <h3 id="info-box-title" style="font-family: var(--font-brand); font-size: 18px; margin: 0 0 8px 0;">Notice</h3>
+      <p id="info-box-message" style="font-size: 13.5px; line-height: 1.5; color: var(--on-surface-variant); margin: 0 0 20px 0;">Details...</p>
+      <button class="calc-btn" id="btn-close-info-box">Dismiss</button>
+    </div>
+  </div>
+
+  <!-- Loading State Indicator overlay -->
+  <div id="ai-loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text" id="ai-loading-status-text">DocGenius AI is crafting your document...</div>
+      <div style="font-size: 11px; color: var(--outline); margin-top: 6px;">Retrieving template structure & applying tone</div>
+    </div>
+  </div>
+
+  <!-- Core Mock DB & Auth engine script modules -->
+  <script src="firebase-mock.js"></script>
+  <script src="db.js"></script>
+  <!-- Main application script -->
+  <script src="app.js"></script>
+</body>
+</html>
