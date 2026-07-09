@@ -150,6 +150,10 @@ const FirebaseMock = (() => {
       return currentUser;
     },
 
+    get isReal() {
+      return !!realAuth;
+    },
+
     onAuthStateChanged(listener) {
       authStateListeners.push(listener);
       listener(currentUser);

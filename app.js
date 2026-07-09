@@ -302,6 +302,19 @@ function showAuthScreen(screenName) {
   const screens = document.querySelectorAll(".auth-box");
   screens.forEach(s => s.style.display = "none");
   document.getElementById(`auth-screen-${screenName}`).style.display = "block";
+  
+  if (screenName === "forgot") {
+    document.getElementById("forgot-step-1").style.display = "block";
+    document.getElementById("forgot-step-2").style.display = "none";
+    document.getElementById("forgot-email").value = "";
+    
+    const submitBtn = document.getElementById("forgot-submit-btn");
+    if (FirebaseMock.auth.isReal) {
+      submitBtn.textContent = "Send Reset Link";
+    } else {
+      submitBtn.textContent = "Send Verification OTP";
+    }
+  }
 }
 
 function togglePasswordVisibility(fieldId, btnId) {
@@ -506,42 +519,73 @@ async function handleOtpConfirm() {
 }
 
 async function handleForgotSubmit() {
-  const email = document.getElementById("forgot-email").value;
+  const email = document.getElementById("forgot-email").value.trim();
   if (!email) {
     alert("Please enter your email.");
     return;
   }
+  
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    alert("Please enter a valid email address.");
+    return;
+  }
+
+  const btn = document.getElementById("forgot-submit-btn");
+  const originalText = btn.textContent;
+  btn.textContent = "Sending...";
+  btn.disabled = true;
+
   try {
+    const isReal = FirebaseMock.auth.isReal;
     await FirebaseMock.auth.sendPasswordResetEmail(email);
-    
-    // Generate a random 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    appState.currentOTP = otp;
 
-    const emailSubject = "DocGenius AI - Password Recovery";
-    const emailBody = `
-      <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 500px;">
-        <h2 style="color: #9d4edd; margin: 0 0 10px 0;">Reset Your Password</h2>
-        <p>We received a request to reset your password. Use the following authorization code to complete your reset request:</p>
-        <div style="font-size: 28px; font-weight: 700; color: #9d4edd; letter-spacing: 4px; padding: 12px; background: #faf5ff; text-align: center; border-radius: 6px; margin: 20px 0; border: 1px dashed #d8b4fe;">${otp}</div>
-        <p>If you did not request a password reset, please ignore this email.</p>
-        <hr style="border: none; border-top: 1px solid #e2e8f0; margin-top: 20px;">
-        <p style="font-size: 11px; color: #a5a2b8; margin: 10px 0 0 0;">DocGenius AI Smart Document Generation Platform</p>
-      </div>
-    `;
-
-    document.getElementById("forgot-step-1").style.display = "none";
-    document.getElementById("forgot-step-2").style.display = "block";
-
-    const sent = await sendOTPEmail(email, emailSubject, emailBody);
-    if (sent) {
-      alert(`A password recovery code has been sent to ${email}. Check your inbox!`);
+    if (isReal) {
+      alert("A password reset link has been sent to your email. Please check your inbox (and Spam folder if necessary).");
+      showAuthScreen("signin");
     } else {
-      appState.currentOTP = "123456";
-      alert("SMTP Server not configured. Bypassed email recovery: please use code 123456 to authorize reset.");
+      // Mock flow with OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      appState.currentOTP = otp;
+
+      const emailSubject = "DocGenius AI - Password Recovery";
+      const emailBody = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 500px;">
+          <h2 style="color: #9d4edd; margin: 0 0 10px 0;">Reset Your Password</h2>
+          <p>We received a request to reset your password. Use the following authorization code to complete your reset request:</p>
+          <div style="font-size: 28px; font-weight: 700; color: #9d4edd; letter-spacing: 4px; padding: 12px; background: #faf5ff; text-align: center; border-radius: 6px; margin: 20px 0; border: 1px dashed #d8b4fe;">${otp}</div>
+          <p>If you did not request a password reset, please ignore this email.</p>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin-top: 20px;">
+          <p style="font-size: 11px; color: #a5a2b8; margin: 10px 0 0 0;">DocGenius AI Smart Document Generation Platform</p>
+        </div>
+      `;
+
+      document.getElementById("forgot-step-1").style.display = "none";
+      document.getElementById("forgot-step-2").style.display = "block";
+
+      const sent = await sendOTPEmail(email, emailSubject, emailBody);
+      if (sent) {
+        alert(`A password recovery code has been sent to ${email}. Check your inbox!`);
+      } else {
+        appState.currentOTP = "123456";
+        alert("SMTP Server not configured. Bypassed email recovery: please use code 123456 to authorize reset.");
+      }
     }
   } catch(e) {
-    alert(e.message);
+    console.error("Password Reset Error:", e);
+    let errMsg = e.message;
+    if (e.code === 'auth/invalid-email') {
+      errMsg = "The email address entered is invalid or badly formatted.";
+    } else if (e.code === 'auth/user-not-found') {
+      errMsg = "This email address is not registered in our system.";
+    } else if (e.code === 'auth/network-request-failed') {
+      errMsg = "A network connection error occurred. Please check your internet connectivity.";
+    }
+    alert(errMsg);
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
   }
 }
 
