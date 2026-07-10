@@ -13,37 +13,42 @@ let appState = {
 
 // ================= INITIALIZATION & ROUTING =================
 document.addEventListener("DOMContentLoaded", async () => {
-  // Load configuration details globally on boot
-  appState.apiConfig = await FirebaseMock.db.apiConfig.get();
+  try {
+    // Load configuration details globally on boot
+    appState.apiConfig = await FirebaseMock.db.apiConfig.get();
 
-  // Check auth status first
-  FirebaseMock.auth.onAuthStateChanged((user) => {
-    if (user) {
-      // User is logged in
-      document.getElementById("auth-overlay").style.display = "none";
-      document.getElementById("app-layout").style.display = "flex";
-      
-      // Load user configurations
-      initUserData();
-    } else {
-      // User is logged out
-      document.getElementById("auth-overlay").style.display = "flex";
-      document.getElementById("app-layout").style.display = "none";
-      appState.activeDocument = null;
-    }
-  });
+    // Check auth status first
+    FirebaseMock.auth.onAuthStateChanged((user) => {
+      if (user) {
+        // User is logged in
+        document.getElementById("auth-overlay").style.display = "none";
+        document.getElementById("app-layout").style.display = "flex";
+        
+        // Load user configurations
+        initUserData();
+      } else {
+        // User is logged out
+        document.getElementById("auth-overlay").style.display = "flex";
+        document.getElementById("app-layout").style.display = "none";
+        appState.activeDocument = null;
+      }
+    });
 
-  // Setup layout UI listeners
-  setupAuthListeners();
-  setupNavigation();
-  setupSidebarCollapse();
-  setupDynamicFormGenerator();
-  setupGenerationLogic();
-  setupAssistantUtilities();
-  setupBrandKitHandlers();
-  setupSettingsHandlers();
-  setupVoiceInput();
-  setupQuickTemplates();
+    // Setup layout UI listeners
+    setupAuthListeners();
+    setupNavigation();
+    setupSidebarCollapse();
+    setupDynamicFormGenerator();
+    setupGenerationLogic();
+    setupAssistantUtilities();
+    setupBrandKitHandlers();
+    setupSettingsHandlers();
+    setupVoiceInput();
+    setupQuickTemplates();
+  } catch (err) {
+    const errInfo = encodeURIComponent(`Boot Error: ${err.message} at ${err.stack}`);
+    fetch(`/api/log-error?msg=${errInfo}`).catch(() => {});
+  }
 });
 
 // Load user brand details, API key, and documents stats
