@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Remote Error Diagnostics Hook -->
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      const errInfo = encodeURIComponent(`${message} at ${source}:${lineno}:${colno}`);
+      fetch(`/api/log-error?msg=${errInfo}`).catch(() => {});
+      return false;
+    };
+    window.addEventListener("unhandledrejection", function(event) {
+      const errInfo = encodeURIComponent(`Promise Rejection: ${event.reason}`);
+      fetch(`/api/log-error?msg=${errInfo}`).catch(() => {});
+    });
+  </script>
   <title>DocGenius AI – Smart Document Generation Platform</title>
   
   <!-- Favicon -->
