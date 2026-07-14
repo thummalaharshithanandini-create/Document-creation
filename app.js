@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setupQuickTemplates();
     setupSummaryReader();
     setupDocumentUploader();
+    setupPricingPanel();
   } catch (err) {
     const errInfo = encodeURIComponent(`Boot Error: ${err.message} at ${err.stack}`);
     fetch(`/api/log-error?msg=${errInfo}`).catch(() => {});
@@ -2391,4 +2392,110 @@ function setupDocumentUploader() {
       }
     }, 600);
   }
+}
+
+// ================= PRICING PLANS & RECOMMENDATION ENGINE =================
+function setupPricingPanel() {
+  const btnCatEdu = document.getElementById("btn-cat-edu");
+  const btnCatBiz = document.getElementById("btn-cat-biz");
+  const btnReset = document.getElementById("btn-reset-pricing");
+  const recBadge = document.getElementById("plan-recommendation-badge");
+  const recText = document.getElementById("plan-recommendation-text");
+
+  const cardFree = document.getElementById("card-plan-free");
+  const cardEdu = document.getElementById("card-plan-edu");
+  const cardBiz = document.getElementById("card-plan-biz");
+
+  if (!btnCatEdu || !btnCatBiz || !btnReset) return;
+
+  btnCatEdu.addEventListener("click", () => {
+    // Style buttons
+    btnCatEdu.style.background = "var(--secondary)";
+    btnCatEdu.style.color = "#000";
+    btnCatEdu.style.border = "none";
+
+    btnCatBiz.style.background = "transparent";
+    btnCatBiz.style.color = "#fff";
+    btnCatBiz.style.border = "1.5px solid var(--outline-variant)";
+
+    // Highlight Edu Card
+    cardEdu.style.border = "2px solid var(--secondary)";
+    cardEdu.style.transform = "scale(1.02)";
+    cardEdu.style.boxShadow = "0 0 20px var(--secondary-glow)";
+
+    // Reset others
+    cardFree.style.border = "1px solid var(--outline-variant)";
+    cardFree.style.transform = "none";
+    cardFree.style.boxShadow = "none";
+    
+    cardBiz.style.border = "1px solid var(--outline-variant)";
+    cardBiz.style.transform = "none";
+    cardBiz.style.boxShadow = "none";
+
+    // Show recommendation badge
+    recText.innerText = "Recommended Fit: Education Plan (Affordable pricing starting at ₹100/month).";
+    recBadge.style.color = "var(--secondary)";
+    recBadge.style.background = "rgba(0, 188, 212, 0.05)";
+    recBadge.style.borderColor = "var(--secondary)";
+    recBadge.style.display = "flex";
+  });
+
+  btnCatBiz.addEventListener("click", () => {
+    // Style buttons
+    btnCatBiz.style.background = "var(--primary)";
+    btnCatBiz.style.color = "#000";
+    btnCatBiz.style.border = "none";
+
+    btnCatEdu.style.background = "transparent";
+    btnCatEdu.style.color = "#fff";
+    btnCatEdu.style.border = "1.5px solid var(--outline-variant)";
+
+    // Highlight Biz Card
+    cardBiz.style.border = "2px solid var(--primary)";
+    cardBiz.style.transform = "scale(1.02)";
+    cardBiz.style.boxShadow = "0 0 20px var(--primary-glow)";
+
+    // Reset others
+    cardFree.style.border = "1px solid var(--outline-variant)";
+    cardFree.style.transform = "none";
+    cardFree.style.boxShadow = "none";
+    
+    cardEdu.style.border = "1px solid var(--outline-variant)";
+    cardEdu.style.transform = "none";
+    cardEdu.style.boxShadow = "none";
+
+    // Show recommendation badge
+    recText.innerText = "Recommended Fit: Business Plan (Enterprise scalability & dedicated tools).";
+    recBadge.style.color = "var(--primary)";
+    recBadge.style.background = "rgba(187, 134, 252, 0.05)";
+    recBadge.style.borderColor = "var(--primary)";
+    recBadge.style.display = "flex";
+  });
+
+  btnReset.addEventListener("click", () => {
+    // Reset buttons
+    btnCatEdu.style.background = "transparent";
+    btnCatEdu.style.color = "#fff";
+    btnCatEdu.style.border = "1.5px solid var(--outline-variant)";
+
+    btnCatBiz.style.background = "transparent";
+    btnCatBiz.style.color = "#fff";
+    btnCatBiz.style.border = "1.5px solid var(--outline-variant)";
+
+    // Reset cards
+    cardFree.style.border = "1px solid var(--outline-variant)";
+    cardFree.style.transform = "none";
+    cardFree.style.boxShadow = "none";
+
+    cardEdu.style.border = "1px solid var(--outline-variant)";
+    cardEdu.style.transform = "none";
+    cardEdu.style.boxShadow = "none";
+
+    cardBiz.style.border = "1px solid var(--outline-variant)";
+    cardBiz.style.transform = "none";
+    cardBiz.style.boxShadow = "none";
+
+    // Hide badge
+    recBadge.style.display = "none";
+  });
 }
