@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deepika Pickles – Food Point Flyer Menu</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Serif+Telugu:wght@500;700&family=Outfit:wght@400;500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-yellow: #f3ba1c;
+      --maroon: #58081a;
+      --maroon-dark: #36030e;
+      --gold: #d4af37;
+      --white: #ffffff;
+      --font-title: 'Montserrat', sans-serif;
+      --font-cursive: 'Great Vibes', cursive;
+      --font-telugu: 'Noto Serif Telugu', serif;
+      --font-clean: 'Outfit', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #1a0206;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M40 0 L40 80 M0 40 L80 40' stroke='%23f3ba1c' stroke-opacity='0.03' stroke-width='1.2'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      font-family: var(--font-clean);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 16px;
+    }
+
+    /* Controls Header for Browser Mode */
+    .controls-header {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 12px 24px;
+      background: rgba(26, 2, 6, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(243, 186, 28, 0.25);
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      z-index: 100;
+    }
+
+    .controls-title {
+      color: var(--primary-yellow);
+      font-family: var(--font-title);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .action-btn {
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      font-family: var(--font-clean);
+    }
+
+    .btn-primary {
+      background: var(--primary-yellow);
+      color: var(--maroon-dark);
+      box-shadow: 0 4px 15px rgba(243, 186, 28, 0.3);
+      font-weight: 800;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(243, 186, 28, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+    }
+
+    /* Menu Card Container */
+    .menu-sheet {
+      width: 100%;
+      max-width: 800px;
+      height: 1100px; /* Locked A4 Portrait height */
+      background-color: var(--maroon);
+      border: 6px solid var(--primary-yellow);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top Half Spread */
+    .top-half-spread {
+      height: 350px;
+      display: grid;
+      grid-template-columns: 50% 50%;
+      position: relative;
+    }
+
+    /* Left Top Panel: Yellow Background Cover */
+    .left-top-panel {
+      background-color: var(--primary-yellow);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--maroon-dark);
+      position: relative;
+    }
+
+    .left-top-header {
+      background-color: var(--maroon);
+      color: var(--primary-yellow);
+      width: calc(100% + 40px);
+      margin-top: -20px;
+      padding: 15px 10px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .brand-title {
+      font-family: var(--font-title);
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      line-height: 1.0;
+    }
+
+    .brand-subtitle {
+      font-family: var(--font-cursive);
+      font-size: 28px;
+      color: var(--white);
+      margin-top: -4px;
+      line-height: 1.0;
+    }
+
+    .large-circular-frame {
+      width: 155px;
+      height: 155px;
+      border-radius: 50%;
+      border: 4px solid var(--maroon);
+      overflow: hidden;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+      background: white;
+      margin: 10px 0;
+    }
+
+    .large-circular-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .category-badges-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      justify-content: center;
+      margin-top: 5px;
+    }
+
+    .category-badge {
+      background-color: var(--maroon);
+      color: var(--primary-yellow);
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    /* Right Top Panel: Maroon Background with staggered Stack */
+    .right-top-panel {
+      background-color: var(--maroon-dark);
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Staggered diagonal photo stack */
+    .staggered-stack-container {
+      position: relative;
+      width: 260px;
+      height: 160px;
+      margin-top: 15px;
+    }
+
+    .staggered-photo-frame {
+      width: 80px;
+      height: 80px;
+      border: 3px solid var(--primary-yellow);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.4);
+      border-radius: 4px;
+      overflow: hidden;
+      position: absolute;
+    }
+
+    .staggered-photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .stack-1 {
+      top: 0;
+      left: 10px;
+      transform: rotate(-6deg);
+    }
+
+    .stack-2 {
+      top: 30px;
+      left: 90px;
+      transform: rotate(4deg);
+      border-color: var(--white);
+    }
+
+    .stack-3 {
+      top: 60px;
+      left: 170px;
+      transform: rotate(-4deg);
+    }
+
+    .thank-you-script {
+      font-family: var(--font-cursive);
+      font-size: 34px;
+      color: var(--primary-yellow);
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    /* Horizontal Separator Bar */
+    .horizontal-separator-bar {
+      height: 8px;
+      background-color: var(--primary-yellow);
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    /* Bottom Menu Content */
+    .bottom-menu-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 46% 54%;
+      gap: 20px;
+      padding: 25px 20px 10px 20px;
+    }
+
+    .menu-column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Category headers inside capsules */
+    .category-header-capsule {
+      background-color: var(--primary-yellow);
+      color: var(--maroon-dark);
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 30px;
+      text-align: center;
+      margin-bottom: 15px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Item row styles */
+    .menu-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 8.5px;
+      font-size: 10px;
+      font-weight: 700;
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    .menu-item-row:hover {
+      transform: translateX(4px);
+    }
+
+    .item-info {
+      display: flex;
+      flex-direction: column;
+      max-width: 82%;
+    }
+
+    .item-name {
+      font-family: var(--font-clean);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--white);
+    }
+
+    .item-desc {
+      font-family: var(--font-telugu);
+      font-size: 9px;
+      color: #dfa04c;
+      margin-top: 0.5px;
+    }
+
+    .dots-leader {
+      flex-grow: 1;
+      border-bottom: 1.2px dotted rgba(255, 255, 255, 0.25);
+      margin-bottom: 3.5px;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+
+    .item-price {
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary-yellow);
+    }
+
+    /* Right column interior layout with item list + far right photo stack */
+    .right-column-split {
+      display: flex;
+      height: 100%;
+      justify-content: space-between;
+    }
+
+    .right-items-list-area {
+      flex: 1;
+      margin-right: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .far-right-photo-stack {
+      width: 75px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .far-right-photo-frame {
+      width: 75px;
+      height: 75px;
+      border: 2px solid var(--primary-yellow);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .far-right-photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Yellow Address Booking Bar at bottom */
+    .yellow-address-bar {
+      background-color: var(--primary-yellow);
+      color: var(--maroon-dark);
+      padding: 10px 15px;
+      text-align: center;
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .yellow-address-bar span {
+      color: var(--maroon);
+    }
+
+    /* PRINT LAYOUT OVERRIDES */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      html, body {
+        height: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+      }
+      .controls-header {
+        display: none !important;
+      }
+      .menu-sheet {
+        box-shadow: none !important;
+        border: 6px solid var(--primary-yellow) !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background-color: var(--maroon) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .left-top-panel {
+        background-color: var(--primary-yellow) !important;
+        color: var(--maroon-dark) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .left-top-header {
+        background-color: var(--maroon) !important;
+        color: var(--primary-yellow) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .right-top-panel {
+        background-color: var(--maroon-dark) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .horizontal-separator-bar {
+        background-color: var(--primary-yellow) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .category-header-capsule {
+        background-color: var(--primary-yellow) !important;
+        color: var(--maroon-dark) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .item-price {
+        color: var(--primary-yellow) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .yellow-address-bar {
+        background-color: var(--primary-yellow) !important;
+        color: var(--maroon-dark) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls Header for Browser Mode -->
+  <header class="controls-header">
+    <div class="controls-title">Deepika Pickles – Food Point Flyer</div>
+    <div class="btn-group">
+      <button class="action-btn btn-secondary" onclick="window.location.href='index.html'">
+        ← DocGenius App
+      </button>
+      <button class="action-btn btn-primary" onclick="window.print()">
+        Print Flyer Menu (A4 Portrait)
+      </button>
+    </div>
+  </header>
+
+  <!-- Flyer Menu Sheet -->
+  <div class="menu-sheet">
+    
+    <!-- Top Half Spread -->
+    <div class="top-half-spread">
+      
+      <!-- Left Top Panel (Yellow Cover) -->
+      <div class="left-top-panel">
+        <div class="left-top-header">
+          <h2 class="brand-title">Deepika</h2>
+          <p class="brand-subtitle">Food Point</p>
+        </div>
+        
+        <div class="large-circular-frame">
+          <img src="mango_pickle.png" alt="Pickle Platter">
+        </div>
+
+        <div class="category-badges-row">
+          <span class="category-badge">Veg</span>
+          <span class="category-badge">Non-Veg</span>
+          <span class="category-badge">Organic</span>
+        </div>
+      </div>
+
+      <!-- Right Top Panel (Maroon Staggered Stack) -->
+      <div class="right-top-panel">
+        <div class="staggered-stack-container">
+          <div class="staggered-photo-frame stack-1">
+            <img src="mango_pickle.png" alt="Mango Pickle">
+          </div>
+          <div class="staggered-photo-frame stack-2">
+            <img src="lemon_pickle.png" alt="Lemon Pickle">
+          </div>
+          <div class="staggered-photo-frame stack-3">
+            <img src="chicken_pickle.png" alt="Chicken Pickle">
+          </div>
+        </div>
+
+        <div class="thank-you-script">Thank You...</div>
+      </div>
+
+    </div>
+
+    <!-- Horizontal Separator Bar -->
+    <div class="horizontal-separator-bar"></div>
+
+    <!-- Bottom Menu Content -->
+    <div class="bottom-menu-content">
+      
+      <!-- Left Column: Vegetarian (12 items) -->
+      <div class="menu-column">
+        <div class="category-header-capsule">Vegetarian Pickles</div>
+        
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Mango (Avakaya)</span>
+            <span class="item-desc">మామిడికాయ ఆవకాయ పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">650</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Tomato</span>
+            <span class="item-desc">టమాటో నిల్వ పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Gongura</span>
+            <span class="item-desc">గోంగూర నిల్వ పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Pudina (Mint)</span>
+            <span class="item-desc">పుదీనా ఆకు పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Gooseberry</span>
+            <span class="item-desc">ఉసిరికాయ నిల్వ పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Mixed Vegetable</span>
+            <span class="item-desc">మిశ్రమ కూరగాయల పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Red Chili</span>
+            <span class="item-desc">పండు మిరపకాయ పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Gongura Red Chili</span>
+            <span class="item-desc">గోంగూర పండు మిరప పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Drumstick</span>
+            <span class="item-desc">ములక్కాయ నిల్వ పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Lemon</span>
+            <span class="item-desc">నిమ్మకాయ నిల్వ పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Brinjal (Eggplant)</span>
+            <span class="item-desc">వంకాయ నిల్వ పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+
+        <div class="menu-item-row">
+          <div class="item-info">
+            <span class="item-name">Ginger</span>
+            <span class="item-desc">అల్లం వెల్లుల్లి నిల్వ పచ్చడి</span>
+          </div>
+          <span class="dots-leader"></span>
+          <span class="item-price">600</span>
+        </div>
+      </div>
+
+      <!-- Right Column: Non-Vegetarian + Far Right Photo Stack -->
+      <div class="menu-column">
+        <div class="category-header-capsule">Non-Vegetarian Pickles</div>
+        
+        <div class="right-column-split">
+          <!-- Items List area -->
+          <div class="right-items-list-area">
+            <div class="menu-item-row">
+              <div class="item-info">
+                <span class="item-name">Chicken Bone</span>
+                <span class="item-desc">చికెన్ నిల్వ పచ్చడి (ఎముకలతో)</span>
+              </div>
+              <span class="dots-leader"></span>
+              <span class="item-price">900</span>
+            </div>
+
+            <div class="menu-item-row">
+              <div class="item-info">
+                <span class="item-name">Chicken Boneless</span>
+                <span class="item-desc">చికెన్ నిల్వ పచ్చడి (ఎముకలు లేనిది)</span>
+              </div>
+              <span class="dots-leader"></span>
+              <span class="item-price">1200</span>
+            </div>
+
+            <div class="menu-item-row">
+              <div class="item-info">
+                <span class="item-name">Mutton Bone</span>
+                <span class="item-desc">మటన్ నిల్వ పచ్చడి (ఎముకలతో)</span>
+              </div>
+              <span class="dots-leader"></span>
+              <span class="item-price">1500</span>
+            </div>
+
+            <div class="menu-item-row">
+              <div class="item-info">
+                <span class="item-name">Mutton Boneless</span>
+                <span class="item-desc">మటన్ నిల్వ పచ్చడి (ఎముకలు లేనిది)</span>
+              </div>
+              <span class="dots-leader"></span>
+              <span class="item-price">1800</span>
+            </div>
+
+            <div class="menu-item-row">
+              <div class="item-info">
+                <span class="item-name">Fish Boneless</span>
+                <span class="item-desc">చేప నిల్వ పచ్చడి (ఎముకలు లేనిది)</span>
+              </div>
+              <span class="dots-leader"></span>
+              <span class="item-price">1600</span>
+            </div>
+
+            <div class="menu-item-row">
+              <div class="item-info">
+                <span class="item-name">Fish Bone</span>
+                <span class="item-desc">చేప నిల్వ పచ్చడి (ఎముకలతో)</span>
+              </div>
+              <span class="dots-leader"></span>
+              <span class="item-price">1200</span>
+            </div>
+
+            <div class="menu-item-row">
+              <div class="item-info">
+                <span class="item-name">Prawns</span>
+                <span class="item-desc">రొయ్యల నిల్వ పచ్చడి</span>
+              </div>
+              <span class="dots-leader"></span>
+              <span class="item-price">1600</span>
+            </div>
+            
+            <div style="flex-grow: 1;"></div>
+          </div>
+
+          <!-- Far Right Photo Stack (staggered vertical stack) -->
+          <div class="far-right-photo-stack">
+            <div class="far-right-photo-frame">
+              <img src="mango_pickle.png" alt="Mango">
+            </div>
+            <div class="far-right-photo-frame">
+              <img src="lemon_pickle.png" alt="Lemon">
+            </div>
+            <div class="far-right-photo-frame">
+              <img src="chicken_pickle.png" alt="Chicken">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Yellow Address Booking Bar at bottom -->
+    <div class="yellow-address-bar">
+      M. 5th Avenue, Hyderabad, India | deepikapickles26@gmail.com | Order Now: <span>+91 9652286824</span>
+    </div>
+
+  </div>
+
+</body>
+</html>

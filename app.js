@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setupSettingsHandlers();
     setupVoiceInput();
     setupQuickTemplates();
+    setupSummaryReader();
   } catch (err) {
     const errInfo = encodeURIComponent(`Boot Error: ${err.message} at ${err.stack}`);
     fetch(`/api/log-error?msg=${errInfo}`).catch(() => {});
@@ -851,6 +852,7 @@ async function triggerDocumentGeneration() {
   document.getElementById("btn-save-doc").removeAttribute("disabled");
   document.getElementById("btn-export-pdf").removeAttribute("disabled");
   document.getElementById("btn-export-word").removeAttribute("disabled");
+  document.getElementById("btn-summarize-doc").removeAttribute("disabled");
 
   // Since it's a new generation, clear the activeDocument id reference
   // so saving is treated as a new document draft creation
@@ -1132,6 +1134,7 @@ async function openDocumentInEditor(docId) {
   document.getElementById("btn-share-doc").removeAttribute("disabled");
   document.getElementById("btn-export-pdf").removeAttribute("disabled");
   document.getElementById("btn-export-word").removeAttribute("disabled");
+  document.getElementById("btn-summarize-doc").removeAttribute("disabled");
   
   // Show assist utilities and version list
   document.getElementById("assist-utilities-box").style.display = "block";
@@ -1345,6 +1348,7 @@ async function deleteDocument(docId) {
     document.getElementById("document-content-editor").innerHTML = "";
     document.getElementById("btn-save-doc").setAttribute("disabled", "true");
     document.getElementById("btn-share-doc").setAttribute("disabled", "true");
+    document.getElementById("btn-summarize-doc").setAttribute("disabled", "true");
     document.getElementById("version-control-sidebar").style.display = "none";
     updateBrandingOverlayOnPreview();
   }
@@ -1923,4 +1927,273 @@ function exportToWord(title, htmlContent, brandInfo, useBranding) {
     console.error("Word compilation error:", e);
     alert("Could not compile Word document. Check console.");
   });
+}
+
+// ================= DOCUMENT SUMMARY & AUDIO READER FEATURE =================
+function setupSummaryReader() {
+  const btnSummarize = document.getElementById("btn-summarize-doc");
+  const modalSummary = document.getElementById("modal-summary-reader");
+  const btnClose = document.getElementById("btn-close-summary-reader");
+  const quoteText = document.getElementById("summary-quote-text");
+  const btnPlay = document.getElementById("btn-summary-play");
+  const btnStop = document.getElementById("btn-summary-stop");
+  const btnDictate = document.getElementById("btn-summary-dictate");
+  const btnAppend = document.getElementById("btn-summary-append");
+  const loadingStatus = document.getElementById("summary-loading-status");
+  const playIcon = document.getElementById("summary-play-icon");
+  const playText = document.getElementById("summary-play-text");
+  const dictateIcon = document.getElementById("summary-dictate-icon");
+  const dictateText = document.getElementById("summary-dictate-text");
+
+  if (!btnSummarize || !modalSummary) return;
+
+  let synthUtterance = null;
+  let summaryRecognition = null;
+  let isDictating = false;
+
+  // Open modal & start AI generation
+  btnSummarize.addEventListener("click", async () => {
+    // Reset state & UI
+    quoteText.innerText = "";
+    btnPlay.setAttribute("disabled", "true");
+    btnStop.setAttribute("disabled", "true");
+    btnAppend.setAttribute("disabled", "true");
+    loadingStatus.style.display = "flex";
+    modalSummary.style.display = "flex";
+
+    const docText = document.getElementById("document-content-editor").innerText.trim();
+    if (!docText) {
+      loadingStatus.style.display = "none";
+      quoteText.innerText = "The document is currently empty. Please generate some content first.";
+      return;
+    }
+
+    const apiKey = (appState.apiConfig && appState.apiConfig.apiKey) ? appState.apiConfig.apiKey.trim() : "";
+    const modelName = (appState.apiConfig && appState.apiConfig.model) ? appState.apiConfig.model : "gemini-2.5-flash";
+
+    let summary = "";
+
+    if (apiKey) {
+      // Live summary API call
+      try {
+        const prompt = "Provide a concise executive summary quote of the following document. Keep the response limited to a single professional quotation sentence (maximum 2-3 lines) suitable for a busy executive, and return ONLY the quote itself, without introductory or surrounding text: \n\n" + docText;
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.3 }
+          })
+        });
+
+        if (response.ok) {
+          const resData = await response.json();
+          summary = resData.candidates[0].content.parts[0].text.replace(/^["'\s]+|["'\s]+$/g, '').trim();
+        } else {
+          throw new Error("API call failed");
+        }
+      } catch (e) {
+        console.warn("Gemini summarization failed, falling back to local extractor.", e);
+        summary = extractLocalSummary(docText);
+      }
+    } else {
+      // Offline fallback
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      summary = extractLocalSummary(docText);
+    }
+
+    loadingStatus.style.display = "none";
+    quoteText.innerText = summary || "Could not generate summary. You can dictate or type one manually.";
+    
+    // Enable controls
+    btnPlay.removeAttribute("disabled");
+    btnStop.removeAttribute("disabled");
+    btnAppend.removeAttribute("disabled");
+  });
+
+  // Close modal and cancel reading
+  btnClose.addEventListener("click", () => {
+    modalSummary.style.display = "none";
+    stopSpeaking();
+    stopDictating();
+  });
+
+  // Play / Pause Speech Synthesis
+  btnPlay.addEventListener("click", () => {
+    if (window.speechSynthesis.speaking) {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+        playIcon.innerText = "pause";
+        playText.innerText = "Pause";
+      } else {
+        window.speechSynthesis.pause();
+        playIcon.innerText = "play_arrow";
+        playText.innerText = "Resume";
+      }
+    } else {
+      startSpeaking();
+    }
+  });
+
+  // Stop Speech Synthesis
+  btnStop.addEventListener("click", () => {
+    stopSpeaking();
+  });
+
+  // Dictate Speech-to-Text override
+  btnDictate.addEventListener("click", () => {
+    if (isDictating) {
+      stopDictating();
+    } else {
+      startDictating();
+    }
+  });
+
+  // Append Summary Quote to Document Editor
+  btnAppend.addEventListener("click", () => {
+    const summaryText = quoteText.innerText.trim();
+    const editor = document.getElementById("document-content-editor");
+    if (!summaryText || !editor) return;
+
+    // Append formatted executive summary block
+    const dividerHtml = '<hr class="summary-divider" style="margin: 24px 0; border: none; border-top: 1px dashed var(--outline-variant);">';
+    const quoteHtml = `<blockquote class="executive-summary-blockquote" style="border-left: 4px solid var(--primary); padding-left: 16px; margin: 16px 0; font-style: italic; color: var(--on-surface-variant); line-height: 1.6;"><strong>Executive Summary:</strong> "${summaryText}"</blockquote>`;
+    
+    // Remove old summary if present
+    const oldDivider = editor.querySelector(".summary-divider");
+    const oldQuote = editor.querySelector(".executive-summary-blockquote");
+    if (oldDivider) oldDivider.remove();
+    if (oldQuote) oldQuote.remove();
+
+    editor.innerHTML += dividerHtml + quoteHtml;
+
+    // Re-apply visual branding overlays
+    updateBrandingOverlayOnPreview();
+    
+    showNotification("Summary Added", "Executive summary quote appended to the end of the document.");
+    modalSummary.style.display = "none";
+    stopSpeaking();
+    stopDictating();
+  });
+
+  function startSpeaking() {
+    window.speechSynthesis.cancel(); // Stop anything else
+
+    const textToSpeak = quoteText.innerText.trim();
+    if (!textToSpeak) return;
+
+    synthUtterance = new SpeechSynthesisUtterance(textToSpeak);
+    
+    // Find an English voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const englishVoice = voices.find(voice => voice.lang.startsWith('en'));
+    if (englishVoice) {
+      synthUtterance.voice = englishVoice;
+    }
+
+    synthUtterance.onend = () => {
+      resetPlayUI();
+    };
+
+    synthUtterance.onerror = () => {
+      resetPlayUI();
+    };
+
+    window.speechSynthesis.speak(synthUtterance);
+    playIcon.innerText = "pause";
+    playText.innerText = "Pause";
+  }
+
+  function stopSpeaking() {
+    window.speechSynthesis.cancel();
+    resetPlayUI();
+  }
+
+  function resetPlayUI() {
+    playIcon.innerText = "play_arrow";
+    playText.innerText = "Listen";
+  }
+
+  function startDictating() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice input is not supported in this browser. Please use Google Chrome or Safari.");
+      return;
+    }
+
+    summaryRecognition = new SpeechRecognition();
+    summaryRecognition.continuous = false;
+    summaryRecognition.interimResults = false;
+    summaryRecognition.lang = 'en-US';
+
+    summaryRecognition.onstart = () => {
+      isDictating = true;
+      dictateIcon.innerText = "mic_double";
+      dictateText.innerText = "Listening...";
+      dictateIcon.style.color = "red";
+    };
+
+    summaryRecognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      if (quoteText.innerText === "Could not generate summary. You can dictate or type one manually." || quoteText.innerText === "") {
+        quoteText.innerText = transcript;
+      } else {
+        quoteText.innerText += " " + transcript;
+      }
+    };
+
+    summaryRecognition.onerror = (event) => {
+      console.error("Summary recognition error:", event.error);
+      stopDictating();
+    };
+
+    summaryRecognition.onend = () => {
+      stopDictating();
+    };
+
+    summaryRecognition.start();
+  }
+
+  function stopDictating() {
+    if (summaryRecognition) {
+      try {
+        summaryRecognition.stop();
+      } catch(e) {}
+    }
+    isDictating = false;
+    dictateIcon.innerText = "mic";
+    dictateText.innerText = "Dictate Quote";
+    dictateIcon.style.color = "";
+  }
+
+  // Smart local extractor fallback
+  function extractLocalSummary(htmlContent) {
+    // Strip HTML tags to get pure text
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = htmlContent;
+    const text = tempDiv.innerText || tempDiv.textContent || "";
+    
+    // Split into sentences
+    const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 15);
+    
+    if (sentences.length === 0) {
+      return "A professional document detailing administrative and business objectives.";
+    }
+
+    // Try to extract key indicators
+    let summaryQuote = "";
+    
+    // Find sentences with action verbs or nouns
+    const businessKeywords = ["invoice", "total", "proposal", "timeline", "scope", "agreement", "objective", "cost", "contract"];
+    const bestSentence = sentences.find(s => businessKeywords.some(keyword => s.toLowerCase().includes(keyword))) || sentences[0];
+
+    summaryQuote = bestSentence + ".";
+    
+    // Format quote cleanly
+    if (summaryQuote.length > 150) {
+      summaryQuote = summaryQuote.substring(0, 147) + "...";
+    }
+    
+    return summaryQuote;
+  }
 }

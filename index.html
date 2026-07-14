@@ -348,6 +348,11 @@
               <h4>Meeting Minutes</h4>
               <p>Summarize logs, tasks, and corporate summaries</p>
             </div>
+            <div class="template-card" data-category="business" data-type="menu_card">
+              <span class="material-symbols-outlined template-icon" style="color: #FF5722;">restaurant_menu</span>
+              <h4>Traditional Menu</h4>
+              <p>Ornate Indian menu with veg & non-veg sections</p>
+            </div>
           </div>
 
           <!-- Recent Documents Log Section -->
@@ -502,6 +507,7 @@
                     <option value="quotation">Convert to Quotation</option>
                     <option value="invoice">Convert to Invoice</option>
                     <option value="meeting_minutes">Convert to Meeting Minutes</option>
+                    <option value="menu_card">Convert to Traditional Menu</option>
                   </select>
                   <button class="calc-btn" id="btn-util-convert" style="width: auto; padding: 0 16px; height: 38px; font-size: 12.5px; margin-top: 0;">Convert</button>
                 </div>
@@ -522,6 +528,10 @@
                   <button class="preview-tool-btn" id="btn-share-doc" title="Generate Shareable Link" disabled>
                     <span class="material-symbols-outlined">share</span>
                     <span>Share Link</span>
+                  </button>
+                  <button class="preview-tool-btn" id="btn-summarize-doc" title="Summarize & Read Aloud" disabled>
+                    <span class="material-symbols-outlined">volume_up</span>
+                    <span>Summary Reader</span>
                   </button>
                 </div>
                 
@@ -884,6 +894,55 @@
       <h3 id="info-box-title" style="font-family: var(--font-brand); font-size: 18px; margin: 0 0 8px 0;">Notice</h3>
       <p id="info-box-message" style="font-size: 13.5px; line-height: 1.5; color: var(--on-surface-variant); margin: 0 0 20px 0;">Details...</p>
       <button class="calc-btn" id="btn-close-info-box">Dismiss</button>
+    </div>
+  </div>
+
+  <!-- Dialog Modal: Summary & Voice Reader -->
+  <div class="modal-overlay" id="modal-summary-reader" style="display: none;">
+    <div class="modal-box" style="max-width: 500px; text-align: left;">
+      <h3 style="font-family: var(--font-brand); font-size: 20px; color: var(--primary); margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
+        <span class="material-symbols-outlined">auto_stories</span>
+        <span>Summary & Audio Reader</span>
+      </h3>
+      <p style="font-size: 12.5px; color: var(--outline); margin: 0 0 16px 0;">Concise document summary and executive quotation for busy people.</p>
+      
+      <!-- Summary Display Area -->
+      <div id="summary-loading-status" style="display: none; align-items: center; gap: 8px; font-size: 13px; color: var(--primary); margin-bottom: 12px;">
+        <div class="loading-spinner-small" style="width: 16px; height: 16px; border: 2px solid var(--primary-glow); border-top: 2px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <span>AI is extracting summary quotation...</span>
+      </div>
+      
+      <div class="summary-quote-container" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--outline-variant); border-radius: 8px; padding: 16px; margin-bottom: 20px; min-height: 100px; position: relative;">
+        <span class="material-symbols-outlined" style="position: absolute; top: 12px; left: 12px; font-size: 36px; color: rgba(255, 255, 255, 0.05); pointer-events: none;">format_quote</span>
+        <blockquote id="summary-quote-text" style="margin: 0; font-size: 14.5px; line-height: 1.6; font-style: italic; color: #fff; text-indent: 16px; min-height: 40px; outline: none;" contenteditable="true" placeholder="Click 'Generate Summary' or type custom summary here..."></blockquote>
+      </div>
+
+      <!-- Controls Row -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 8px; flex-wrap: wrap;">
+        <!-- Audio controls -->
+        <div style="display: flex; gap: 8px;">
+          <button class="calc-btn" id="btn-summary-play" style="width: auto; padding: 0 16px; height: 40px; margin: 0; display: flex; align-items: center; gap: 6px; background: var(--primary); color: #000;" disabled>
+            <span class="material-symbols-outlined" id="summary-play-icon">play_arrow</span>
+            <span id="summary-play-text">Listen</span>
+          </button>
+          <button class="calc-btn" id="btn-summary-stop" style="width: auto; padding: 0 16px; height: 40px; margin: 0; display: flex; align-items: center; gap: 6px;" disabled>
+            <span class="material-symbols-outlined">stop</span>
+            <span>Stop</span>
+          </button>
+        </div>
+        
+        <!-- Voice input dictation controls -->
+        <button class="calc-btn" id="btn-summary-dictate" style="width: auto; padding: 0 16px; height: 40px; margin: 0; display: flex; align-items: center; gap: 6px; border: 1px dashed var(--primary); background: transparent; color: var(--primary);">
+          <span class="material-symbols-outlined" id="summary-dictate-icon">mic</span>
+          <span id="summary-dictate-text">Dictate Quote</span>
+        </button>
+      </div>
+
+      <!-- Footer Actions -->
+      <div style="display: flex; gap: 12px;">
+        <button class="calc-btn primary-glowing-btn" id="btn-summary-append" style="flex: 1; margin: 0;" disabled>Append to Document</button>
+        <button class="calc-btn" id="btn-close-summary-reader" style="width: 100px; margin: 0;">Close</button>
+      </div>
     </div>
   </div>
 
