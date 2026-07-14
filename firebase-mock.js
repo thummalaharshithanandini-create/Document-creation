@@ -261,6 +261,10 @@ const FirebaseMock = (() => {
       if (!realAuth) initRealFirebase();
       if (realAuth) {
         const provider = new window.firebase.auth.GoogleAuthProvider();
+        // Force the Google login account chooser popup every time
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
         return realAuth.signInWithPopup(provider)
           .then(result => {
             currentUser = mapFirebaseUser(result.user);
@@ -271,10 +275,19 @@ const FirebaseMock = (() => {
           });
       }
 
+      // Offline mock authentication fallback with dynamic account chooser prompt
+      const mockEmail = prompt("Choose a Google Account to sign in:", "google.user@gmail.com");
+      if (mockEmail === null) {
+        return Promise.reject(new Error("Google sign-in cancelled by user"));
+      }
+      
+      const namePart = mockEmail.split('@')[0];
+      const fullName = namePart.charAt(0).toUpperCase() + namePart.slice(1) + " User";
+
       currentUser = {
-        id: "u_google",
-        fullName: "Google User",
-        email: "google.user@gmail.com",
+        id: "u_google_" + namePart,
+        fullName: fullName,
+        email: mockEmail,
         phoneNumber: "+91 9999988888",
         emailVerified: true,
         phoneVerified: false,
