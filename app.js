@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setupVoiceInput();
     setupQuickTemplates();
     setupSummaryReader();
+    setupDocumentUploader();
   } catch (err) {
     const errInfo = encodeURIComponent(`Boot Error: ${err.message} at ${err.stack}`);
     fetch(`/api/log-error?msg=${errInfo}`).catch(() => {});
@@ -2195,5 +2196,199 @@ function setupSummaryReader() {
     }
     
     return summaryQuote;
+  }
+}
+
+// ================= DOCUMENT UPLOADER & TEXT EXTRACTION FEATURE =================
+function setupDocumentUploader() {
+  const btnDashboardUpload = document.getElementById("btn-dashboard-upload");
+  const modalUploader = document.getElementById("modal-document-uploader");
+  const btnClose = document.getElementById("btn-close-doc-uploader");
+  const uploaderZone = document.getElementById("doc-uploader-zone");
+  const fileInput = document.getElementById("doc-uploader-file-input");
+  const statusContainer = document.getElementById("doc-upload-status");
+  const statusText = document.getElementById("doc-upload-status-text");
+
+  if (!btnDashboardUpload || !modalUploader) return;
+
+  let dependenciesLoaded = false;
+
+  // Open modal
+  btnDashboardUpload.addEventListener("click", () => {
+    modalUploader.style.display = "flex";
+    statusContainer.style.display = "none";
+    loadParserDependencies();
+  });
+
+  // Close modal
+  btnClose.addEventListener("click", () => {
+    modalUploader.style.display = "none";
+  });
+
+  // Drag & drop handlers
+  uploaderZone.addEventListener("click", () => fileInput.click());
+
+  uploaderZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    uploaderZone.style.borderColor = "var(--primary)";
+    uploaderZone.style.background = "rgba(255, 193, 7, 0.05)";
+  });
+
+  uploaderZone.addEventListener("dragleave", () => {
+    uploaderZone.style.borderColor = "var(--outline-variant)";
+    uploaderZone.style.background = "rgba(255, 255, 255, 0.01)";
+  });
+
+  uploaderZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    uploaderZone.style.borderColor = "var(--outline-variant)";
+    uploaderZone.style.background = "rgba(255, 255, 255, 0.01)";
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      processDocumentFile(files[0]);
+    }
+  });
+
+  fileInput.addEventListener("change", (e) => {
+    const files = e.target.files;
+    if (files.length > 0) {
+      processDocumentFile(files[0]);
+    }
+  });
+
+  // Load mammoth.js and pdf.js dynamically on demand
+  function loadParserDependencies() {
+    if (dependenciesLoaded) return;
+
+    // Load Mammoth.js (Word converter)
+    if (!window.mammoth) {
+      const mammothScript = document.createElement("script");
+      mammothScript.src = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js";
+      document.head.appendChild(mammothScript);
+    }
+
+    // Load PDF.js (PDF reader)
+    if (!window['pdfjs-dist/build/pdf']) {
+      const pdfjsScript = document.createElement("script");
+      pdfjsScript.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js";
+      document.head.appendChild(pdfjsScript);
+    }
+
+    dependenciesLoaded = true;
+  }
+
+  // Parse and route files based on extensions
+  function processDocumentFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    
+    if (!['txt', 'docx', 'pdf'].includes(ext)) {
+      alert("Unsupported file format. Please upload a .txt, .docx, or .pdf file.");
+      return;
+    }
+
+    statusText.innerText = `Extracting content from ${file.name}...`;
+    statusContainer.style.display = "flex";
+
+    const reader = new FileReader();
+
+    if (ext === 'txt') {
+      reader.onload = (e) => {
+        const text = e.target.result;
+        // Format text as HTML paragraphs
+        const formattedHtml = text.split('\n').map(p => {
+          const trimmed = p.trim();
+          return trimmed ? `<p>${trimmed}</p>` : "";
+        }).join("");
+        loadDocumentToEditor(file.name, formattedHtml);
+      };
+      reader.readAsText(file);
+    } 
+    else if (ext === 'docx') {
+      reader.onload = async (e) => {
+        try {
+          if (!window.mammoth) {
+            throw new Error("Mammoth conversion library not loaded. Please wait a second and retry.");
+          }
+          const arrayBuffer = e.target.result;
+          const result = await window.mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+          loadDocumentToEditor(file.name, result.value || "<p>Empty Word Document</p>");
+        } catch (err) {
+          alert("Error parsing Word file: " + err.message);
+          statusContainer.style.display = "none";
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } 
+    else if (ext === 'pdf') {
+      reader.onload = async (e) => {
+        try {
+          const pdfjsLib = window['pdfjs-dist/build/pdf'];
+          if (!pdfjsLib) {
+            throw new Error("PDF extraction library not loaded. Please wait a second and retry.");
+          }
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+          
+          const arrayBuffer = e.target.result;
+          const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+          const pdf = await loadingTask.promise;
+          let fullTextHtml = "";
+
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map(item => item.str).join(" ").trim();
+            if (pageText) {
+              fullTextHtml += `<p>${pageText}</p>\n`;
+            }
+          }
+
+          loadDocumentToEditor(file.name, fullTextHtml || "<p>Empty PDF Document</p>");
+        } catch (err) {
+          alert("Error parsing PDF file: " + err.message);
+          statusContainer.style.display = "none";
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  }
+
+  // Load content into preview and auto-open Summarizer
+  function loadDocumentToEditor(fileName, htmlContent) {
+    const editor = document.getElementById("document-content-editor");
+    if (editor) {
+      editor.innerHTML = htmlContent;
+    }
+
+    // Apply branding kit overlay
+    updateBrandingOverlayOnPreview();
+
+    // Enable preview toolbars
+    document.getElementById("btn-save-doc").removeAttribute("disabled");
+    document.getElementById("btn-export-pdf").removeAttribute("disabled");
+    document.getElementById("btn-export-word").removeAttribute("disabled");
+    document.getElementById("btn-summarize-doc").removeAttribute("disabled");
+
+    // Clear activeDocument id since this is a new file import
+    appState.activeDocument = null;
+    document.getElementById("btn-share-doc").setAttribute("disabled", "true");
+    document.getElementById("version-control-sidebar").style.display = "none";
+
+    // Switch view to generator workspace
+    switchView("generator");
+
+    // Close uploader modal
+    modalUploader.style.display = "none";
+    statusContainer.style.display = "none";
+
+    showNotification("Import Successful", `Successfully loaded text content from ${fileName}`);
+
+    // Auto-open summary reader after a brief transition delay
+    setTimeout(() => {
+      const btnSummarize = document.getElementById("btn-summarize-doc");
+      if (btnSummarize) {
+        btnSummarize.click();
+      }
+    }, 600);
   }
 }
