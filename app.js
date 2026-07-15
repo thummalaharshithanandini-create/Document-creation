@@ -1797,6 +1797,18 @@ function exportToPDF(title, elementId) {
   });
 }
 
+// Global trigger wrappers for HTML inline onclick event bindings
+window.triggerPDFExport = function() {
+  const title = appState.activeDocument ? appState.activeDocument.title : "DocGenius_Export";
+  exportToPDF(title, "a4-document-paper");
+};
+
+window.triggerWordExport = function() {
+  const title = appState.activeDocument ? appState.activeDocument.title : "DocGenius_Export";
+  const content = document.getElementById("document-content-editor").innerHTML;
+  exportToWord(title, content, appState.brandKit, document.getElementById("gen-apply-brand").checked);
+};
+
 // Client-side text parsing to DOCX using docx.js library
 function exportToWord(title, htmlContent, brandInfo, useBranding) {
   const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, WidthType, BorderStyle } = window.docx;

@@ -581,11 +581,11 @@
                 </div>
                 
                 <div style="display: flex; gap: 8px;">
-                  <button class="preview-export-btn btn-export-pdf" id="btn-export-pdf" title="Export as PDF" disabled>
+                  <button class="preview-export-btn btn-export-pdf" id="btn-export-pdf" title="Export as PDF" onclick="triggerPDFExport()" disabled>
                     <span class="material-symbols-outlined">picture_as_pdf</span>
                     <span>PDF</span>
                   </button>
-                  <button class="preview-export-btn btn-export-word" id="btn-export-word" title="Export as Word (.docx)" disabled>
+                  <button class="preview-export-btn btn-export-word" id="btn-export-word" title="Export as Word (.docx)" onclick="triggerWordExport()" disabled>
                     <span class="material-symbols-outlined">description</span>
                     <span>Word</span>
                   </button>
@@ -1270,9 +1270,9 @@
   </div>
 
   <!-- Core Mock DB & Auth engine script modules -->
-  <script src="firebase-mock.js?v=4.5"></script>
-  <script src="db.js?v=4.5"></script>
+  <script src="firebase-mock.js?v=4.6"></script>
+  <script src="db.js?v=4.6"></script>
   <!-- Main application script -->
-  <script src="app.js?v=4.5"></script>
+  <script src="app.js?v=4.6"></script>
 </body>
 </html>
