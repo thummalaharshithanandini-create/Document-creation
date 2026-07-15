@@ -2747,6 +2747,30 @@ function setupPricingPanel() {
       }
     });
   }
+
+  const textQuote = document.getElementById("text-custom-quote");
+  if (textQuote) {
+    textQuote.style.cursor = "pointer";
+    textQuote.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const btn = document.getElementById("btn-contact-sales");
+      if (btn) {
+        btn.click();
+      }
+    });
+  }
+
+  const cardSmart = document.getElementById("card-plan-smart-fit");
+  if (cardSmart) {
+    cardSmart.style.cursor = "pointer";
+    cardSmart.addEventListener("click", (e) => {
+      if (e.target.id === "btn-reset-pricing" || e.target.closest("#btn-reset-pricing")) return;
+      const btn = document.getElementById("btn-reset-pricing");
+      if (btn) {
+        btn.click();
+      }
+    });
+  }
 }
 
 // Show standard information modal dialog
