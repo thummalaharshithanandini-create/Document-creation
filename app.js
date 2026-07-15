@@ -2580,21 +2580,26 @@ function setupPricingPanel() {
       btnSubscribeEdu.setAttribute("disabled", "true");
     }
 
-    btnSubscribeEdu.addEventListener("click", () => {
-      const activeUser = FirebaseMock.auth.currentUser;
-      const isGuest = !activeUser || activeUser.id === "u_guest";
+    btnSubscribeEdu.addEventListener("click", handleEduSubscriptionTrigger);
+  }
 
-      if (isGuest) {
-        // Step 1: Open Email Verification modal
-        document.getElementById("modal-auth-verify").style.display = "flex";
-        document.getElementById("verify-email-step-1").style.display = "block";
-        document.getElementById("verify-email-step-2").style.display = "none";
-        document.getElementById("verify-email-input").value = "";
-      } else {
-        // Step 2: Open Recharge Billing modal directly
-        openRechargeBillingPortal(activeUser);
-      }
-    });
+  function handleEduSubscriptionTrigger(e) {
+    if (e) e.stopPropagation();
+    
+    const btn = document.getElementById("btn-subscribe-edu");
+    if (btn && btn.hasAttribute("disabled")) return;
+
+    const activeUser = FirebaseMock.auth.currentUser;
+    const isGuest = !activeUser || activeUser.id === "u_guest";
+
+    if (isGuest) {
+      document.getElementById("modal-auth-verify").style.display = "flex";
+      document.getElementById("verify-email-step-1").style.display = "block";
+      document.getElementById("verify-email-step-2").style.display = "none";
+      document.getElementById("verify-email-input").value = "";
+    } else {
+      openRechargeBillingPortal(activeUser);
+    }
   }
 
   function openRechargeBillingPortal(user) {
@@ -2705,17 +2710,20 @@ function setupPricingPanel() {
     }
   });
 
+  function handleBizContactTrigger(e) {
+    if (e) e.stopPropagation();
+    const activeUser = FirebaseMock.auth.currentUser;
+    const userEmail = activeUser ? activeUser.email : "";
+
+    const promptMsg = prompt("Enter your corporate inquiries or business requirements:", "We require 15 seats with team collaboration...");
+    if (promptMsg === null || !promptMsg.trim()) return;
+
+    showInfoBox("Inquiry Sent Successfully", `Thank you! Your inquiry was successfully received. Our Enterprise Solutions team will contact you at ${userEmail || 'your email'} within 24 hours.`, "mail");
+    showNotification("Sales Inquiry Sent", "Enterprise inquiry registered.");
+  }
+
   if (btnContactSales) {
-    btnContactSales.addEventListener("click", () => {
-      const activeUser = FirebaseMock.auth.currentUser;
-      const userEmail = activeUser ? activeUser.email : "";
-
-      const promptMsg = prompt("Enter your corporate inquiries or business requirements:", "We require 15 seats with team collaboration...");
-      if (promptMsg === null || !promptMsg.trim()) return;
-
-      showInfoBox("Inquiry Sent Successfully", `Thank you! Your inquiry was successfully received. Our Enterprise Solutions team will contact you at ${userEmail || 'your email'} within 24 hours.`, "mail");
-      showNotification("Sales Inquiry Sent", "Enterprise inquiry registered.");
-    });
+    btnContactSales.addEventListener("click", handleBizContactTrigger);
   }
 
   const btnCloseInfo = document.getElementById("btn-close-info-box");
@@ -2728,48 +2736,57 @@ function setupPricingPanel() {
   // Entire pricing card clickable event listeners
   if (cardEdu) {
     cardEdu.style.cursor = "pointer";
-    cardEdu.addEventListener("click", (e) => {
-      if (e.target.id === "btn-subscribe-edu" || e.target.closest("#btn-subscribe-edu")) return;
-      const btn = document.getElementById("btn-subscribe-edu");
-      if (btn && !btn.hasAttribute("disabled")) {
-        btn.click();
-      }
-    });
+    cardEdu.addEventListener("click", handleEduSubscriptionTrigger);
   }
 
   if (cardBiz) {
     cardBiz.style.cursor = "pointer";
-    cardBiz.addEventListener("click", (e) => {
-      if (e.target.id === "btn-contact-sales" || e.target.closest("#btn-contact-sales")) return;
-      const btn = document.getElementById("btn-contact-sales");
-      if (btn) {
-        btn.click();
-      }
-    });
+    cardBiz.addEventListener("click", handleBizContactTrigger);
   }
 
   const textQuote = document.getElementById("text-custom-quote");
   if (textQuote) {
     textQuote.style.cursor = "pointer";
-    textQuote.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const btn = document.getElementById("btn-contact-sales");
-      if (btn) {
-        btn.click();
-      }
-    });
+    textQuote.addEventListener("click", handleBizContactTrigger);
+  }
+
+  function handleResetPricingTrigger(e) {
+    if (e) e.stopPropagation();
+    
+    // Reset buttons
+    btnCatEdu.style.background = "transparent";
+    btnCatEdu.style.color = "#fff";
+    btnCatEdu.style.border = "1.5px solid var(--outline-variant)";
+
+    btnCatBiz.style.background = "transparent";
+    btnCatBiz.style.color = "#fff";
+    btnCatBiz.style.border = "1.5px solid var(--outline-variant)";
+
+    // Reset cards
+    cardFree.style.border = "1px solid var(--outline-variant)";
+    cardFree.style.transform = "none";
+    cardFree.style.boxShadow = "none";
+
+    cardEdu.style.border = "1px solid var(--outline-variant)";
+    cardEdu.style.transform = "none";
+    cardEdu.style.boxShadow = "none";
+
+    cardBiz.style.border = "1px solid var(--outline-variant)";
+    cardBiz.style.transform = "none";
+    cardBiz.style.boxShadow = "none";
+
+    // Hide badge
+    recBadge.style.display = "none";
+  }
+
+  if (btnReset) {
+    btnReset.addEventListener("click", handleResetPricingTrigger);
   }
 
   const cardSmart = document.getElementById("card-plan-smart-fit");
   if (cardSmart) {
     cardSmart.style.cursor = "pointer";
-    cardSmart.addEventListener("click", (e) => {
-      if (e.target.id === "btn-reset-pricing" || e.target.closest("#btn-reset-pricing")) return;
-      const btn = document.getElementById("btn-reset-pricing");
-      if (btn) {
-        btn.click();
-      }
-    });
+    cardSmart.addEventListener("click", handleResetPricingTrigger);
   }
 }
 
