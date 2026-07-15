@@ -90,7 +90,7 @@ const FirebaseMock = (() => {
   const initRealFirebase = () => {
     const config = loadData('fb_doc_global_config', {});
     if (config.fbApiKey && config.fbAuthDomain && config.fbProjectId) {
-      if (window.firebase) {
+      if (window.firebase && typeof window.firebase.initializeApp === 'function' && typeof window.firebase.auth === 'function') {
         try {
           const fbConfig = {
             apiKey: config.fbApiKey,
@@ -100,22 +100,26 @@ const FirebaseMock = (() => {
           };
           
           const proceedInit = () => {
-            window.firebase.initializeApp(fbConfig);
-            realAuth = window.firebase.auth();
-            console.log("Real Firebase initialized successfully!");
-            
-            // Connect state listener
-            realAuth.onAuthStateChanged(fbUser => {
-              if (fbUser) {
-                currentUser = mapFirebaseUser(fbUser);
-                syncUserToLocalDatabase(currentUser);
-                saveData('fb_doc_current_user', currentUser);
-              } else {
-                currentUser = null;
-                saveData('fb_doc_current_user', null);
-              }
-              notifyAuthStateChanged();
-            });
+            try {
+              window.firebase.initializeApp(fbConfig);
+              realAuth = window.firebase.auth();
+              console.log("Real Firebase initialized successfully!");
+              
+              // Connect state listener
+              realAuth.onAuthStateChanged(fbUser => {
+                if (fbUser) {
+                  currentUser = mapFirebaseUser(fbUser);
+                  syncUserToLocalDatabase(currentUser);
+                  saveData('fb_doc_current_user', currentUser);
+                } else {
+                  currentUser = null;
+                  saveData('fb_doc_current_user', null);
+                }
+                notifyAuthStateChanged();
+              });
+            } catch (innerErr) {
+              console.error("Async Firebase initialization failed:", innerErr);
+            }
           };
 
           if (window.firebase.apps.length) {
