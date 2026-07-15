@@ -1809,161 +1809,193 @@ window.triggerWordExport = function() {
   exportToWord(title, content, appState.brandKit, document.getElementById("gen-apply-brand").checked);
 };
 
-// Client-side text parsing to DOCX using docx.js library
+// Client-side text parsing to DOCX using docx.js library with a reliable HTML fallback
 function exportToWord(title, htmlContent, brandInfo, useBranding) {
-  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, WidthType, BorderStyle } = window.docx;
-  
-  const children = [];
-
-  // 1. Add Brand Header details if branding enabled
-  if (useBranding && brandInfo && brandInfo.companyName) {
-    children.push(new Paragraph({
-      children: [
-        new TextRun({ text: brandInfo.companyName, bold: true, size: 28, color: brandInfo.primaryColor.replace('#', '') })
-      ],
-      alignment: AlignmentType.RIGHT
-    }));
-    
-    if (brandInfo.tagline) {
-      children.push(new Paragraph({
-        children: [new TextRun({ text: brandInfo.tagline, italics: true, size: 20, color: "555555" })],
-        alignment: AlignmentType.RIGHT
-      }));
+  try {
+    if (!window.docx) {
+      throw new Error("docx.js library not loaded.");
     }
     
-    children.push(new Paragraph({
-      children: [
-        new TextRun({ 
-          text: `${brandInfo.address || ''} | Phone: ${brandInfo.phone || ''} | Email: ${brandInfo.email || ''}`, 
-          size: 16, 
-          color: "888888" 
-        })
-      ],
-      alignment: AlignmentType.RIGHT
-    }));
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, WidthType, BorderStyle } = window.docx;
+    const children = [];
 
-    if (brandInfo.taxNumber) {
+    // 1. Add Brand Header details if branding enabled
+    if (useBranding && brandInfo && brandInfo.companyName) {
       children.push(new Paragraph({
-        children: [new TextRun({ text: `GSTIN: ${brandInfo.taxNumber}`, size: 16, bold: true, color: "111111" })],
+        children: [
+          new TextRun({ text: brandInfo.companyName, bold: true, size: 28, color: brandInfo.primaryColor.replace('#', '') })
+        ],
         alignment: AlignmentType.RIGHT
       }));
-    }
-
-    // Add separator border
-    children.push(new Paragraph({
-      text: "",
-      border: { bottom: { color: brandInfo.primaryColor.replace('#', ''), space: 8, style: BorderStyle.SINGLE, size: 12 } }
-    }));
-  }
-
-  // 2. Parse HTML elements iteratively
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = htmlContent;
-
-  Array.from(tempDiv.children).forEach(el => {
-    const text = el.innerText.trim();
-    if (!text && el.tagName !== 'TABLE' && el.tagName !== 'HR') return;
-
-    if (el.tagName === 'H1') {
-      children.push(new Paragraph({
-        children: [new TextRun({ text: text, bold: true, size: 32, color: "1e1b4b" })],
-        spacing: { before: 240, after: 120 }
-      }));
-    } else if (el.tagName === 'H2') {
-      children.push(new Paragraph({
-        children: [new TextRun({ text: text, bold: true, size: 26, color: "1e1b4b" })],
-        spacing: { before: 180, after: 90 }
-      }));
-    } else if (el.tagName === 'H3') {
-      children.push(new Paragraph({
-        children: [new TextRun({ text: text, bold: true, size: 22, color: "1e1b4b" })],
-        spacing: { before: 140, after: 70 }
-      }));
-    } else if (el.tagName === 'P') {
-      children.push(new Paragraph({
-        children: [new TextRun({ text: text, size: 22 })],
-        spacing: { after: 120 }
-      }));
-    } else if (el.tagName === 'UL') {
-      Array.from(el.children).forEach(li => {
-        children.push(new Paragraph({
-          children: [new TextRun({ text: li.innerText.trim(), size: 22 })],
-          bullet: { level: 0 },
-          spacing: { after: 60 }
-        }));
-      });
-    } else if (el.tagName === 'OL') {
-      let count = 1;
-      Array.from(el.children).forEach(li => {
-        children.push(new Paragraph({
-          children: [new TextRun({ text: `${count}. ${li.innerText.trim()}`, size: 22 })],
-          spacing: { after: 60 }
-        }));
-        count++;
-      });
-    } else if (el.tagName === 'TABLE') {
-      const rows = [];
-      Array.from(el.querySelectorAll("tr")).forEach(tr => {
-        const cells = [];
-        Array.from(tr.children).forEach(cell => {
-          cells.push(new TableCell({
-            children: [
-              new Paragraph({ 
-                children: [
-                  new TextRun({ 
-                    text: cell.innerText.trim(), 
-                    size: 20, 
-                    bold: cell.tagName === 'TH' 
-                  })
-                ] 
-              })
-            ],
-            shading: cell.tagName === 'TH' ? { fill: "f1f5f9" } : undefined,
-            width: { size: 2500, type: WidthType.DXA },
-            margins: { top: 120, bottom: 120, left: 120, right: 120 }
-          }));
-        });
-        rows.push(new TableRow({ children: cells }));
-      });
       
-      children.push(new Table({ 
-        rows: rows,
-        width: { size: 9000, type: WidthType.DXA }
+      if (brandInfo.tagline) {
+        children.push(new Paragraph({
+          children: [new TextRun({ text: brandInfo.tagline, italics: true, size: 20, color: "555555" })],
+          alignment: AlignmentType.RIGHT
+        }));
+      }
+      
+      children.push(new Paragraph({
+        children: [
+          new TextRun({ 
+            text: `${brandInfo.address || ''} | Phone: ${brandInfo.phone || ''} | Email: ${brandInfo.email || ''}`, 
+            size: 16, 
+            color: "888888" 
+          })
+        ],
+        alignment: AlignmentType.RIGHT
       }));
-      // spacing after table
-      children.push(new Paragraph({ text: "", spacing: { after: 120 } }));
-    } else if (el.tagName === 'HR') {
+
+      if (brandInfo.taxNumber) {
+        children.push(new Paragraph({
+          children: [new TextRun({ text: `GSTIN: ${brandInfo.taxNumber}`, size: 16, bold: true, color: "111111" })],
+          alignment: AlignmentType.RIGHT
+        }));
+      }
+
+      // Add separator border
       children.push(new Paragraph({
         text: "",
-        border: { bottom: { color: "cbd5e1", space: 4, style: BorderStyle.SINGLE, size: 6 } },
-        spacing: { before: 100, after: 100 }
+        border: { bottom: { color: brandInfo.primaryColor.replace('#', ''), space: 8, style: BorderStyle.SINGLE, size: 12 } }
       }));
     }
-  });
 
-  // 3. Assemble document
-  const doc = new Document({
-    sections: [{
-      properties: {},
-      children: children
-    }]
-  });
+    // 2. Parse HTML elements iteratively
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = htmlContent;
 
-  // 4. Blob compile and download
-  Packer.toBlob(doc).then(blob => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.docx`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showNotification("Word Export Successful", "Generated DOCX file downloaded.");
-  }).catch(e => {
-    console.error("Word compilation error:", e);
-    alert("Could not compile Word document. Check console.");
+    Array.from(tempDiv.children).forEach(el => {
+      const text = el.innerText.trim();
+      if (!text && el.tagName !== 'TABLE' && el.tagName !== 'HR') return;
+
+      if (el.tagName === 'H1') {
+        children.push(new Paragraph({
+          children: [new TextRun({ text: text, bold: true, size: 32, color: "1e1b4b" })],
+          spacing: { before: 240, after: 120 }
+        }));
+      } else if (el.tagName === 'H2') {
+        children.push(new Paragraph({
+          children: [new TextRun({ text: text, bold: true, size: 26, color: "1e1b4b" })],
+          spacing: { before: 180, after: 90 }
+        }));
+      } else if (el.tagName === 'H3') {
+        children.push(new Paragraph({
+          children: [new TextRun({ text: text, bold: true, size: 22, color: "1e1b4b" })],
+          spacing: { before: 140, after: 70 }
+        }));
+      } else if (el.tagName === 'P') {
+        children.push(new Paragraph({
+          children: [new TextRun({ text: text, size: 22 })],
+          spacing: { after: 120 }
+        }));
+      } else if (el.tagName === 'UL') {
+        Array.from(el.children).forEach(li => {
+          children.push(new Paragraph({
+            children: [new TextRun({ text: li.innerText.trim(), size: 22 })],
+            bullet: { level: 0 },
+            spacing: { after: 60 }
+          }));
+        });
+      } else if (el.tagName === 'OL') {
+        let count = 1;
+        Array.from(el.children).forEach(li => {
+          children.push(new Paragraph({
+            children: [new TextRun({ text: `${count}. ${li.innerText.trim()}`, size: 22 })],
+            spacing: { after: 60 }
+          }));
+          count++;
+        });
+      } else if (el.tagName === 'TABLE') {
+        const rows = [];
+        Array.from(el.querySelectorAll("tr")).forEach(tr => {
+          const cells = [];
+          Array.from(tr.children).forEach(cell => {
+            cells.push(new TableCell({
+              children: [
+                new Paragraph({ 
+                  children: [
+                    new TextRun({ 
+                      text: cell.innerText.trim(), 
+                      size: 20, 
+                      bold: cell.tagName === 'TH' 
+                    })
+                  ] 
+                })
+              ],
+              shading: cell.tagName === 'TH' ? { fill: "f1f5f9" } : undefined,
+              width: { size: 2500, type: WidthType.DXA },
+              margins: { top: 120, bottom: 120, left: 120, right: 120 }
+            }));
+          });
+          rows.push(new TableRow({ children: cells }));
+        });
+        
+        children.push(new Table({ 
+          rows: rows,
+          width: { size: 9000, type: WidthType.DXA }
+        }));
+        children.push(new Paragraph({ text: "", spacing: { after: 120 } }));
+      } else if (el.tagName === 'HR') {
+        children.push(new Paragraph({
+          text: "",
+          border: { bottom: { color: "cbd5e1", space: 4, style: BorderStyle.SINGLE, size: 6 } },
+          spacing: { before: 100, after: 100 }
+        }));
+      }
+    });
+
+    // 3. Assemble document
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: children
+      }]
+    });
+
+    // 4. Blob compile and download
+    Packer.toBlob(doc).then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showNotification("Word Export Successful", "Generated DOCX file downloaded.");
+    }).catch(err => {
+      console.warn("Packer.toBlob compilation error, falling back to HTML Word exporter:", err);
+      exportToWordHtmlFallback(title, htmlContent);
+    });
+
+  } catch (err) {
+    console.warn("exportToWord structural compilation failed, falling back to HTML Word exporter:", err);
+    exportToWordHtmlFallback(title, htmlContent);
+  }
+}
+
+// Zero-dependency HTML-to-Word fallback exporter
+function exportToWordHtmlFallback(title, htmlContent) {
+  const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+    "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+    "xmlns='http://www.w3.org/TR/REC-html40'>" +
+    "<head><title>" + title + "</title><meta charset='utf-8'></head><body>";
+  const footer = "</body></html>";
+  const sourceHTML = header + htmlContent + footer;
+  
+  const blob = new Blob(['\ufeff' + sourceHTML], {
+    type: 'application/msword'
   });
+  
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showNotification("Word Fallback Export", "Document exported successfully via HTML engine.");
 }
 
 // ================= DOCUMENT SUMMARY & AUDIO READER FEATURE =================
