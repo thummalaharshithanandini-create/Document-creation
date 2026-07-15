@@ -276,6 +276,36 @@
             <span id="header-brand-text">Generic Branding</span>
           </div>
 
+          <!-- QR Code Mobile Link Widget -->
+          <div class="qr-code-widget-container" style="position: relative; display: flex; align-items: center; margin-right: 4px;">
+            <button class="top-bar-action" id="btn-show-qr" title="Scan to test on Mobile" style="display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border-radius: 8px; width: 36px; height: 36px;">
+              <span class="material-symbols-outlined" style="font-size: 20px; color: var(--primary);">qr_code_2</span>
+            </button>
+            <div class="qr-dropdown-popover" id="qr-popover" style="
+              display: none;
+              position: absolute;
+              top: 44px;
+              right: 0;
+              width: 220px;
+              background: #121318;
+              border: 1px solid var(--outline-variant);
+              border-radius: 12px;
+              padding: 16px;
+              box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+              z-index: 1000;
+              text-align: center;
+              flex-direction: column;
+              align-items: center;
+            ">
+              <h4 style="margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: #fff;">Scan to Test on Mobile</h4>
+              <p style="margin: 0 0 12px 0; font-size: 10.5px; color: var(--outline); line-height: 1.3;">Scan this code to load DocuChat on your phone.</p>
+              <div style="background: white; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 8px;">
+                <img id="qr-code-img" src="" alt="QR Code" style="width: 140px; height: 140px; display: block;">
+              </div>
+              <div style="font-size: 9.5px; word-break: break-all; color: var(--primary); font-family: monospace;" id="qr-url-text">https://...</div>
+            </div>
+          </div>
+
           <div class="header-user-status" id="header-user-avatar" title="Manage Profile">U</div>
           <button class="top-bar-action" id="header-logout-btn" title="Sign Out">
             <span class="material-symbols-outlined">logout</span>
