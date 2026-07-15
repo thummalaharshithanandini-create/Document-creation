@@ -2724,6 +2724,29 @@ function setupPricingPanel() {
       document.getElementById("modal-info-box").style.display = "none";
     });
   }
+
+  // Entire pricing card clickable event listeners
+  if (cardEdu) {
+    cardEdu.style.cursor = "pointer";
+    cardEdu.addEventListener("click", (e) => {
+      if (e.target.id === "btn-subscribe-edu" || e.target.closest("#btn-subscribe-edu")) return;
+      const btn = document.getElementById("btn-subscribe-edu");
+      if (btn && !btn.hasAttribute("disabled")) {
+        btn.click();
+      }
+    });
+  }
+
+  if (cardBiz) {
+    cardBiz.style.cursor = "pointer";
+    cardBiz.addEventListener("click", (e) => {
+      if (e.target.id === "btn-contact-sales" || e.target.closest("#btn-contact-sales")) return;
+      const btn = document.getElementById("btn-contact-sales");
+      if (btn) {
+        btn.click();
+      }
+    });
+  }
 }
 
 // Show standard information modal dialog
