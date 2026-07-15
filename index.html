@@ -244,6 +244,26 @@
         </button>
       </nav>
       
+      <!-- Sidebar QR Code Card -->
+      <div class="sidebar-qr-card" id="sidebar-qr-card" style="
+        margin: 16px 12px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--outline-variant);
+        border-radius: 8px;
+        text-align: center;
+        transition: all 0.3s ease;
+      ">
+        <div style="font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+          <span class="material-symbols-outlined" style="font-size: 15px; color: var(--primary);">qr_code_2</span>
+          <span>Test on Mobile</span>
+        </div>
+        <div style="background: white; padding: 6px; border-radius: 6px; display: inline-block; margin-bottom: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.25);">
+          <img id="sidebar-qr-img" src="" alt="QR Code" style="width: 100px; height: 100px; display: block;">
+        </div>
+        <div style="font-size: 8px; color: var(--outline); word-break: break-all; font-family: monospace; overflow: hidden; max-height: 24px;" id="sidebar-qr-url">https://...</div>
+      </div>
+
       <div class="sidebar-footer">
         <button class="sidebar-toggle-btn" id="sidebar-toggle" title="Collapse Sidebar">
           <span class="material-symbols-outlined">menu_open</span>
@@ -1230,9 +1250,9 @@
   </div>
 
   <!-- Core Mock DB & Auth engine script modules -->
-  <script src="firebase-mock.js?v=4.2"></script>
-  <script src="db.js?v=4.2"></script>
+  <script src="firebase-mock.js?v=4.3"></script>
+  <script src="db.js?v=4.3"></script>
   <!-- Main application script -->
-  <script src="app.js?v=4.2"></script>
+  <script src="app.js?v=4.3"></script>
 </body>
 </html>

@@ -411,6 +411,10 @@ h1, h2, h3, h4, h5, h6 {
   display: none;
 }
 
+.sidebar.collapsed .sidebar-qr-card {
+  display: none;
+}
+
 .sidebar.collapsed .sidebar-header {
   justify-content: center;
   padding: 0;

@@ -2748,40 +2748,48 @@ function generateAutoLogo(companyName, primaryColor) {
   return canvas.toDataURL("image/png");
 }
 
-// Setup top bar QR Code Mobile Link Widget
+// Setup top bar and sidebar QR Code Mobile Link Widgets
 function setupQRCodeWidget() {
   const btnShowQr = document.getElementById("btn-show-qr");
   const qrPopover = document.getElementById("qr-popover");
   const qrImg = document.getElementById("qr-code-img");
   const qrUrlText = document.getElementById("qr-url-text");
 
-  if (!btnShowQr || !qrPopover || !qrImg || !qrUrlText) return;
+  const sidebarQrImg = document.getElementById("sidebar-qr-img");
+  const sidebarQrUrl = document.getElementById("sidebar-qr-url");
 
   // Render QR helper for current active URL
   function refreshQR() {
     const currentUrl = window.location.href;
-    qrUrlText.innerText = currentUrl;
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(currentUrl)}`;
+    if (qrUrlText) qrUrlText.innerText = currentUrl;
+    if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(currentUrl)}`;
+    
+    if (sidebarQrUrl) sidebarQrUrl.innerText = currentUrl;
+    if (sidebarQrImg) sidebarQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`;
   }
 
   // Initial generation
   refreshQR();
 
   // Toggle dropdown popover
-  btnShowQr.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const isVisible = qrPopover.style.display === "flex";
-    qrPopover.style.display = isVisible ? "none" : "flex";
-    if (!isVisible) {
-      refreshQR();
-    }
-  });
+  if (btnShowQr && qrPopover) {
+    btnShowQr.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isVisible = qrPopover.style.display === "flex";
+      qrPopover.style.display = isVisible ? "none" : "flex";
+      if (!isVisible) {
+        refreshQR();
+      }
+    });
+  }
 
   // Close when clicking outside of widget
   document.addEventListener("click", () => {
-    qrPopover.style.display = "none";
+    if (qrPopover) qrPopover.style.display = "none";
   });
-  qrPopover.addEventListener("click", (e) => {
-    e.stopPropagation();
-  });
+  if (qrPopover) {
+    qrPopover.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  }
 }
