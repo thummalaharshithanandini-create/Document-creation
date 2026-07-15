@@ -2534,34 +2534,130 @@ function setupPricingPanel() {
       btnSubscribeEdu.setAttribute("disabled", "true");
     }
 
-    btnSubscribeEdu.addEventListener("click", async () => {
+    btnSubscribeEdu.addEventListener("click", () => {
       const activeUser = FirebaseMock.auth.currentUser;
-      if (!activeUser || activeUser.id === "u_guest") {
-        showInfoBox("Authentication Required", "Please sign in or register an account before subscribing to a premium plan.", "warning");
-        return;
-      }
+      const isGuest = !activeUser || activeUser.id === "u_guest";
 
-      const conf = confirm("Confirm subscription to Education Plan (₹100/month)? This will unlock unlimited AI generations.");
-      if (!conf) return;
-
-      try {
-        // Upgrade profile
-        await FirebaseMock.auth.updateUserProfile({ subscription: 'education', role: 'student' });
-        
-        // Update button UI
-        btnSubscribeEdu.innerText = "Subscribed ✓";
-        btnSubscribeEdu.style.background = "var(--outline-variant)";
-        btnSubscribeEdu.style.color = "var(--outline)";
-        btnSubscribeEdu.setAttribute("disabled", "true");
-        
-        // Show success info modal
-        showInfoBox("Subscription Successful", "Welcome to DocuChat AI premium! Your account is now upgraded to the Education Plan. Unlimited document drafting is now active.", "stars");
-        showNotification("Tier Upgraded", "Education Plan activated successfully.");
-      } catch (err) {
-        alert(err.message);
+      if (isGuest) {
+        // Step 1: Open Email Verification modal
+        document.getElementById("modal-auth-verify").style.display = "flex";
+        document.getElementById("verify-email-step-1").style.display = "block";
+        document.getElementById("verify-email-step-2").style.display = "none";
+        document.getElementById("verify-email-input").value = "";
+      } else {
+        // Step 2: Open Recharge Billing modal directly
+        openRechargeBillingPortal(activeUser);
       }
     });
   }
+
+  function openRechargeBillingPortal(user) {
+    document.getElementById("modal-recharge-billing").style.display = "flex";
+    document.getElementById("recharge-amount").value = "100";
+    document.getElementById("recharge-card-name").value = user.fullName || "";
+    document.getElementById("recharge-card-number").value = "";
+    document.getElementById("recharge-card-expiry").value = "";
+    document.getElementById("recharge-card-cvv").value = "";
+  }
+
+  // Email verification step 1 send code
+  document.getElementById("btn-verify-send-code").addEventListener("click", () => {
+    const email = document.getElementById("verify-email-input").value.trim();
+    if (!email || !email.includes("@")) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+    showNotification("OTP Code Sent", "Verification code 123456 sent to " + email);
+    document.getElementById("verify-email-step-1").style.display = "none";
+    document.getElementById("verify-email-step-2").style.display = "block";
+    document.getElementById("verify-otp-input").value = "";
+  });
+
+  // Email verification step 2 confirm code
+  document.getElementById("btn-verify-confirm-code").addEventListener("click", async () => {
+    const code = document.getElementById("verify-otp-input").value.trim();
+    if (code !== "123456") {
+      alert("Invalid verification code. Please enter 123456.");
+      return;
+    }
+    
+    const email = document.getElementById("verify-email-input").value.trim();
+    const namePart = email.split('@')[0];
+    const fullName = namePart.charAt(0).toUpperCase() + namePart.slice(1) + " User";
+    
+    const mockUser = {
+      id: "u_google_" + namePart,
+      fullName: fullName,
+      email: email,
+      phoneNumber: "+91 9999988888",
+      emailVerified: true,
+      phoneVerified: false,
+      role: "user",
+      blocked: false
+    };
+
+    try {
+      await FirebaseMock.auth.setSessionUser(mockUser);
+      initUserData(); // reload UI
+      
+      document.getElementById("modal-auth-verify").style.display = "none";
+      showNotification("Email Verified", "Identity authenticated successfully.");
+      
+      setTimeout(() => {
+        openRechargeBillingPortal(mockUser);
+      }, 500);
+    } catch(err) {
+      alert(err.message);
+    }
+  });
+
+  // Cancel verification modal
+  document.getElementById("btn-close-auth-verify").addEventListener("click", () => {
+    document.getElementById("modal-auth-verify").style.display = "none";
+  });
+
+  // Cancel recharge modal
+  document.getElementById("btn-close-recharge").addEventListener("click", () => {
+    document.getElementById("modal-recharge-billing").style.display = "none";
+  });
+
+  // Submit payment recharge
+  document.getElementById("btn-recharge-submit").addEventListener("click", async () => {
+    const amount = document.getElementById("recharge-amount").value;
+    const cardholder = document.getElementById("recharge-card-name").value.trim();
+    const cardnum = document.getElementById("recharge-card-number").value.trim();
+    const expiry = document.getElementById("recharge-card-expiry").value.trim();
+    const cvv = document.getElementById("recharge-card-cvv").value.trim();
+
+    if (!amount || parseInt(amount) < 10) {
+      alert("Please enter a valid recharge amount (minimum ₹10).");
+      return;
+    }
+    if (!cardholder || !cardnum || !expiry || !cvv) {
+      alert("Please fill in all credit card payment details.");
+      return;
+    }
+
+    try {
+      // Complete subscription mock purchase
+      await FirebaseMock.auth.updateUserProfile({ subscription: 'education', role: 'student' });
+      
+      // Update UI button
+      const btnSub = document.getElementById("btn-subscribe-edu");
+      if (btnSub) {
+        btnSub.innerText = "Subscribed ✓";
+        btnSub.style.background = "var(--outline-variant)";
+        btnSub.style.color = "var(--outline)";
+        btnSub.setAttribute("disabled", "true");
+      }
+
+      document.getElementById("modal-recharge-billing").style.display = "none";
+      showInfoBox("Recharge Successful", `Payment of ₹${amount} was processed successfully! Your account has been upgraded to the Education Plan.`, "check_circle");
+      showNotification("Recharge Complete", `₹${amount} paid. Plan activated.`);
+    } catch (err) {
+      alert(err.message);
+    }
+  });
 
   if (btnContactSales) {
     btnContactSales.addEventListener("click", () => {

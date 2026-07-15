@@ -430,6 +430,20 @@ const FirebaseMock = (() => {
       saveData('fb_doc_current_user', null);
       notifyAuthStateChanged();
       return Promise.resolve();
+    },
+
+    setSessionUser(user) {
+      currentUser = user;
+      if (user && user.id !== "u_guest") {
+        const idx = users.findIndex(u => u.id === user.id);
+        if (idx === -1) {
+          users.push(user);
+          saveData('fb_doc_users', users);
+        }
+      }
+      saveData('fb_doc_current_user', currentUser);
+      notifyAuthStateChanged();
+      return Promise.resolve(currentUser);
     }
   };
 

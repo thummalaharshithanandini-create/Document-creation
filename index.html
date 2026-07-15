@@ -1069,6 +1069,78 @@
     </div>
   </div>
 
+  <!-- Dialog Modal: Email Verification for Plans -->
+  <div class="modal-overlay" id="modal-auth-verify" style="display: none;">
+    <div class="modal-box" style="max-width: 400px; text-align: center;">
+      <span class="material-symbols-outlined" style="font-size: 48px; color: var(--secondary); margin-bottom: 12px;">mark_email_read</span>
+      <h3 style="font-family: var(--font-brand); font-size: 18px; margin: 0 0 8px 0;">Verify Email Address</h3>
+      <p style="font-size: 13px; line-height: 1.5; color: var(--on-surface-variant); margin: 0 0 20px 0;">Verify your identity to unlock premium subscriptions and recharges.</p>
+      
+      <!-- Input Email view -->
+      <div id="verify-email-step-1">
+        <div class="calc-input-group" style="text-align: left; margin-bottom: 16px;">
+          <label class="calc-label">Enter Email Address</label>
+          <input type="email" class="calc-field" id="verify-email-input" placeholder="name@domain.com">
+        </div>
+        <button class="calc-btn" id="btn-verify-send-code" style="width: 100%; background: var(--secondary); color: #000; font-weight: 700; border: none; margin-bottom: 8px;">Send Verification Code</button>
+      </div>
+
+      <!-- Input Code view -->
+      <div id="verify-email-step-2" style="display: none;">
+        <div class="calc-input-group" style="text-align: left; margin-bottom: 16px;">
+          <label class="calc-label">Enter 6-Digit OTP Code</label>
+          <input type="text" class="calc-field" id="verify-otp-input" placeholder="123456" style="text-align: center; letter-spacing: 4px; font-weight: bold; font-size: 16px;">
+          <div style="font-size: 11px; color: var(--secondary); margin-top: 6px; text-align: center;">Simulated code is <strong>123456</strong></div>
+        </div>
+        <button class="calc-btn" id="btn-verify-confirm-code" style="width: 100%; background: var(--secondary); color: #000; font-weight: 700; border: none; margin-bottom: 8px;">Verify & Continue</button>
+      </div>
+
+      <button class="calc-btn" id="btn-close-auth-verify" style="width: 100%; background: transparent; border: 1.5px solid var(--outline-variant); color: #fff; margin: 0;">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Dialog Modal: Recharge & Payment Gateway -->
+  <div class="modal-overlay" id="modal-recharge-billing" style="display: none;">
+    <div class="modal-box" style="max-width: 440px; text-align: left;">
+      <h3 style="font-family: var(--font-brand); font-size: 20px; color: var(--primary); margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px;">
+        <span class="material-symbols-outlined">payments</span>
+        <span>Secure Recharge Portal</span>
+      </h3>
+      <p style="font-size: 12.5px; color: var(--outline); margin: 0 0 20px 0;">Add funds or purchase billing recharges to activate premium tiers.</p>
+      
+      <div class="calc-input-group">
+        <label class="calc-label">Recharge Amount (₹)</label>
+        <input type="number" class="calc-field" id="recharge-amount" value="100" min="10" placeholder="100" style="font-size: 16px; font-weight: bold; color: var(--primary);">
+      </div>
+
+      <div class="calc-input-group">
+        <label class="calc-label">Cardholder Name</label>
+        <input type="text" class="calc-field" id="recharge-card-name" placeholder="John Doe">
+      </div>
+
+      <div class="calc-input-group">
+        <label class="calc-label">Credit / Debit Card Number</label>
+        <input type="text" class="calc-field" id="recharge-card-number" placeholder="4111 2222 3333 4444" maxlength="19">
+      </div>
+
+      <div class="calc-input-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+        <div class="calc-input-group" style="margin-bottom: 0;">
+          <label class="calc-label">Expiration Date</label>
+          <input type="text" class="calc-field" id="recharge-card-expiry" placeholder="MM/YY" maxlength="5" style="text-align: center;">
+        </div>
+        <div class="calc-input-group" style="margin-bottom: 0;">
+          <label class="calc-label">CVV / CVN</label>
+          <input type="password" class="calc-field" id="recharge-card-cvv" placeholder="•••" maxlength="3" style="text-align: center; letter-spacing: 2px;">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button class="calc-btn" id="btn-recharge-submit" style="flex: 1; background: var(--primary); color: #000; font-weight: 700; border: none; margin: 0;">Add Recharge</button>
+        <button class="calc-btn" id="btn-close-recharge" style="background: transparent; border: 1.5px solid var(--outline-variant); color: #fff; margin: 0; min-width: 90px;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Dialog Modal: Summary & Voice Reader -->
   <div class="modal-overlay" id="modal-summary-reader" style="display: none;">
     <div class="modal-box" style="max-width: 500px; text-align: left;">
@@ -1128,9 +1200,9 @@
   </div>
 
   <!-- Core Mock DB & Auth engine script modules -->
-  <script src="firebase-mock.js?v=4.1"></script>
-  <script src="db.js?v=4.1"></script>
+  <script src="firebase-mock.js?v=4.2"></script>
+  <script src="db.js?v=4.2"></script>
   <!-- Main application script -->
-  <script src="app.js?v=4.1"></script>
+  <script src="app.js?v=4.2"></script>
 </body>
 </html>
