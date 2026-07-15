@@ -2749,24 +2749,18 @@ function generateAutoLogo(companyName, primaryColor) {
   return canvas.toDataURL("image/png");
 }
 
-// Setup top bar and sidebar QR Code Mobile Link Widgets
+// Setup top bar QR Code Mobile Link Popover Widget
 function setupQRCodeWidget() {
   const btnShowQr = document.getElementById("btn-show-qr");
   const qrPopover = document.getElementById("qr-popover");
   const qrImg = document.getElementById("qr-code-img");
   const qrUrlText = document.getElementById("qr-url-text");
 
-  const sidebarQrImg = document.getElementById("sidebar-qr-img");
-  const sidebarQrUrl = document.getElementById("sidebar-qr-url");
-
   // Render QR helper for current active URL
   function refreshQR() {
     const currentUrl = window.location.href;
     if (qrUrlText) qrUrlText.innerText = currentUrl;
     if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(currentUrl)}`;
-    
-    if (sidebarQrUrl) sidebarQrUrl.innerText = currentUrl;
-    if (sidebarQrImg) sidebarQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`;
   }
 
   // Initial generation
