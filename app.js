@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setupDocumentUploader();
     setupPricingPanel();
     setupQRCodeWidget();
+    setupDedicatedQRGenerator();
   } catch (err) {
     const errInfo = encodeURIComponent(`Boot Error: ${err.message} at ${err.stack}`);
     fetch(`/api/log-error?msg=${errInfo}`).catch(() => {});
@@ -95,7 +96,7 @@ function switchView(viewName) {
     // Update Header title
     const headerTitle = document.getElementById("page-header-title");
     if (headerTitle) {
-      headerTitle.innerText = viewName.charAt(0).toUpperCase() + viewName.slice(1).replace('generator', 'AI Generator').replace('brand', 'Brand Kit').replace('history', 'Documents Log');
+      headerTitle.innerText = viewName.charAt(0).toUpperCase() + viewName.slice(1).replace('generator', 'AI Generator').replace('brand', 'Brand Kit').replace('history', 'Documents Log').replace('qr-generator', 'QR Code Generator');
     }
     
     // Highlight sidebar items
@@ -2792,4 +2793,89 @@ function setupQRCodeWidget() {
       e.stopPropagation();
     });
   }
+}
+
+// Setup dedicated QR Generator page view
+function setupDedicatedQRGenerator() {
+  const inputUrl = document.getElementById("qr-input-url");
+  const displayUrl = document.getElementById("qr-display-url");
+  const canvas = document.getElementById("qr-canvas-element");
+  const errorMsg = document.getElementById("qr-error-msg");
+  const btnDownload = document.getElementById("btn-qr-download");
+
+  if (!inputUrl || !displayUrl || !canvas || !errorMsg || !btnDownload) return;
+
+  // Prefill current URL
+  const initialUrl = window.location.href;
+  inputUrl.value = initialUrl;
+  displayUrl.innerText = initialUrl;
+
+  let qr = null;
+
+  // Generate QR Code with validation
+  function generateQR(url) {
+    // Validate URL pattern
+    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?(\?.*)?$/i;
+    if (!urlPattern.test(url)) {
+      errorMsg.style.display = "block";
+      return;
+    }
+    errorMsg.style.display = "none";
+    displayUrl.innerText = url;
+
+    // Create QR using QRious library if loaded, fallback to Google Charts / QRServer
+    if (window.QRious) {
+      qr = new QRious({
+        element: canvas,
+        value: url,
+        size: 250,
+        level: 'H'
+      });
+    } else {
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        canvas.width = 250;
+        canvas.height = 250;
+        ctx.drawImage(img, 0, 0, 250, 250);
+      };
+      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`;
+    }
+  }
+
+  // Load QRious library dynamically
+  if (!window.QRious) {
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js";
+    script.onload = () => {
+      generateQR(inputUrl.value);
+    };
+    document.head.appendChild(script);
+  } else {
+    generateQR(inputUrl.value);
+  }
+
+  // Reactive input regeneration
+  inputUrl.addEventListener("input", () => {
+    generateQR(inputUrl.value.trim());
+  });
+
+  // Download QR Code as PNG
+  btnDownload.addEventListener("click", () => {
+    const url = inputUrl.value.trim();
+    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?(\?.*)?$/i;
+    if (!urlPattern.test(url)) {
+      alert("Please enter a valid website URL before downloading.");
+      return;
+    }
+
+    // Create a download link
+    const link = document.createElement("a");
+    link.download = "docuchat_qr_code.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    
+    showNotification("QR Downloaded", "High-quality QR code saved as PNG.");
+  });
 }

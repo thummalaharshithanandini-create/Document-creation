@@ -242,6 +242,11 @@
           <span class="material-symbols-outlined">payments</span>
           <span class="sidebar-label">Plans & Limits</span>
         </button>
+
+        <button class="sidebar-item" data-target="qr-generator">
+          <span class="material-symbols-outlined">qr_code</span>
+          <span class="sidebar-label">QR Generator</span>
+        </button>
       </nav>
       
       <!-- Sidebar QR Code Card -->
@@ -1059,6 +1064,41 @@
             </div>
           </div>
         </section>
+
+        <!-- ================= PAGE 5: QR GENERATOR ================= -->
+        <section class="page-view" id="view-qr-generator" style="display: none; padding: 24px;">
+          <div style="max-width: 600px; margin: 0 auto;">
+            <div class="calc-card" style="text-align: center; padding: 32px 24px; margin-bottom: 0;">
+              <h2 style="font-family: var(--font-brand); font-size: 24px; color: var(--primary); margin: 0 0 8px 0;">Scan to Access</h2>
+              <p style="font-size: 13.5px; color: var(--outline); margin: 0 0 24px 0;">Generate and download a high-quality QR code for any website link.</p>
+              
+              <!-- Input URL Field -->
+              <div class="calc-input-group" style="text-align: left; margin-bottom: 20px;">
+                <label class="calc-label" for="qr-input-url">Website Link / URL</label>
+                <input type="text" class="calc-field" id="qr-input-url" placeholder="https://example.com" style="font-size: 14.5px;">
+                <div id="qr-error-msg" style="color: #ff5252; font-size: 11px; margin-top: 6px; display: none;">Please enter a valid website URL (including http:// or https://).</div>
+              </div>
+
+              <!-- Centered QR code container -->
+              <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--outline-variant); border-radius: 12px; padding: 24px; display: inline-block; margin-bottom: 16px;">
+                <div style="background: white; padding: 12px; border-radius: 8px; display: inline-block; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+                  <canvas id="qr-canvas-element" style="display: block;"></canvas>
+                </div>
+              </div>
+
+              <div style="font-size: 12px; color: var(--primary); font-family: monospace; word-break: break-all; margin-bottom: 16px; padding: 0 12px;" id="qr-display-url">https://...</div>
+              
+              <p style="font-size: 12.5px; color: var(--outline); margin: 0 0 24px 0; line-height: 1.5; padding: 0 20px;">
+                Scan this QR code using your mobile camera to visit our website.
+              </p>
+
+              <button class="calc-btn primary-glowing-btn" id="btn-qr-download" style="width: 100%; max-width: 240px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span class="material-symbols-outlined">download</span>
+                <span>Download QR Code</span>
+              </button>
+            </div>
+          </div>
+        </section>
       </main>
 
     </div>
@@ -1250,9 +1290,9 @@
   </div>
 
   <!-- Core Mock DB & Auth engine script modules -->
-  <script src="firebase-mock.js?v=4.3"></script>
-  <script src="db.js?v=4.3"></script>
+  <script src="firebase-mock.js?v=4.4"></script>
+  <script src="db.js?v=4.4"></script>
   <!-- Main application script -->
-  <script src="app.js?v=4.3"></script>
+  <script src="app.js?v=4.4"></script>
 </body>
 </html>
