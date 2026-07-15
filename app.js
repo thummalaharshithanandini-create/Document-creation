@@ -2498,4 +2498,82 @@ function setupPricingPanel() {
     // Hide badge
     recBadge.style.display = "none";
   });
+
+  // Subscription click handlers
+  const btnSubscribeEdu = document.getElementById("btn-subscribe-edu");
+  const btnContactSales = document.getElementById("btn-contact-sales");
+
+  if (btnSubscribeEdu) {
+    // Check current state of subscription on load to update button text if active
+    const user = FirebaseMock.auth.currentUser;
+    if (user && user.subscription === 'education') {
+      btnSubscribeEdu.innerText = "Subscribed ✓";
+      btnSubscribeEdu.style.background = "var(--outline-variant)";
+      btnSubscribeEdu.style.color = "var(--outline)";
+      btnSubscribeEdu.setAttribute("disabled", "true");
+    }
+
+    btnSubscribeEdu.addEventListener("click", async () => {
+      const activeUser = FirebaseMock.auth.currentUser;
+      if (!activeUser || activeUser.id === "u_guest") {
+        showInfoBox("Authentication Required", "Please sign in or register an account before subscribing to a premium plan.", "warning");
+        return;
+      }
+
+      const conf = confirm("Confirm subscription to Education Plan (₹100/month)? This will unlock unlimited AI generations.");
+      if (!conf) return;
+
+      try {
+        // Upgrade profile
+        await FirebaseMock.auth.updateUserProfile({ subscription: 'education', role: 'student' });
+        
+        // Update button UI
+        btnSubscribeEdu.innerText = "Subscribed ✓";
+        btnSubscribeEdu.style.background = "var(--outline-variant)";
+        btnSubscribeEdu.style.color = "var(--outline)";
+        btnSubscribeEdu.setAttribute("disabled", "true");
+        
+        // Show success info modal
+        showInfoBox("Subscription Successful", "Welcome to DocuChat AI premium! Your account is now upgraded to the Education Plan. Unlimited document drafting is now active.", "stars");
+        showNotification("Tier Upgraded", "Education Plan activated successfully.");
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  }
+
+  if (btnContactSales) {
+    btnContactSales.addEventListener("click", () => {
+      const activeUser = FirebaseMock.auth.currentUser;
+      const userEmail = activeUser ? activeUser.email : "";
+
+      const promptMsg = prompt("Enter your corporate inquiries or business requirements:", "We require 15 seats with team collaboration...");
+      if (promptMsg === null || !promptMsg.trim()) return;
+
+      showInfoBox("Inquiry Sent Successfully", `Thank you! Your inquiry was successfully received. Our Enterprise Solutions team will contact you at ${userEmail || 'your email'} within 24 hours.`, "mail");
+      showNotification("Sales Inquiry Sent", "Enterprise inquiry registered.");
+    });
+  }
+
+  const btnCloseInfo = document.getElementById("btn-close-info-box");
+  if (btnCloseInfo) {
+    btnCloseInfo.addEventListener("click", () => {
+      document.getElementById("modal-info-box").style.display = "none";
+    });
+  }
+}
+
+// Show standard information modal dialog
+function showInfoBox(title, message, icon = "info") {
+  const modal = document.getElementById("modal-info-box");
+  const modalTitle = document.getElementById("info-box-title");
+  const modalMessage = document.getElementById("info-box-message");
+  const modalIcon = document.getElementById("info-box-icon");
+
+  if (!modal || !modalTitle || !modalMessage || !modalIcon) return;
+
+  modalTitle.innerText = title;
+  modalMessage.innerText = message;
+  modalIcon.innerText = icon;
+  modal.style.display = "flex";
 }
