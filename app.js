@@ -937,6 +937,16 @@ function setupAssistantUtilities() {
   document.getElementById("btn-util-rewrite").addEventListener("click", () => triggerAssistAction("rewrite"));
   document.getElementById("btn-util-summarize").addEventListener("click", () => triggerAssistAction("summarize"));
   document.getElementById("btn-util-grammar").addEventListener("click", () => triggerAssistAction("grammar"));
+  
+  // Translate instantly when option changes in dropdown
+  const translateSelect = document.getElementById("util-translate-lang");
+  if (translateSelect) {
+    translateSelect.addEventListener("change", () => {
+      const lang = translateSelect.value;
+      triggerAssistAction("translate", lang);
+    });
+  }
+
   document.getElementById("btn-util-translate").addEventListener("click", () => {
     const lang = document.getElementById("util-translate-lang").value;
     triggerAssistAction("translate", lang);
@@ -1036,6 +1046,9 @@ function mockOfflineAssistantResult(actionType, currentHtml, param = "") {
     case "grammar":
       return `<h2>(Grammar Corrected Draft)</h2>\n${currentHtml}`;
     case "translate":
+      if (window.FirebaseMock && window.FirebaseMock.db && typeof window.FirebaseMock.db.translateOfflineHtml === 'function') {
+        return window.FirebaseMock.db.translateOfflineHtml(currentHtml, param);
+      }
       return `<h2>(Translated to ${param})</h2>\n${currentHtml}`;
     case "convert":
       return `<h1>Converted Document (${param.toUpperCase()})</h1>\n<p>Converted from original template to fit the ${param} layout guidelines.</p>\n${currentHtml}`;
