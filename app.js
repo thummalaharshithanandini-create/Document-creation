@@ -1046,8 +1046,8 @@ function mockOfflineAssistantResult(actionType, currentHtml, param = "") {
     case "grammar":
       return `<h2>(Grammar Corrected Draft)</h2>\n${currentHtml}`;
     case "translate":
-      if (window.FirebaseMock && window.FirebaseMock.db && typeof window.FirebaseMock.db.translateOfflineHtml === 'function') {
-        return window.FirebaseMock.db.translateOfflineHtml(currentHtml, param);
+      if (window.DocumentDB && typeof window.DocumentDB.translateOfflineHtml === 'function') {
+        return window.DocumentDB.translateOfflineHtml(currentHtml, param);
       }
       return `<h2>(Translated to ${param})</h2>\n${currentHtml}`;
     case "convert":
