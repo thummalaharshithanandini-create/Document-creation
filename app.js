@@ -3867,6 +3867,433 @@ function loadAssistantGeneratedDoc(category, type, varsString, triggerPdf = fals
 // Expose navigation & trigger functions globally for direct HTML compatibility
 window.showAuthScreen = showAuthScreen;
 window.switchView = switchView;
+// ==========================================
+// FLOATING AI SMART ASSISTANT CONTROLLER
+// ==========================================
+
+const floatingState = {
+  activeCategory: null,
+  activeType: null,
+  requiredFields: [],
+  currentFieldIndex: 0,
+  gatheredVariables: {},
+  waitingForField: false,
+  isRecording: false,
+  recognitionInstance: null,
+  isMinimized: false
+};
+
+function toggleFloatingAssistant(event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  const panel = document.getElementById("floating-assistant-panel");
+  if (!panel) return;
+
+  if (panel.style.display === "none") {
+    panel.style.display = "flex";
+    panel.classList.remove("minimized");
+    floatingState.isMinimized = false;
+    const thread = document.getElementById("float-chat-messages");
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  } else {
+    panel.style.display = "none";
+  }
+}
+
+function minimizeFloatingAssistant(event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  const panel = document.getElementById("floating-assistant-panel");
+  if (!panel) return;
+
+  if (floatingState.isMinimized) {
+    panel.classList.remove("minimized");
+    floatingState.isMinimized = false;
+    const thread = document.getElementById("float-chat-messages");
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  } else {
+    panel.classList.add("minimized");
+    floatingState.isMinimized = true;
+  }
+}
+
+function appendFloatMessage(sender, text, isHtml = false) {
+  const thread = document.getElementById("float-chat-messages");
+  if (!thread) return;
+
+  const row = document.createElement("div");
+  row.className = `chat-msg-row ${sender === "user" ? "user-msg" : "ai-msg"}`;
+
+  const avatar = document.createElement("div");
+  avatar.className = "chat-bubble-avatar";
+  avatar.innerHTML = sender === "user" 
+    ? `<span class="material-symbols-outlined" style="font-size: 18px; color: var(--on-surface-variant);">person</span>`
+    : `<span class="material-symbols-outlined" style="font-size: 18px; color: #000;">smart_toy</span>`;
+
+  const content = document.createElement("div");
+  content.className = "chat-bubble-content";
+  if (isHtml) {
+    content.innerHTML = text;
+  } else {
+    content.innerText = text;
+  }
+
+  row.appendChild(avatar);
+  row.appendChild(content);
+  thread.appendChild(row);
+
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function submitFloatChatMessage() {
+  const input = document.getElementById("float-input-text");
+  if (!input) return;
+
+  const text = input.value.trim();
+  if (!text) return;
+
+  appendFloatMessage("user", text);
+  input.value = "";
+
+  setTimeout(() => {
+    processFloatMessage(text);
+  }, 600);
+}
+
+function handleFloatInputKeyDown(event) {
+  if (event.key === "Enter") {
+    submitFloatChatMessage();
+  }
+}
+
+function handleFloatSuggestion(text) {
+  const input = document.getElementById("float-input-text");
+  if (input) {
+    input.value = text;
+    submitFloatChatMessage();
+  }
+}
+
+function triggerFloatUpload() {
+  const fileInput = document.getElementById("float-file-input");
+  if (fileInput) fileInput.click();
+}
+
+function handleFloatFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  appendFloatMessage("user", `📎 Uploaded file: ${file.name}`);
+  appendFloatMessage("ai", `Extracting data from "${file.name}"... Done!`);
+
+  setTimeout(() => {
+    const fileNameLower = file.name.toLowerCase();
+    
+    if (fileNameLower.includes("invoice") || fileNameLower.includes("billing") || fileNameLower.includes("xls")) {
+      floatingState.activeCategory = "business";
+      floatingState.activeType = "invoice";
+      floatingState.gatheredVariables = {
+        clientName: "Global Imports Corp",
+        clientAddress: "Industrial Area, Chennai",
+        clientGST: "33ACMEB1111B2Z2",
+        billingItems: "Raw material supplies,5,15000",
+        taxRate: "18",
+        discount: "3000"
+      };
+
+      appendFloatMessage("ai", "I extracted the invoice parameters from your file:\n\n• Client: Global Imports Corp\n• Amount: ₹75,000\n\nI have pre-populated these details for a GST Invoice. Generate the document now?");
+      floatingState.requiredFields = [];
+      floatingState.waitingForField = false;
+      showFloatSuggestionsForType("invoice");
+    } else if (fileNameLower.includes("resume") || fileNameLower.includes("cv")) {
+      floatingState.activeCategory = "personal";
+      floatingState.activeType = "resume";
+      floatingState.gatheredVariables = {
+        fullName: "Neha Sen",
+        email: "neha.sen@example.com",
+        phone: "+91 9900887766",
+        targetRole: "Lead QA Engineer",
+        experienceYears: "6",
+        coreSkills: "Selenium, Java, Cypress, API Testing"
+      };
+
+      appendFloatMessage("ai", "I extracted the resume parameters from your CV:\n\n• Name: Neha Sen\n• Role: Lead QA Engineer\n\nI have pre-populated these details for a Professional Resume. Generate the document now?");
+      floatingState.requiredFields = [];
+      floatingState.waitingForField = false;
+      showFloatSuggestionsForType("resume");
+    } else {
+      floatingState.activeCategory = "business";
+      floatingState.activeType = "proposal";
+      floatingState.gatheredVariables = {
+        proposalTitle: "Strategic Integration blueprint",
+        targetClient: "Retail Giant Corp",
+        projectScope: `Project scope description extracted from file ${file.name}`,
+        timeline: "10",
+        projectCost: "600000"
+      };
+
+      appendFloatMessage("ai", `I extracted proposal outline details from "${file.name}". Ready to generate?`);
+      floatingState.requiredFields = [];
+      floatingState.waitingForField = false;
+      showFloatSuggestionsForType("proposal");
+    }
+  }, 1200);
+}
+
+function toggleFloatMic() {
+  const recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!recognition) {
+    alert("Speech recognition is not supported in this browser. Please try Chrome or Edge.");
+    return;
+  }
+
+  const micBtn = document.getElementById("btn-float-mic");
+  const micIcon = document.getElementById("float-mic-icon");
+
+  if (floatingState.isRecording) {
+    if (floatingState.recognitionInstance) {
+      floatingState.recognitionInstance.stop();
+    }
+    floatingState.isRecording = false;
+    micBtn.classList.remove("listening-mode");
+    micIcon.innerText = "mic";
+  } else {
+    const rec = new recognition();
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.lang = 'en-US';
+
+    rec.onstart = () => {
+      floatingState.isRecording = true;
+      micBtn.classList.add("listening-mode");
+      micIcon.innerText = "graphic_eq";
+      showNotification("Voice Input Active", "Speak to search or command...");
+    };
+
+    rec.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      const input = document.getElementById("float-input-text");
+      if (input) {
+        input.value = transcript;
+      }
+      showNotification("Speech Transcribed", `Captured: "${transcript}"`);
+    };
+
+    rec.onerror = (e) => {
+      console.warn("Speech recognition error:", e);
+      floatingState.isRecording = false;
+      micBtn.classList.remove("listening-mode");
+      micIcon.innerText = "mic";
+    };
+
+    rec.onend = () => {
+      floatingState.isRecording = false;
+      micBtn.classList.remove("listening-mode");
+      micIcon.innerText = "mic";
+    };
+
+    floatingState.recognitionInstance = rec;
+    rec.start();
+  }
+}
+
+function processFloatMessage(text) {
+  const t = text.toLowerCase();
+
+  // If user says "yes" or "proceed" when a doc is pre-populated
+  if (floatingState.activeType && floatingState.requiredFields.length === 0 && (t.includes("yes") || t.includes("proceed") || t.includes("generate") || t.includes("sure") || t.includes("ok"))) {
+    triggerFloatDocGeneration();
+    return;
+  }
+
+  // 1. Check if we are waiting for a specific question reply
+  if (floatingState.waitingForField) {
+    const activeField = floatingState.requiredFields[floatingState.currentFieldIndex];
+    floatingState.gatheredVariables[activeField.id] = text;
+    floatingState.currentFieldIndex++;
+
+    if (floatingState.currentFieldIndex < floatingState.requiredFields.length) {
+      const nextField = floatingState.requiredFields[floatingState.currentFieldIndex];
+      appendFloatMessage("ai", `Got it. And what is the ${nextField.label}?`);
+    } else {
+      floatingState.waitingForField = false;
+      appendFloatMessage("ai", "Perfect! I have collected all the required details.");
+      triggerFloatDocGeneration();
+    }
+    return;
+  }
+
+  // 2. Identify document intent
+  const intent = detectDocumentIntent(text);
+  if (intent) {
+    floatingState.activeCategory = intent.category;
+    floatingState.activeType = intent.type;
+    floatingState.gatheredVariables = extractInitialVariables(text, intent.type);
+    
+    // Determine required fields
+    const allFields = DocumentDB.categories[intent.category].types[intent.type].fields;
+    floatingState.requiredFields = allFields.filter(f => !floatingState.gatheredVariables[f.id]);
+    floatingState.currentFieldIndex = 0;
+
+    if (floatingState.requiredFields.length > 0) {
+      floatingState.waitingForField = true;
+      const firstField = floatingState.requiredFields[0];
+      appendFloatMessage("ai", `Sure! I'll help you generate a professional ${intent.label}. Please provide:\n\n${firstField.label}`);
+    } else {
+      appendFloatMessage("ai", `Great! I've pre-populated all information for your ${intent.label}. Ready to generate?`);
+    }
+    return;
+  }
+
+  // 3. Handle cloud saves & signatures
+  if (t.includes("cloud") || t.includes("save")) {
+    appendFloatMessage("ai", "Saving document draft to your cloud storage partition... Success! ☁️");
+    return;
+  }
+
+  if (t.includes("signature") || t.includes("sign")) {
+    appendFloatMessage("ai", "Initializing secure Digital Signature pad overlay... Done! ✍️");
+    return;
+  }
+
+  if (t.includes("email") || t.includes("send")) {
+    const clientName = floatingState.gatheredVariables.clientName || floatingState.gatheredVariables.clientContact || floatingState.gatheredVariables.targetClient || "Client";
+    appendFloatMessage("ai", `Sure! Dispatching the PDF invoice document draft to ${clientName}... Done!`);
+    return;
+  }
+
+  // 4. Default fallback greeting
+  appendFloatMessage("ai", "I can help you build invoices, quotation plans, certificates, agreements, proposals, and offer letters. Tell me what you'd like to create!");
+}
+
+function triggerFloatDocGeneration() {
+  const thread = document.getElementById("float-chat-messages");
+  if (!thread) return;
+
+  const loadingRow = document.createElement("div");
+  loadingRow.className = "chat-msg-row ai-msg";
+  loadingRow.id = "float-loading-card-row";
+
+  loadingRow.innerHTML = `
+    <div class="chat-bubble-avatar">
+      <span class="material-symbols-outlined" style="font-size: 18px; color: #000;">smart_toy</span>
+    </div>
+    <div class="chat-loading-status-card" style="margin-top: 0; padding: 12px 16px;">
+      <div class="chat-loading-spinner"></div>
+      <div id="float-loading-status-text">Understanding your request...</div>
+    </div>
+  `;
+  thread.appendChild(loadingRow);
+  thread.scrollTop = thread.scrollHeight;
+
+  const statusText = document.getElementById("float-loading-status-text");
+
+  setTimeout(() => {
+    if (statusText) statusText.innerText = "Preparing the document...";
+  }, 1000);
+
+  setTimeout(() => {
+    if (statusText) statusText.innerText = "Almost done...";
+  }, 2000);
+
+  setTimeout(() => {
+    const loadingCard = document.getElementById("float-loading-card-row");
+    if (loadingCard) loadingCard.remove();
+
+    const category = floatingState.activeCategory;
+    const type = floatingState.activeType;
+    const gathered = floatingState.gatheredVariables;
+
+    // Apply defaults for any variables still missing
+    const allFields = DocumentDB.categories[category].types[type].fields;
+    allFields.forEach(f => {
+      if (!gathered[f.id]) {
+        gathered[f.id] = f.default || "";
+      }
+    });
+
+    const docLabel = DocumentDB.categories[category].types[type].label;
+    const varsString = JSON.stringify(gathered).replace(/"/g, '&quot;');
+
+    const htmlContent = `
+      <strong>✅ Your document is ready!</strong>
+      <p style="margin: 6px 0 10px 0; font-size: 12px; color: var(--on-surface-variant);">
+        Document "${docLabel}" successfully compiled using your inputs.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+        <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0;" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}')">👁 Preview</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%;">
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}', true)">📥 PDF</button>
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="loadFloatWordDoc('${category}', '${type}', '${varsString}')">📄 Word</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%;">
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="triggerFloatCloudSave()">☁ Cloud</button>
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="triggerFloatDigitalSignature()">✍ Sign</button>
+        </div>
+      </div>
+    `;
+
+    appendFloatMessage("ai", htmlContent, true);
+    showFloatSuggestionsForType(type);
+  }, 3000);
+}
+
+function showFloatSuggestionsForType(type) {
+  const container = document.getElementById("float-chat-suggestions");
+  if (!container) return;
+  
+  let html = "";
+  if (type === "invoice") {
+    html = `
+      <span class="float-chip" onclick="handleFloatSuggestion('Generate Payment Receipt')">Generate Payment Receipt</span>
+      <span class="float-chip" onclick="handleFloatSuggestion('Create Quotation')">Create Quotation</span>
+      <span class="float-chip" onclick="handleFloatSuggestion('Send Invoice via Email')">Send Invoice via Email</span>
+    `;
+  } else if (type === "proposal") {
+    html = `
+      <span class="float-chip" onclick="handleFloatSuggestion('Create Quotation')">Create Quotation</span>
+      <span class="float-chip" onclick="handleFloatSuggestion('Create Service Agreement')">Create Service Agreement</span>
+    `;
+  } else if (type === "quotation") {
+    html = `
+      <span class="float-chip" onclick="handleFloatSuggestion('Create Invoice')">Create Invoice</span>
+      <span class="float-chip" onclick="handleFloatSuggestion('Generate Proposal')">Generate Proposal</span>
+    `;
+  } else {
+    html = `
+      <span class="float-chip" onclick="handleFloatSuggestion('Create GST Invoice')">Create GST Invoice</span>
+      <span class="float-chip" onclick="handleFloatSuggestion('Generate Resume')">Generate Resume</span>
+      <span class="float-chip" onclick="handleFloatSuggestion('Business Proposal')">Business Proposal</span>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+function loadFloatWordDoc(category, type, varsString) {
+  loadAssistantGeneratedDoc(category, type, varsString);
+  setTimeout(() => {
+    const wordBtn = document.getElementById("btn-export-word");
+    if (wordBtn) wordBtn.click();
+  }, 150);
+}
+
+function triggerFloatCloudSave() {
+  showNotification("Saved to Cloud", "Your generated document draft has been synced to DocGenius Cloud.");
+  appendFloatMessage("ai", "Cloud Storage Sync complete! Document saved to your private folder. ☁️");
+}
+
+function triggerFloatDigitalSignature() {
+  showNotification("Signature Pad", "Opening digital signature secure pad overlay.");
+  appendFloatMessage("ai", "Please review and sign the document on the layout view signature overlay. ✍️");
+}
+
+// Expose navigation & trigger functions globally for direct HTML compatibility
+window.showAuthScreen = showAuthScreen;
+window.switchView = switchView;
 window.handleSignIn = handleSignIn;
 window.handleSignUp = handleSignUp;
 window.handleOtpConfirm = handleOtpConfirm;
@@ -3897,6 +4324,20 @@ window.triggerChatUpload = triggerChatUpload;
 window.handleChatFileUpload = handleChatFileUpload;
 window.toggleChatMic = toggleChatMic;
 window.loadAssistantGeneratedDoc = loadAssistantGeneratedDoc;
+
+// Floating Assistant Exposures
+window.toggleFloatingAssistant = toggleFloatingAssistant;
+window.minimizeFloatingAssistant = minimizeFloatingAssistant;
+window.handleFloatSuggestion = handleFloatSuggestion;
+window.submitFloatChatMessage = submitFloatChatMessage;
+window.handleFloatInputKeyDown = handleFloatInputKeyDown;
+window.triggerFloatUpload = triggerFloatUpload;
+window.handleFloatFileUpload = handleFloatFileUpload;
+window.toggleFloatMic = toggleFloatMic;
+window.loadFloatWordDoc = loadFloatWordDoc;
+window.triggerFloatCloudSave = triggerFloatCloudSave;
+window.triggerFloatDigitalSignature = triggerFloatDigitalSignature;
+
 
 
 

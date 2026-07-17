@@ -1125,7 +1125,77 @@
             </div>
           </div>
         </section>
-      </main>
+      <!-- Floating AI Smart Assistant Toggle Button -->
+      <button id="floating-assistant-btn" class="floating-assistant-trigger" onclick="toggleFloatingAssistant(event)" title="AI Smart Assistant">
+        <span class="material-symbols-outlined">smart_toy</span>
+        <span class="btn-tooltip">AI Assistant</span>
+      </button>
+
+      <!-- Floating AI Smart Assistant Panel Drawer -->
+      <div id="floating-assistant-panel" class="floating-assistant-panel" style="display: none;">
+        <!-- Header -->
+        <div class="float-chat-header">
+          <div class="float-chat-header-info">
+            <span class="online-indicator"></span>
+            <strong>🤖 AI Smart Assistant</strong>
+          </div>
+          <div class="float-chat-header-actions">
+            <button class="icon-btn-small" onclick="minimizeFloatingAssistant(event)" title="Minimize">
+              <span class="material-symbols-outlined" style="font-size: 18px;">remove</span>
+            </button>
+            <button class="icon-btn-small" onclick="toggleFloatingAssistant(event)" title="Close">
+              <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Messages -->
+        <div class="float-chat-messages" id="float-chat-messages">
+          <div class="chat-msg-row ai-msg">
+            <div class="chat-bubble-avatar">
+              <span class="material-symbols-outlined" style="font-size: 18px; color: #000;">smart_toy</span>
+            </div>
+            <div class="chat-bubble-content">
+              👋 Hello! I'm your DocGenius AI Assistant.
+              <br><br>
+              I can help you:
+              <br>• Generate invoices
+              <br>• Create business proposals
+              <br>• Generate resumes
+              <br>• Create certificates
+              <br>• Generate question papers
+              <br>• Summarize documents
+              <br>• Answer document-related questions
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggestion Chips -->
+        <div class="float-chat-suggestions" id="float-chat-suggestions">
+          <span class="float-chip" onclick="handleFloatSuggestion('Create GST Invoice')">Create GST Invoice</span>
+          <span class="float-chip" onclick="handleFloatSuggestion('Generate Resume')">Generate Resume</span>
+          <span class="float-chip" onclick="handleFloatSuggestion('Business Proposal')">Business Proposal</span>
+          <span class="float-chip" onclick="handleFloatSuggestion('Create Certificate')">Create Certificate</span>
+        </div>
+
+        <!-- Inputs Toolbar -->
+        <div class="float-chat-input-bar">
+          <button class="float-action-btn" onclick="triggerFloatUpload()" title="Upload PDF/Excel/Word">
+            <span class="material-symbols-outlined" style="font-size: 18px;">attach_file</span>
+          </button>
+          <input type="file" id="float-file-input" style="display: none;" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" onchange="handleFloatFileUpload(event)">
+          
+          <input type="text" class="float-input-field" id="float-input-text" placeholder="Ask me anything..." onkeydown="handleFloatInputKeyDown(event)">
+          
+          <button class="float-action-btn" id="btn-float-mic" onclick="toggleFloatMic()" title="Voice Input">
+            <span class="material-symbols-outlined" id="float-mic-icon" style="font-size: 18px;">mic</span>
+          </button>
+          
+          <button class="float-action-btn send-btn" onclick="submitFloatChatMessage()" title="Send">
+            <span class="material-symbols-outlined" style="font-size: 18px;">send</span>
+          </button>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -1316,9 +1386,9 @@
   </div>
 
   <!-- Core Mock DB & Auth engine script modules -->
-  <script src="firebase-mock.js?v=6.4"></script>
-  <script src="db.js?v=6.4"></script>
+  <script src="firebase-mock.js?v=6.5"></script>
+  <script src="db.js?v=6.5"></script>
   <!-- Main application script -->
-  <script src="app.js?v=6.4"></script>
+  <script src="app.js?v=6.5"></script>
 </body>
 </html>
