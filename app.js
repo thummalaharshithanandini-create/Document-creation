@@ -2595,33 +2595,7 @@ function setupPricingPanel() {
     btnSubscribeEdu.addEventListener("click", handleEduSubscriptionTrigger);
   }
 
-  function handleEduSubscriptionTrigger(e) {
-    if (e) e.stopPropagation();
-    
-    const btn = document.getElementById("btn-subscribe-edu");
-    if (btn && btn.hasAttribute("disabled")) return;
 
-    const activeUser = FirebaseMock.auth.currentUser;
-    const isGuest = !activeUser || activeUser.id === "u_guest";
-
-    if (isGuest) {
-      document.getElementById("modal-auth-verify").style.display = "flex";
-      document.getElementById("verify-email-step-1").style.display = "block";
-      document.getElementById("verify-email-step-2").style.display = "none";
-      document.getElementById("verify-email-input").value = "";
-    } else {
-      openRechargeBillingPortal(activeUser);
-    }
-  }
-
-  function openRechargeBillingPortal(user) {
-    document.getElementById("modal-recharge-billing").style.display = "flex";
-    document.getElementById("recharge-amount").value = "100";
-    document.getElementById("recharge-card-name").value = user.fullName || "";
-    document.getElementById("recharge-card-number").value = "";
-    document.getElementById("recharge-card-expiry").value = "";
-    document.getElementById("recharge-card-cvv").value = "";
-  }
 
   // Email verification step 1 send code
   document.getElementById("btn-verify-send-code").addEventListener("click", () => {
@@ -2722,17 +2696,7 @@ function setupPricingPanel() {
     }
   });
 
-  function handleBizContactTrigger(e) {
-    if (e) e.stopPropagation();
-    const activeUser = FirebaseMock.auth.currentUser;
-    const userEmail = activeUser ? activeUser.email : "";
 
-    const promptMsg = prompt("Enter your corporate inquiries or business requirements:", "We require 15 seats with team collaboration...");
-    if (promptMsg === null || !promptMsg.trim()) return;
-
-    showInfoBox("Inquiry Sent Successfully", `Thank you! Your inquiry was successfully received. Our Enterprise Solutions team will contact you at ${userEmail || 'your email'} within 24 hours.`, "mail");
-    showNotification("Sales Inquiry Sent", "Enterprise inquiry registered.");
-  }
 
   if (btnContactSales) {
     btnContactSales.addEventListener("click", handleBizContactTrigger);
@@ -2792,20 +2756,6 @@ function setupPricingPanel() {
   }
 
   const btnFreeLimit = document.getElementById("btn-current-free-limit");
-  const handleFreeLimitTrigger = (e) => {
-    if (e) e.stopPropagation();
-    
-    const user = FirebaseMock.auth.currentUser;
-    const userId = user ? user.id : "u_guest";
-    
-    // Query local storage documents count
-    const docs = JSON.parse(localStorage.getItem("fb_doc_documents") || "[]");
-    const userDocsCount = docs.filter(doc => doc.userId === userId).length;
-    const docsToday = Math.min(userDocsCount, 10);
-    
-    showInfoBox("Daily Usage Status", `You are currently on the Free Plan.\n\nUsage Today: ${docsToday} / 10 documents created.\n\nDaily limits reset automatically every 24 hours. You can upgrade to the Education or Business plans for unlimited access.`, "info");
-    showNotification("Usage Status", `${docsToday} / 10 documents generated today.`);
-  };
 
   if (btnFreeLimit) {
     btnFreeLimit.style.cursor = "pointer";
@@ -2815,11 +2765,6 @@ function setupPricingPanel() {
     cardFree.style.cursor = "pointer";
     cardFree.addEventListener("click", handleFreeLimitTrigger);
   }
-
-  // Expose triggers globally for inline HTML onclick attributes
-  window.handleEduSubscriptionTrigger = handleEduSubscriptionTrigger;
-  window.handleBizContactTrigger = handleBizContactTrigger;
-  window.handleFreeLimitTrigger = handleFreeLimitTrigger;
 }
 
 // Show standard information modal dialog
@@ -3012,4 +2957,60 @@ function setupDedicatedQRGenerator() {
     
     showNotification("QR Downloaded", "High-quality QR code saved as PNG.");
   });
+}
+
+// ================= GLOBAL PRICING & LIMITS TRIGGERS =================
+function handleEduSubscriptionTrigger(e) {
+  if (e) e.stopPropagation();
+  
+  const btn = document.getElementById("btn-subscribe-edu");
+  if (btn && btn.hasAttribute("disabled")) return;
+
+  const activeUser = FirebaseMock.auth.currentUser;
+  const isGuest = !activeUser || activeUser.id === "u_guest";
+
+  if (isGuest) {
+    document.getElementById("modal-auth-verify").style.display = "flex";
+    document.getElementById("verify-email-step-1").style.display = "block";
+    document.getElementById("verify-email-step-2").style.display = "none";
+    document.getElementById("verify-email-input").value = "";
+  } else {
+    openRechargeBillingPortal(activeUser);
+  }
+}
+
+function openRechargeBillingPortal(user) {
+  document.getElementById("modal-recharge-billing").style.display = "flex";
+  document.getElementById("recharge-amount").value = "100";
+  document.getElementById("recharge-card-name").value = user.fullName || "";
+  document.getElementById("recharge-card-number").value = "";
+  document.getElementById("recharge-card-expiry").value = "";
+  document.getElementById("recharge-card-cvv").value = "";
+}
+
+function handleBizContactTrigger(e) {
+  if (e) e.stopPropagation();
+  const activeUser = FirebaseMock.auth.currentUser;
+  const userEmail = activeUser ? activeUser.email : "";
+
+  const promptMsg = prompt("Enter your corporate inquiries or business requirements:", "We require 15 seats with team collaboration...");
+  if (promptMsg === null || !promptMsg.trim()) return;
+
+  showInfoBox("Inquiry Sent Successfully", `Thank you! Your inquiry was successfully received. Our Enterprise Solutions team will contact you at ${userEmail || 'your email'} within 24 hours.`, "mail");
+  showNotification("Sales Inquiry Sent", "Enterprise inquiry registered.");
+}
+
+function handleFreeLimitTrigger(e) {
+  if (e) e.stopPropagation();
+  
+  const user = FirebaseMock.auth.currentUser;
+  const userId = user ? user.id : "u_guest";
+  
+  // Query local storage documents count
+  const docs = JSON.parse(localStorage.getItem("fb_doc_documents") || "[]");
+  const userDocsCount = docs.filter(doc => doc.userId === userId).length;
+  const docsToday = Math.min(userDocsCount, 10);
+  
+  showInfoBox("Daily Usage Status", `You are currently on the Free Plan.\n\nUsage Today: ${docsToday} / 10 documents created.\n\nDaily limits reset automatically every 24 hours. You can upgrade to the Education or Business plans for unlimited access.`, "info");
+  showNotification("Usage Status", `${docsToday} / 10 documents generated today.`);
 }
