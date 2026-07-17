@@ -1121,7 +1121,7 @@
           <label class="calc-label">Enter Email Address</label>
           <input type="email" class="calc-field" id="verify-email-input" placeholder="name@domain.com">
         </div>
-        <button class="calc-btn" id="btn-verify-send-code" style="width: 100%; background: var(--secondary); color: #000; font-weight: 700; border: none; margin-bottom: 8px;">Send Verification Code</button>
+        <button class="calc-btn" id="btn-verify-send-code" onclick="sendVerificationOTP()" style="width: 100%; background: var(--secondary); color: #000; font-weight: 700; border: none; margin-bottom: 8px;">Send Verification Code</button>
       </div>
 
       <!-- Input Code view -->
@@ -1131,10 +1131,10 @@
           <input type="text" class="calc-field" id="verify-otp-input" placeholder="123456" style="text-align: center; letter-spacing: 4px; font-weight: bold; font-size: 16px;">
           <div style="font-size: 11px; color: var(--secondary); margin-top: 6px; text-align: center;">Simulated code is <strong>123456</strong></div>
         </div>
-        <button class="calc-btn" id="btn-verify-confirm-code" style="width: 100%; background: var(--secondary); color: #000; font-weight: 700; border: none; margin-bottom: 8px;">Verify & Continue</button>
+        <button class="calc-btn" id="btn-verify-confirm-code" onclick="confirmVerificationOTP()" style="width: 100%; background: var(--secondary); color: #000; font-weight: 700; border: none; margin-bottom: 8px;">Verify & Continue</button>
       </div>
 
-      <button class="calc-btn" id="btn-close-auth-verify" style="width: 100%; background: transparent; border: 1.5px solid var(--outline-variant); color: #fff; margin: 0;">Cancel</button>
+      <button class="calc-btn" id="btn-close-auth-verify" onclick="closeAuthVerificationModal()" style="width: 100%; background: transparent; border: 1.5px solid var(--outline-variant); color: #fff; margin: 0;">Cancel</button>
     </div>
   </div>
 
@@ -1174,8 +1174,8 @@
       </div>
 
       <div style="display: flex; gap: 12px;">
-        <button class="calc-btn" id="btn-recharge-submit" style="flex: 1; background: var(--primary); color: #000; font-weight: 700; border: none; margin: 0;">Add Recharge</button>
-        <button class="calc-btn" id="btn-close-recharge" style="background: transparent; border: 1.5px solid var(--outline-variant); color: #fff; margin: 0; min-width: 90px;">Cancel</button>
+        <button class="calc-btn" id="btn-recharge-submit" onclick="submitRechargePayment()" style="flex: 1; background: var(--primary); color: #000; font-weight: 700; border: none; margin: 0;">Add Recharge</button>
+        <button class="calc-btn" id="btn-close-recharge" onclick="closeRechargeBillingPortal()" style="background: transparent; border: 1.5px solid var(--outline-variant); color: #fff; margin: 0; min-width: 90px;">Cancel</button>
       </div>
     </div>
   </div>
@@ -1239,9 +1239,9 @@
   </div>
 
   <!-- Core Mock DB & Auth engine script modules -->
-  <script src="firebase-mock.js?v=5.4"></script>
-  <script src="db.js?v=5.4"></script>
+  <script src="firebase-mock.js?v=5.5"></script>
+  <script src="db.js?v=5.5"></script>
   <!-- Main application script -->
-  <script src="app.js?v=5.4"></script>
+  <script src="app.js?v=5.5"></script>
 </body>
 </html>
