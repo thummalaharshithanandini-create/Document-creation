@@ -3014,3 +3014,100 @@ function handleFreeLimitTrigger(e) {
   showInfoBox("Daily Usage Status", `You are currently on the Free Plan.\n\nUsage Today: ${docsToday} / 10 documents created.\n\nDaily limits reset automatically every 24 hours. You can upgrade to the Education or Business plans for unlimited access.`, "info");
   showNotification("Usage Status", `${docsToday} / 10 documents generated today.`);
 }
+
+function closeRechargeBillingPortal() {
+  const modal = document.getElementById("modal-recharge-billing");
+  if (modal) modal.style.display = "none";
+}
+
+async function submitRechargePayment() {
+  const amount = document.getElementById("recharge-amount").value;
+  const cardholder = document.getElementById("recharge-card-name").value.trim();
+  const cardnum = document.getElementById("recharge-card-number").value.trim();
+  const expiry = document.getElementById("recharge-card-expiry").value.trim();
+  const cvv = document.getElementById("recharge-card-cvv").value.trim();
+
+  if (!amount || parseInt(amount) < 10) {
+    alert("Please enter a valid recharge amount (minimum ₹10).");
+    return;
+  }
+  if (!cardholder || !cardnum || !expiry || !cvv) {
+    alert("Please fill in all credit card payment details.");
+    return;
+  }
+
+  try {
+    // Complete subscription mock purchase
+    await FirebaseMock.auth.updateUserProfile({ subscription: 'education', role: 'student' });
+    
+    // Update UI button
+    const btnSub = document.getElementById("btn-subscribe-edu");
+    if (btnSub) {
+      btnSub.innerText = "Subscribed ✓";
+      btnSub.style.background = "var(--outline-variant)";
+      btnSub.style.color = "var(--outline)";
+      btnSub.setAttribute("disabled", "true");
+    }
+
+    closeRechargeBillingPortal();
+    showInfoBox("Recharge Successful", `Payment of ₹${amount} was processed successfully! Your account has been upgraded to the Education Plan.`, "check_circle");
+    showNotification("Recharge Complete", `₹${amount} paid. Plan activated.`);
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+function sendVerificationOTP() {
+  const email = document.getElementById("verify-email-input").value.trim();
+  if (!email || !email.includes("@")) {
+    alert("Please enter a valid email address.");
+    return;
+  }
+  showNotification("OTP Code Sent", "Verification code 123456 sent to " + email);
+  document.getElementById("verify-email-step-1").style.display = "none";
+  document.getElementById("verify-email-step-2").style.display = "block";
+  document.getElementById("verify-otp-input").value = "";
+}
+
+async function confirmVerificationOTP() {
+  const code = document.getElementById("verify-otp-input").value.trim();
+  if (code !== "123456") {
+    alert("Invalid verification code. Please enter 123456.");
+    return;
+  }
+  
+  const email = document.getElementById("verify-email-input").value.trim();
+  const namePart = email.split('@')[0];
+  const fullName = namePart.charAt(0).toUpperCase() + namePart.slice(1) + " User";
+  
+  const mockUser = {
+    id: "u_google_" + namePart,
+    fullName: fullName,
+    email: email,
+    phoneNumber: "+91 9999988888",
+    emailVerified: true,
+    phoneVerified: false,
+    role: "user",
+    blocked: false
+  };
+
+  try {
+    await FirebaseMock.auth.setSessionUser(mockUser);
+    initUserData(); // reload UI
+    
+    closeAuthVerificationModal();
+    showNotification("Email Verified", "Identity authenticated successfully.");
+    
+    setTimeout(() => {
+      openRechargeBillingPortal(mockUser);
+    }, 500);
+  } catch(err) {
+    alert(err.message);
+  }
+}
+
+function closeAuthVerificationModal() {
+  const modal = document.getElementById("modal-auth-verify");
+  if (modal) modal.style.display = "none";
+}
+
