@@ -3254,6 +3254,7 @@ function bindAllButtonsOnclick() {
     "btn-close-auth-verify": () => closeAuthVerificationModal(),
     "btn-recharge-submit": () => submitRechargePayment(),
     "btn-close-recharge": () => closeRechargeBillingPortal(),
+    "btn-close-info-box": () => closeInfoBox(),
     "btn-close-privacy": () => {
       document.getElementById("modal-privacy-terms").style.display = "none";
     },
@@ -3361,6 +3362,11 @@ async function resendRegistrationOTP() {
   }
 }
 
+function closeInfoBox() {
+  const modal = document.getElementById("modal-info-box");
+  if (modal) modal.style.display = "none";
+}
+
 // Expose navigation & trigger functions globally for direct HTML compatibility
 window.showAuthScreen = showAuthScreen;
 window.switchView = switchView;
@@ -3384,5 +3390,6 @@ window.closeAuthVerificationModal = closeAuthVerificationModal;
 window.submitRechargePayment = submitRechargePayment;
 window.closeRechargeBillingPortal = closeRechargeBillingPortal;
 window.resendRegistrationOTP = resendRegistrationOTP;
+window.closeInfoBox = closeInfoBox;
 
 
