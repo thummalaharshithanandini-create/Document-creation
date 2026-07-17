@@ -443,6 +443,8 @@ async function handleSignUp() {
 
   try {
     await FirebaseMock.auth.signUp(name, email, phone, password);
+    appState.signUpEmail = email;
+    appState.signUpName = name;
     
     // Generate a random 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -3115,6 +3117,19 @@ function closeAuthVerificationModal() {
 
 // ================= GLOBAL BUTTON ACTION BINDERS =================
 function bindAllButtonsOnclick() {
+  const exclusions = [
+    "btn-voice-input",
+    "btn-summarize-doc",
+    "btn-close-summary-reader",
+    "btn-summary-play",
+    "btn-summary-stop",
+    "btn-summary-dictate",
+    "btn-summary-append",
+    "btn-dashboard-upload",
+    "btn-close-doc-uploader",
+    "doc-uploader-zone"
+  ];
+
   const mappings = {
     // Welcome screen
     "welcome-btn-signin": () => showAuthScreen("signin"),
@@ -3154,6 +3169,7 @@ function bindAllButtonsOnclick() {
     // OTP verify
     "otp-submit-btn": () => handleOtpConfirm(),
     "otp-back": () => showAuthScreen("signup"),
+    "otp-resend-btn": () => resendRegistrationOTP(),
     // Forgot Password
     "forgot-submit-btn": () => handleForgotSubmit(),
     "forgot-back": () => showAuthScreen("signin"),
@@ -3162,8 +3178,41 @@ function bindAllButtonsOnclick() {
     "header-logout-btn": async () => {
       await FirebaseMock.auth.signOut();
     },
-    "btn-show-qr": () => {
-      switchView("qr-generator");
+    "btn-show-qr": (e) => {
+      if (e) e.stopPropagation();
+      const popover = document.getElementById("qr-popover");
+      if (popover) {
+        const isVisible = popover.style.display === "flex";
+        popover.style.display = isVisible ? "none" : "flex";
+        if (!isVisible) {
+          const urlText = document.getElementById("qr-url-text");
+          const qrImg = document.getElementById("qr-code-img");
+          const currentUrl = window.location.href;
+          if (urlText) urlText.innerText = currentUrl;
+          if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(currentUrl)}`;
+        }
+      }
+    },
+    "sidebar-toggle": () => {
+      const sidebar = document.getElementById("app-sidebar");
+      const toggleBtn = document.getElementById("sidebar-toggle");
+      if (sidebar && toggleBtn) {
+        sidebar.classList.toggle("collapsed");
+        const icon = toggleBtn.querySelector("span");
+        if (sidebar.classList.contains("collapsed")) {
+          icon.innerText = "menu";
+        } else {
+          icon.innerText = "menu_open";
+        }
+      }
+    },
+    "mobile-drawer-toggle": () => {
+      const sidebar = document.getElementById("app-sidebar");
+      if (sidebar) sidebar.classList.toggle("mobile-visible");
+    },
+    "notif-close-btn": () => {
+      const banner = document.getElementById("notif-banner");
+      if (banner) banner.classList.remove("visible");
     },
     // AI Generator View
     "btn-generate-doc": () => triggerDocumentGeneration(),
@@ -3221,6 +3270,7 @@ function bindAllButtonsOnclick() {
   };
 
   Object.entries(mappings).forEach(([id, handler]) => {
+    if (exclusions.includes(id)) return;
     const btn = document.getElementById(id);
     if (btn) {
       btn.onclick = (e) => {
@@ -3275,6 +3325,42 @@ function bindAllButtonsOnclick() {
   }
 }
 
+async function resendRegistrationOTP() {
+  const email = appState.signUpEmail;
+  if (!email) {
+    alert("No registered email address found. Please start sign up again.");
+    showAuthScreen("signup");
+    return;
+  }
+  try {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    appState.currentOTP = otp;
+    startOtpCountdown();
+
+    const emailSubject = "DocGenius AI - Resent Verification Code";
+    const emailBody = `
+      <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 500px;">
+        <h2 style="color: #9d4edd; margin: 0 0 10px 0;">Verify Your Account</h2>
+        <p>Hello <strong>${appState.signUpName || 'User'}</strong>,</p>
+        <p>Here is your new 6-digit verification code to activate your account:</p>
+        <div style="font-size: 28px; font-weight: 700; color: #9d4edd; letter-spacing: 4px; padding: 12px; background: #faf5ff; text-align: center; border-radius: 6px; margin: 20px 0; border: 1px dashed #d8b4fe;">${otp}</div>
+        <p>If you did not initiate this request, please ignore this email.</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin-top: 20px;">
+        <p style="font-size: 11px; color: #a5a2b8; margin: 10px 0 0 0;">DocGenius AI Smart Document Generation Platform</p>
+      </div>
+    `;
+
+    const sent = await sendOTPEmail(email, emailSubject, emailBody);
+    if (sent) {
+      alert(`A verification code has been successfully resent to ${email}. Please check your inbox.`);
+    } else {
+      alert("SMTP Server not configured. We bypassed email dispatch. For demo verification, please use code: 123456");
+    }
+  } catch(e) {
+    alert(e.message);
+  }
+}
+
 // Expose navigation & trigger functions globally for direct HTML compatibility
 window.showAuthScreen = showAuthScreen;
 window.switchView = switchView;
@@ -3297,5 +3383,6 @@ window.confirmVerificationOTP = confirmVerificationOTP;
 window.closeAuthVerificationModal = closeAuthVerificationModal;
 window.submitRechargePayment = submitRechargePayment;
 window.closeRechargeBillingPortal = closeRechargeBillingPortal;
+window.resendRegistrationOTP = resendRegistrationOTP;
 
 
