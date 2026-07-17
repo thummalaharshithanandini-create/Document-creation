@@ -15,6 +15,20 @@
       const errInfo = encodeURIComponent(`Promise Rejection: ${event.reason}`);
       fetch(`/api/log-error?msg=${errInfo}`).catch(() => {});
     });
+    
+    // Fail-safe global modal controllers
+    window.closeInfoBox = function() {
+      const modal = document.getElementById("modal-info-box");
+      if (modal) modal.style.display = "none";
+    };
+    window.closeRechargeBillingPortal = function() {
+      const modal = document.getElementById("modal-recharge-billing");
+      if (modal) modal.style.display = "none";
+    };
+    window.closeAuthVerificationModal = function() {
+      const modal = document.getElementById("modal-auth-verify");
+      if (modal) modal.style.display = "none";
+    };
   </script>
   <title>DocGenius AI – Smart Document Generation Platform</title>
   
@@ -1239,9 +1253,9 @@
   </div>
 
   <!-- Core Mock DB & Auth engine script modules -->
-  <script src="firebase-mock.js?v=6.0"></script>
-  <script src="db.js?v=6.0"></script>
+  <script src="firebase-mock.js?v=6.1"></script>
+  <script src="db.js?v=6.1"></script>
   <!-- Main application script -->
-  <script src="app.js?v=6.0"></script>
+  <script src="app.js?v=6.1"></script>
 </body>
 </html>
