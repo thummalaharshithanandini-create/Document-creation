@@ -689,6 +689,20 @@ Critical Formatting Rules:
         const taxAmt = discounted * taxRate;
         const total = discounted + taxAmt;
 
+        let termsText = `Payment due within 15 days of invoice date. Thank you for your trust in ${brandName}.`;
+        const langLower = (language || "").toLowerCase();
+        if (langLower === "telugu") {
+          termsText = `ఇన్వాయిస్ తేదీ నుండి 15 రోజులలోపు చెల్లింపు చెల్లించాల్సి ఉంటుంది. ${brandName} పై మీ నమ్మకానికి ధన్యవాదాలు.`;
+        } else if (langLower === "tamil") {
+          termsText = `விலைப்பட்டியல் தேதியிலிருந்து 15 நாட்களுக்குள் பணம் செலுத்த வேண்டும். ${brandName} மீதான உங்கள் நம்பிக்கைக்கு நன்றி.`;
+        } else if (langLower === "hindi") {
+          termsText = `भुगतान चालान तिथि के 15 दिनों के भीतर देय है। ${brandName} में आपके विश्वास के लिए धन्यवाद।`;
+        } else if (langLower === "spanish") {
+          termsText = `El pago debe realizarse dentro de los 15 días posteriores a la fecha de la factura. Gracias por su confianza en ${brandName}.`;
+        } else if (langLower === "french") {
+          termsText = `Paiement dû dans les 15 jours suivant la date de facturation. Merci pour votre confiance en ${brandName}.`;
+        }
+
         return `<h1>TAX INVOICE</h1>
 <p><strong>Invoice Number:</strong> ${invNum}<br><strong>Date:</strong> ${variables.invoiceDate || new Date().toISOString().split('T')[0]}</p>
 
@@ -725,7 +739,7 @@ Critical Formatting Rules:
   </tbody>
 </table>
 
-<p><strong>Terms:</strong> Payment due within 15 days of invoice date. Thank you for your trust in ${brandName}.</p>
+<p><strong>Terms:</strong> ${termsText}</p>
 <p style="font-size: 11px; font-style: italic; color: #777;">Additional Context applied: "${promptContext || 'None'}" (Generated in ${tone} tone, language: ${language}).</p>`;
       }
       
@@ -736,11 +750,25 @@ Critical Formatting Rules:
         const timeline = variables.timeline || "6";
         const cost = parseFloat(variables.projectCost || "50000").toLocaleString('en-IN');
 
+        let execSummary = `This proposal outlines the strategy, terms, and cost projections prepared by ${brandName} to deploy the "${title}" project for ${client}. Our objective is to deliver a highly optimized, efficient, and robust solution tailored to your operational requirements.`;
+        const langLower = (language || "").toLowerCase();
+        if (langLower === "telugu") {
+          execSummary = `ఈ ప్రతిపాదన ${client} కోసం "${title}" ప్రాజెక్ట్‌ను అమలు చేయడానికి ${brandName} సిద్ధం చేసిన వ్యూహం, నిబంధనలు మరియు వ్యయ అంచనాలను వివరిస్తుంది. మీ కార్యాచరణ అవసరాలకు అనుగుణంగా అత్యంత ఆప్టిమైజ్ చేయబడిన, సమర్థమైన మరియు బలమైన పరిష్కారాన్ని అందించడమే మా లక్ష్యం.`;
+        } else if (langLower === "tamil") {
+          execSummary = `இந்த முன்மொழிவு ${client} க்காக "${title}" திட்டத்தை வரிசைப்படுத்த ${brandName} தயாரித்த உத்தி, விதிமுறைகள் மற்றும் செலவு கணிப்புகளை கோடிட்டுக் காட்டுகிறது. உங்கள் செயல்பாட்டுத் தேவைகளுக்கு ஏற்ப மிகவும் உகந்த, திறமையான மற்றும் வலுவான தீர்வை வழங்குவதே எங்கள் நோக்கமாகும்.`;
+        } else if (langLower === "hindi") {
+          execSummary = `यह प्रस्ताव ${client} के लिए "${title}" परियोजना को तैनात करने के लिए ${brandName} द्वारा तैयार की गई रणनीति, शर्तों और लागत अनुमानों की रूपरेखा तैयार करता है। हमारा उद्देश्य आपकी परिचालन आवश्यकताओं के अनुरूप एक अत्यधिक अनुकूलित, कुशल और मजबूत समाधान प्रदान करना है।`;
+        } else if (langLower === "spanish") {
+          execSummary = `Esta propuesta describe la estrategia, los términos y las proyecciones de costos preparados por ${brandName} para implementar el proyecto "${title}" para ${client}. Nuestro objetivo es ofrecer una solución altamente optimizada, eficiente y robusta adaptada a sus requisitos operativos.`;
+        } else if (langLower === "french") {
+          execSummary = `Cette proposition décrit la stratégie, les conditions et les projections de coûts préparées par ${brandName} pour déployer le projet "${title}" pour ${client}. Notre objectif est de fournir une solution hautement optimisée, efficace et robuste, adaptée à vos exigences opérationnelles.`;
+        }
+
         return `<h1>Business Proposal: ${title}</h1>
 <p><strong>Prepared By:</strong> ${brandName}<br><strong>Prepared For:</strong> ${client}<br><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
 
 <h2>1. Executive Summary</h2>
-<p>This proposal outlines the strategy, terms, and cost projections prepared by ${brandName} to deploy the "${title}" project for ${client}. Our objective is to deliver a highly optimized, efficient, and robust solution tailored to your operational requirements.</p>
+<p>${execSummary}</p>
 
 <h2>2. Project Scope & Deliverables</h2>
 <p>${scope}</p>
@@ -822,7 +850,23 @@ Critical Formatting Rules:
         const title = promptAnalysis.title || variables.meetingTitle || "General Meeting";
         const date = variables.meetingDate || "July 7, 2026";
         const att = variables.attendees || "Attendees";
-        const points = promptAnalysis.description || variables.discussionPoints || "No details provided.";
+        
+        let points = promptAnalysis.description || variables.discussionPoints || "No details provided.";
+        if (points === "No details provided.") {
+          points = `The primary objective of this meeting was to discuss progress, outline immediate roadblocks, and assign action items for the upcoming sprint cycle.`;
+          const langLower = (language || "").toLowerCase();
+          if (langLower === "telugu") {
+            points = `ఈ సమావేశం యొక్క ప్రధాన లక్ష్యం పురోగతిని చర్చించడం, తక్షణ అడ్డంకులను వివరించడం మరియు రాబోయే స్ప్రింట్ చక్రానికి సంబంధించిన చర్యలను కేటాయించడం.`;
+          } else if (langLower === "tamil") {
+            points = `இந்தக் கூட்டத்தின் முதன்மை நோக்கம் முன்னேற்றம் குறித்து விவாதிப்பது, உடனடித் தடைகளைக் கோடிட்டுக் காட்டுவது மற்றும் வரவிருக்கும் ஸ்பிரிண்ட் சுழற்சிக்கான நடவடிக்கை உருப்படிகளை ஒதுக்குவது ஆகும்.`;
+          } else if (langLower === "hindi") {
+            points = `इस बैठक का प्राथमिक उद्देश्य प्रगति पर चर्चा करना, तत्काल बाधाओं को रेखांकित करना और आगामी स्प्रिंट चक्र के लिए कार्रवाई आइटम आवंटित करना था।`;
+          } else if (langLower === "spanish") {
+            points = `El objetivo principal de esta reunión fue discutir el progreso, señalar los obstáculos inmediatos y asignar tareas para el próximo ciclo de sprint.`;
+          } else if (langLower === "french") {
+            points = `L'objectif principal de cette réunion était de discuter des progrès, de définir les obstacles immédiats et d'attribuer des tâches pour le prochain cycle de sprint.`;
+          }
+        }
 
         return `<h1>Meeting Minutes: ${title}</h1>
 <p><strong>Date/Time:</strong> ${date}<br><strong>Facilitator:</strong> ${brandName}</p>
@@ -867,19 +911,39 @@ Critical Formatting Rules:
         const terms = variables.paymentTerms || "Standard terms.";
         const customClause = promptAnalysis.description ? `<h3>4. Custom Clauses</h3><p>${promptAnalysis.description}</p>` : "";
 
+        let sec1 = `The Provider agrees to perform services as specified in project blueprints. All deliverables will be verified by the Client in writing.`;
+        let sec3 = `Both parties agree to hold proprietary information in strict confidence and prevent disclosure to third parties during and after this contract term.`;
+        const langLower = (language || "").toLowerCase();
+        if (langLower === "telugu") {
+          sec1 = `ప్రాజెక్ట్ బ్లూప్రింట్‌లలో పేర్కొన్న విధంగా సేవలను అందించడానికి ప్రొవైడర్ అంగీకరిస్తారు. అన్ని డెలివరబుల్‌లు క్లయింట్ ద్వారా వ్రాతపూర్వకంగా ధృవీకరించబడతాయి.`;
+          sec3 = `రెండు పక్షాలు యాజమాన్య సమాచారాన్ని కఠినమైన గోప్యతతో ఉంచడానికి మరియు ఈ ఒప్పంద కాలంలో మరియు తరువాత మూడవ పక్షాలకు బహిర్గతం చేయకుండా నిరోధించడానికి అంగీకరిస్తాయి.`;
+        } else if (langLower === "tamil") {
+          sec1 = `திட்ட ப்ளூபிரிண்ட்களில் குறிப்பிட்டுள்ளபடி சேவைகளை வழங்க வழங்குநர் ஒப்புக்கொள்கிறார். அனைத்து விநியோகங்களும் வாடிக்கையாளரால் எழுத்துப்பூர்வமாக சரிபார்க்கப்படும்.`;
+          sec3 = `இரு தரப்பினரும் தனியுரிமத் தகவலை கடுமையான ரகசியமாக வைத்திருக்கவும், இந்த ஒப்பந்த காலத்தின் போதும் அதற்குப் பின்னரும் மூன்றாம் தரப்பினருக்கு வெளிப்படுத்துவதைத் தடுக்கவும் ஒப்புக்கொள்கிறார்கள்.`;
+        } else if (langLower === "hindi") {
+          sec1 = `प्रदाता परियोजना ब्लूप्रिंट में निर्दिष्ट सेवाओं को करने के लिए सहमत है। सभी डिलिवरेबल्स को क्लाइंट द्वारा लिखित रूप में सत्यापित किया जाएगा।`;
+          sec3 = `दोनों पक्ष मालिकाना जानकारी को सख्त गोपनीयता में रखने और इस अनुबंध अवधि के दौरान और बाद में तीसरे पक्ष को प्रकटीकरण को रोकने के लिए सहमत हैं.`;
+        } else if (langLower === "spanish") {
+          sec1 = `El Proveedor acepta prestar los servicios según lo especificado en los planos del proyecto. Todos los entregables serán verificados por el Cliente por escrito.`;
+          sec3 = `Ambas partes acuerdan mantener la información patentada en estricta confidencialidad y evitar su divulgación a terceros durante y después del término de este contrato.`;
+        } else if (langLower === "french") {
+          sec1 = `Le Prestataire accepte de fournir les services comme spécifié dans les plans du projet. Tous les livrables seront vérifiés par le Client par écrit.`;
+          sec3 = `Les deux parties conviennent de garder les informations exclusives confidentielles et d'empêcher leur divulgation à des tiers pendant et après la durée de ce contrat.`;
+        }
+
         return `<h1>MUTUAL SERVICE AGREEMENT</h1>
 <p>This agreement is entered into effective <strong>${date}</strong>, by and between the following parties:</p>
 
 <p><strong>First Party (Provider):</strong> ${pA}<br><strong>Second Party (Client):</strong> ${pB}</p>
 
 <h3>1. Engagement & Deliverables</h3>
-<p>The Provider agrees to perform services as specified in project blueprints. All deliverables will be verified by the Client in writing.</p>
+<p>${sec1}</p>
 
 <h3>2. Payment Terms</h3>
 <p>${terms}</p>
 
 <h3>3. Confidentiality</h3>
-<p>Both parties agree to hold proprietary information in strict confidence and prevent disclosure to third parties during and after this contract term.</p>
+<p>${sec3}</p>
 
 ${customClause}
 
@@ -901,12 +965,32 @@ ${customClause}
         const start = variables.startDate || "2026-07-14";
         const ctc = parseFloat(variables.salary || "600000").toLocaleString('en-IN');
 
+        let introText = `On behalf of <strong>${brandName}</strong>, we are pleased to offer you the position of <strong>${role}</strong>. We were highly impressed with your credentials and look forward to welcoming you to our tech engineering division.`;
+        let acceptText = `Please review and sign this offer letter within 3 business days to signify your acceptance. We look forward to a mutually rewarding association.`;
+        const langLower = (language || "").toLowerCase();
+        if (langLower === "telugu") {
+          introText = `<strong>${brandName}</strong> తరపున, మీకు <strong>${role}</strong> ఉద్యోగాన్ని ఆఫర్ చేయడానికి మేము సంతోషిస్తున్నాము. మీ ఆధారాలు మమ్మల్ని ఎంతగానో ఆకట్టుకున్నాయి మరియు మా విభాగంలోకి మిమ్మల్ని స్వాగతించడానికి మేము ఎదురుచూస్తున్నాము.`;
+          acceptText = `దయచేసి మీ అంగీకారాన్ని తెలియజేయడానికి 3 పని దినాలలోపు ఈ ఆఫర్ లేఖను సమీక్షించి సంతకం చేయండి. పరస్పర ప్రయోజనకరమైన సహకారం కోసం మేము ఎదురుచూస్తున్నాము.`;
+        } else if (langLower === "tamil") {
+          introText = `<strong>${brandName}</strong> சார்பாக, உங்களுக்கு <strong>${role}</strong> பணியை வழங்குவதில் நாங்கள் மகிழ்ச்சியடைகிறோம். உங்கள் சான்றுகளால் நாங்கள் மிகவும் ஈர்க்கப்பட்டோம், மேலும் எங்கள் பிரிவுக்கு உங்களை வரவேற்பதில் மகிழ்ச்சியடைகிறோம்.`;
+          acceptText = `உங்கள் ஏற்பை குறிக்கும் வகையில் 3 வேலை நாட்களுக்குள் இந்த சலுகை கடிதத்தை மதிப்பாய்வு செய்து கையொப்பமிடவும். பரஸ்பரம் நன்மை பயக்கும் சங்கத்தை எதிர்பார்க்கிறோம்.`;
+        } else if (langLower === "hindi") {
+          introText = `<strong>${brandName}</strong> की ओर से, हमें आपको <strong>${role}</strong> के पद की पेशकश करते हुए खुशी हो रही है। हम आपके परिचय-पत्रों से अत्यधिक प्रभावित थे और हमारे विभाग में आपका स्वागत करने के लिए उत्सुक हैं।`;
+          acceptText = `अपनी स्वीकृति दर्शाने के लिए कृपया 3 व्यावसायिक दिनों के भीतर इस प्रस्ताव पत्र की समीक्षा करें और हस्ताक्षर करें। हम एक पारस्परिक रूप से लाभप्रद सहयोग की आशा करते हैं।`;
+        } else if (langLower === "spanish") {
+          introText = `En nombre de <strong>${brandName}</strong>, nos complace ofrecerle el puesto de <strong>${role}</strong>. Nos impresionaron mucho sus credenciales y esperamos darle la bienvenida a nuestra división.`;
+          acceptText = `Revise y firme esta carta de oferta dentro de los 3 días hábiles para indicar su aceptación. Esperamos una asociación mutuamente gratificante.`;
+        } else if (langLower === "french") {
+          introText = `Au nom de <strong>${brandName}</strong>, nous sommes heureux de vous proposer le poste de <strong>${role}</strong>. Nous avons été très impressionnés par vos références et nous réjouissons de vous accueillir au sein de notre division.`;
+          acceptText = `Veuillez examiner et signer cette lettre d'offre dans les 3 jours ouvrables pour signifier votre acceptation. Nous nous réjouissons d'une collaboration mutuellement fructueuse.`;
+        }
+
         return `<h1>EMPLOYEE OFFER LETTER</h1>
 <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
 <p><strong>To,</strong><br>${candidate}</p>
 
 <p>Dear ${candidate},</p>
-<p>On behalf of <strong>${brandName}</strong>, we are pleased to offer you the position of <strong>${role}</strong>. We were highly impressed with your credentials and look forward to welcoming you to our tech engineering division.</p>
+<p>${introText}</p>
 
 <h3>Key Terms of Employment:</h3>
 <ul>
@@ -916,7 +1000,7 @@ ${customClause}
   <li><strong>Reporting Office:</strong> ${brandAddress || 'Company Headquarters'}</li>
 </ul>
 
-<p>Please review and sign this offer letter within 3 business days to signify your acceptance. We look forward to a mutually rewarding association.</p>
+<p>${acceptText}</p>
 
 <p>Sincerely,</p>
 <p><strong>HR Recruitment Team</strong><br>${brandName}</p>
