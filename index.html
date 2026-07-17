@@ -923,7 +923,7 @@
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px;">
             
             <!-- Card 1: Daily Usage Limit -->
-            <div class="calc-card plan-card" id="card-plan-free" style="margin: 0; background: rgba(255, 255, 255, 0.02); border: 1.5px solid var(--outline-variant); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s; position: relative; overflow: hidden;">
+            <div class="calc-card plan-card" id="card-plan-free" onclick="handleFreeLimitTrigger(event)" style="margin: 0; background: rgba(255, 255, 255, 0.02); border: 1.5px solid var(--outline-variant); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s; position: relative; overflow: hidden; cursor: pointer;">
               <div>
                 <span class="material-symbols-outlined" style="font-size: 40px; color: var(--outline); margin-bottom: 16px; text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);">description</span>
                 <h3 style="font-family: var(--font-brand); font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 8px 0;">Daily Usage Limit</h3>
@@ -933,11 +933,11 @@
                   <li>Ideal for casual, light drafting.</li>
                 </ul>
               </div>
-              <button class="calc-btn" id="btn-current-free-limit" style="background: transparent; border: 1.5px solid var(--outline-variant); color: #fff; width: 100%; height: 38px; font-size: 13px; margin: 0;">Current Free Limit</button>
+              <button class="calc-btn" id="btn-current-free-limit" onclick="handleFreeLimitTrigger(event)" style="background: transparent; border: 1.5px solid var(--outline-variant); color: #fff; width: 100%; height: 38px; font-size: 13px; margin: 0; cursor: pointer;">Current Free Limit</button>
             </div>
 
             <!-- Card 2: Education Plan -->
-            <div class="calc-card plan-card" id="card-plan-edu" style="margin: 0; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--outline-variant); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s; position: relative; overflow: hidden;">
+            <div class="calc-card plan-card" id="card-plan-edu" onclick="handleEduSubscriptionTrigger(event)" style="margin: 0; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--outline-variant); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s; position: relative; overflow: hidden; cursor: pointer;">
               <div class="card-glow" style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--secondary) 0%, var(--primary) 100%);"></div>
               <div>
                 <span class="material-symbols-outlined" style="font-size: 40px; color: var(--secondary); margin-bottom: 16px; text-shadow: 0 0 15px var(--secondary-glow);">school</span>
@@ -950,11 +950,11 @@
                   <li>Summarization & Q&A</li>
                 </ul>
               </div>
-              <button class="calc-btn" id="btn-subscribe-edu" style="background: var(--secondary); color: #000; font-weight: 700; border: none; width: 100%; height: 38px; font-size: 13px; margin: 0;">Subscribe Edu</button>
+              <button class="calc-btn" id="btn-subscribe-edu" onclick="handleEduSubscriptionTrigger(event)" style="background: var(--secondary); color: #000; font-weight: 700; border: none; width: 100%; height: 38px; font-size: 13px; margin: 0; cursor: pointer;">Subscribe Edu</button>
             </div>
 
             <!-- Card 3: Business Plan -->
-            <div class="calc-card plan-card" id="card-plan-biz" style="margin: 0; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--outline-variant); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s; position: relative; overflow: hidden;">
+            <div class="calc-card plan-card" id="card-plan-biz" onclick="handleBizContactTrigger(event)" style="margin: 0; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--outline-variant); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s; position: relative; overflow: hidden; cursor: pointer;">
               <div class="card-glow" style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary) 0%, #bb86fc 100%);"></div>
               <div>
                 <span class="material-symbols-outlined" style="font-size: 40px; color: var(--primary); margin-bottom: 16px; text-shadow: 0 0 15px var(--primary-glow);">business_center</span>
@@ -967,7 +967,7 @@
                   <li>Analytics & Priority Support</li>
                 </ul>
               </div>
-              <button class="calc-btn primary-glowing-btn" id="btn-contact-sales" style="width: 100%; height: 38px; font-size: 13px; margin: 0;">Contact Sales</button>
+              <button class="calc-btn primary-glowing-btn" id="btn-contact-sales" onclick="handleBizContactTrigger(event)" style="width: 100%; height: 38px; font-size: 13px; margin: 0; cursor: pointer;">Contact Sales</button>
             </div>
 
           </div>
@@ -1239,9 +1239,9 @@
   </div>
 
   <!-- Core Mock DB & Auth engine script modules -->
-  <script src="firebase-mock.js?v=5.2"></script>
-  <script src="db.js?v=5.2"></script>
+  <script src="firebase-mock.js?v=5.3"></script>
+  <script src="db.js?v=5.3"></script>
   <!-- Main application script -->
-  <script src="app.js?v=5.2"></script>
+  <script src="app.js?v=5.3"></script>
 </body>
 </html>

@@ -2815,6 +2815,11 @@ function setupPricingPanel() {
     cardFree.style.cursor = "pointer";
     cardFree.addEventListener("click", handleFreeLimitTrigger);
   }
+
+  // Expose triggers globally for inline HTML onclick attributes
+  window.handleEduSubscriptionTrigger = handleEduSubscriptionTrigger;
+  window.handleBizContactTrigger = handleBizContactTrigger;
+  window.handleFreeLimitTrigger = handleFreeLimitTrigger;
 }
 
 // Show standard information modal dialog
