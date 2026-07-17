@@ -2792,22 +2792,28 @@ function setupPricingPanel() {
   }
 
   const btnFreeLimit = document.getElementById("btn-current-free-limit");
+  const handleFreeLimitTrigger = (e) => {
+    if (e) e.stopPropagation();
+    
+    const user = FirebaseMock.auth.currentUser;
+    const userId = user ? user.id : "u_guest";
+    
+    // Query local storage documents count
+    const docs = JSON.parse(localStorage.getItem("fb_doc_documents") || "[]");
+    const userDocsCount = docs.filter(doc => doc.userId === userId).length;
+    const docsToday = Math.min(userDocsCount, 10);
+    
+    showInfoBox("Daily Usage Status", `You are currently on the Free Plan.\n\nUsage Today: ${docsToday} / 10 documents created.\n\nDaily limits reset automatically every 24 hours. You can upgrade to the Education or Business plans for unlimited access.`, "info");
+    showNotification("Usage Status", `${docsToday} / 10 documents generated today.`);
+  };
+
   if (btnFreeLimit) {
     btnFreeLimit.style.cursor = "pointer";
-    btnFreeLimit.addEventListener("click", (e) => {
-      if (e) e.stopPropagation();
-      
-      const user = FirebaseMock.auth.currentUser;
-      const userId = user ? user.id : "u_guest";
-      
-      // Query local storage documents count
-      const docs = JSON.parse(localStorage.getItem("fb_doc_documents") || "[]");
-      const userDocsCount = docs.filter(doc => doc.userId === userId).length;
-      const docsToday = Math.min(userDocsCount, 10);
-      
-      showInfoBox("Daily Usage Status", `You are currently on the Free Plan.\n\nUsage Today: ${docsToday} / 10 documents created.\n\nDaily limits reset automatically every 24 hours. You can upgrade to the Education or Business plans for unlimited access.`, "info");
-      showNotification("Usage Status", `${docsToday} / 10 documents generated today.`);
-    });
+    btnFreeLimit.addEventListener("click", handleFreeLimitTrigger);
+  }
+  if (cardFree) {
+    cardFree.style.cursor = "pointer";
+    cardFree.addEventListener("click", handleFreeLimitTrigger);
   }
 }
 
