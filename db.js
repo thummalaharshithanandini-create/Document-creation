@@ -560,11 +560,91 @@ Critical Formatting Rules:
     return translated;
   },
 
+  _analyzePromptContext(promptContext, type) {
+    const ctx = (promptContext || "").toLowerCase();
+    const result = {
+      description: "",
+      items: null,
+      title: "",
+      client: ""
+    };
+
+    if (ctx.includes("coffee") || ctx.includes("cafe")) {
+      result.description = "Supply of premium Arabica coffee beans and cafe barista training services.";
+      result.items = [
+        ["Premium Arabica Coffee Beans (kg)", 25, 1200],
+        ["Barista Training Workshop", 1, 15000],
+        ["Espresso Machine Maintenance", 1, 8000]
+      ];
+      result.title = "Coffee Supply & Training Proposal";
+    } else if (ctx.includes("software") || ctx.includes("web") || ctx.includes("app") || ctx.includes("developer") || ctx.includes("coding")) {
+      result.description = "Custom software development, API integration, and cloud deployment setup.";
+      result.items = [
+        ["Web Application Development (Sprint)", 3, 45000],
+        ["Database Migration & API Setup", 1, 25000],
+        ["Cloud Hosting Configuration", 1, 10000]
+      ];
+      result.title = "Software Development Proposal";
+    } else if (ctx.includes("design") || ctx.includes("graphic") || ctx.includes("ui") || ctx.includes("logo")) {
+      result.description = "Professional UI/UX brand identity design and graphic design assets creation.";
+      result.items = [
+        ["Brand Identity Kit & Logo Design", 1, 20000],
+        ["Mobile App UI/UX Mockups", 1, 35000],
+        ["Social Media Graphic Templates", 10, 1500]
+      ];
+      result.title = "Graphic & Brand Design Proposal";
+    } else if (ctx.includes("marketing") || ctx.includes("seo") || ctx.includes("ads") || ctx.includes("social media")) {
+      result.description = "Digital marketing campaign management, search engine optimization (SEO), and advertising setups.";
+      result.items = [
+        ["SEO Audit & Keyword Optimization", 1, 15000],
+        ["Social Media Ads Management (Month)", 1, 25000],
+        ["Content Copywriting (Articles)", 5, 3000]
+      ];
+      result.title = "Digital Marketing Campaign Proposal";
+    } else if (ctx.includes("consulting") || ctx.includes("consultancy") || ctx.includes("advisor")) {
+      result.description = "Business advisory consulting services, market research, and financial modeling analysis.";
+      result.items = [
+        ["Strategic Business Advisory (Hours)", 20, 2500],
+        ["Market Research & Competitor Study", 1, 30000],
+        ["Financial Model Blueprint", 1, 15000]
+      ];
+      result.title = "Business Advisory Consulting Proposal";
+    } else if (ctx.includes("fitness") || ctx.includes("gym") || ctx.includes("trainer") || ctx.includes("health")) {
+      result.description = "Corporate fitness wellness workshops, personal training sessions, and customized nutrition planning.";
+      result.items = [
+        ["Corporate Wellness Workshop", 2, 12000],
+        ["Personal Training Sessions (Pack)", 1, 15000],
+        ["Nutrition & Meal Plan Blueprint", 1, 5000]
+      ];
+      result.title = "Corporate Fitness Program Proposal";
+    } else if (ctx.includes("photography") || ctx.includes("video") || ctx.includes("shoot")) {
+      result.description = "Professional corporate event photography, commercial video editing, and product shoot production.";
+      result.items = [
+        ["Event Photography & Retouching (Day)", 1, 25000],
+        ["Product Commercial Video Shoot", 1, 40000],
+        ["4K Drone Footage Videography", 1, 15000]
+      ];
+      result.title = "Commercial Media & Video Proposal";
+    }
+
+    if (!result.description && promptContext) {
+      const cleanPrompt = promptContext.replace(/[.\/#$%\^&\*;:{}=\-_`~()]/g, "").trim();
+      if (cleanPrompt.length > 5) {
+        result.description = promptContext;
+        result.title = cleanPrompt.split(" ").slice(0, 4).join(" ") + " Project";
+      }
+    }
+
+    return result;
+  },
+
   // Static Offline Mock Generation templates when Gemini API key is missing
   _generateRawOfflineMockDoc(category, type, variables, promptContext, tone, language, brandInfo, useBranding) {
     const brandName = (useBranding && brandInfo) ? brandInfo.companyName : "Generic Corp";
     const brandAddress = (useBranding && brandInfo) ? brandInfo.address : "";
     const brandTax = (useBranding && brandInfo) ? brandInfo.taxNumber : "";
+
+    const promptAnalysis = this._analyzePromptContext(promptContext, type);
 
     switch (type) {
       case "invoice": {
@@ -579,7 +659,10 @@ Critical Formatting Rules:
         let itemsHtml = "";
         
         try {
-          const itemsStr = variables.billingItems || "Service,1,1000";
+          let itemsStr = variables.billingItems || "Service,1,1000";
+          if (promptAnalysis.items) {
+            itemsStr = promptAnalysis.items.map(parts => parts.join(',')).join(';');
+          }
           const itemsArr = itemsStr.split(';');
           itemsArr.forEach(i => {
             const parts = i.split(',');
@@ -647,9 +730,9 @@ Critical Formatting Rules:
       }
       
       case "proposal": {
-        const title = variables.proposalTitle || "Project Proposal";
+        const title = promptAnalysis.title || variables.proposalTitle || "Project Proposal";
         const client = variables.targetClient || "Prospective Client";
-        const scope = variables.projectScope || "General services to be provided.";
+        const scope = promptAnalysis.description || variables.projectScope || "General services to be provided.";
         const timeline = variables.timeline || "6";
         const cost = parseFloat(variables.projectCost || "50000").toLocaleString('en-IN');
 
@@ -687,7 +770,10 @@ Critical Formatting Rules:
         let itemsHtml = "";
         
         try {
-          const itemsStr = variables.itemsList || "Item,1000";
+          let itemsStr = variables.itemsList || "Item,1000";
+          if (promptAnalysis.items) {
+            itemsStr = promptAnalysis.items.map(parts => `${parts[0]},${parseFloat(parts[1] || 1) * parseFloat(parts[2] || 0)}`).join(';');
+          }
           const itemsArr = itemsStr.split(';');
           itemsArr.forEach(i => {
             const parts = i.split(',');
@@ -733,10 +819,10 @@ Critical Formatting Rules:
       }
 
       case "meeting_minutes": {
-        const title = variables.meetingTitle || "General Meeting";
+        const title = promptAnalysis.title || variables.meetingTitle || "General Meeting";
         const date = variables.meetingDate || "July 7, 2026";
         const att = variables.attendees || "Attendees";
-        const points = variables.discussionPoints || "No details provided.";
+        const points = promptAnalysis.description || variables.discussionPoints || "No details provided.";
 
         return `<h1>Meeting Minutes: ${title}</h1>
 <p><strong>Date/Time:</strong> ${date}<br><strong>Facilitator:</strong> ${brandName}</p>
@@ -779,6 +865,7 @@ Critical Formatting Rules:
         const pB = variables.partyB || "Party B";
         const date = variables.agreementDate || "2026-07-07";
         const terms = variables.paymentTerms || "Standard terms.";
+        const customClause = promptAnalysis.description ? `<h3>4. Custom Clauses</h3><p>${promptAnalysis.description}</p>` : "";
 
         return `<h1>MUTUAL SERVICE AGREEMENT</h1>
 <p>This agreement is entered into effective <strong>${date}</strong>, by and between the following parties:</p>
@@ -794,6 +881,8 @@ Critical Formatting Rules:
 <h3>3. Confidentiality</h3>
 <p>Both parties agree to hold proprietary information in strict confidence and prevent disclosure to third parties during and after this contract term.</p>
 
+${customClause}
+
 <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 50px;">
   <div>
     <p>_______________________</p>
@@ -808,7 +897,7 @@ Critical Formatting Rules:
 
       case "offer_letter": {
         const candidate = variables.candidateName || "Candidate";
-        const role = variables.jobTitle || "Developer";
+        const role = promptAnalysis.title ? promptAnalysis.title.replace(" Proposal", "").replace(" Project", "") : (variables.jobTitle || "Developer");
         const start = variables.startDate || "2026-07-14";
         const ctc = parseFloat(variables.salary || "600000").toLocaleString('en-IN');
 
