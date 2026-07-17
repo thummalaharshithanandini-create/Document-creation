@@ -97,7 +97,7 @@ function switchView(viewName) {
     // Update Header title
     const headerTitle = document.getElementById("page-header-title");
     if (headerTitle) {
-      headerTitle.innerText = viewName.charAt(0).toUpperCase() + viewName.slice(1).replace('generator', 'AI Generator').replace('brand', 'Brand Kit').replace('history', 'Documents Log').replace('qr-generator', 'QR Code Generator');
+      headerTitle.innerText = viewName.charAt(0).toUpperCase() + viewName.slice(1).replace('generator', 'AI Generator').replace('brand', 'Brand Kit').replace('history', 'Documents Log').replace('qr-generator', 'QR Code Generator').replace('assistant', 'AI Smart Document Assistant');
     }
     
     // Highlight sidebar items
@@ -3367,6 +3367,503 @@ function closeInfoBox() {
   if (modal) modal.style.display = "none";
 }
 
+// ==========================================
+// AI SMART DOCUMENT ASSISTANT STATE & ENGINE
+// ==========================================
+
+const assistantState = {
+  activeCategory: null,
+  activeType: null,
+  requiredFields: [],
+  currentFieldIndex: 0,
+  gatheredVariables: {},
+  waitingForField: false,
+  isRecording: false,
+  recognitionInstance: null
+};
+
+function appendAssistantMessage(sender, text, isHtml = false) {
+  const thread = document.getElementById("chat-messages-thread");
+  if (!thread) return;
+
+  const row = document.createElement("div");
+  row.className = `chat-msg-row ${sender === "user" ? "user-msg" : "ai-msg"}`;
+
+  const avatar = document.createElement("div");
+  avatar.className = "chat-bubble-avatar";
+  avatar.innerHTML = sender === "user" 
+    ? `<span class="material-symbols-outlined" style="font-size: 18px; color: var(--on-surface-variant);">person</span>`
+    : `<span class="material-symbols-outlined" style="font-size: 18px; color: #000;">smart_toy</span>`;
+
+  const content = document.createElement("div");
+  content.className = "chat-bubble-content";
+  if (isHtml) {
+    content.innerHTML = text;
+  } else {
+    content.innerText = text;
+  }
+
+  row.appendChild(avatar);
+  row.appendChild(content);
+  thread.appendChild(row);
+
+  // Auto scroll to bottom
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function submitChatMessage() {
+  const input = document.getElementById("chat-input-text");
+  if (!input) return;
+  
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Append user message
+  appendAssistantMessage("user", text);
+  input.value = "";
+
+  // Process message after a short realistic typing delay
+  setTimeout(() => {
+    processAssistantMessage(text);
+  }, 600);
+}
+
+function handleChatInputKeyDown(event) {
+  if (event.key === "Enter") {
+    submitChatMessage();
+  }
+}
+
+function handleChatSuggestion(text) {
+  const input = document.getElementById("chat-input-text");
+  if (input) {
+    input.value = text;
+    submitChatMessage();
+  }
+}
+
+function triggerChatUpload() {
+  const fileInput = document.getElementById("chat-file-input");
+  if (fileInput) fileInput.click();
+}
+
+function handleChatFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  appendAssistantMessage("user", `📎 Uploaded file: ${file.name}`);
+  
+  // Show loading indicator
+  appendAssistantMessage("ai", `Analyzing uploaded document "${file.name}" and extracting data... Got it!`);
+  
+  setTimeout(() => {
+    // Mock extract information based on file content/name
+    const fileNameLower = file.name.toLowerCase();
+    
+    if (fileNameLower.includes("invoice") || fileNameLower.includes("billing") || fileNameLower.includes("xls")) {
+      assistantState.activeCategory = "business";
+      assistantState.activeType = "invoice";
+      assistantState.gatheredVariables = {
+        clientName: "XYZ Solutions Ltd",
+        clientAddress: "100 Tech Park, Bangalore",
+        clientGST: "29ACMEB1111B2Z4",
+        billingItems: "Software consulting services,1,85000",
+        taxRate: "18",
+        discount: "5000"
+      };
+      
+      appendAssistantMessage("ai", "I extracted the following billing details from your file:\n\n• Customer: XYZ Solutions Ltd\n• Amount: ₹85,000\n• Services: Software consulting services\n\nI have pre-populated these details for an Invoice. Should I generate the document now?");
+      
+      assistantState.requiredFields = [];
+      assistantState.waitingForField = false;
+      
+      showChatSuggestionsForType("invoice");
+    } else if (fileNameLower.includes("resume") || fileNameLower.includes("cv")) {
+      assistantState.activeCategory = "personal";
+      assistantState.activeType = "resume";
+      assistantState.gatheredVariables = {
+        fullName: "Amit Kumar",
+        email: "amit.kumar@example.com",
+        phone: "+91 9876543210",
+        targetRole: "Senior React Developer",
+        experienceYears: "5",
+        coreSkills: "React, Node.js, JavaScript, AWS"
+      };
+      
+      appendAssistantMessage("ai", "I extracted the following resume parameters from your CV:\n\n• Name: Amit Kumar\n• Role: Senior React Developer\n• Experience: 5 Years\n\nI have pre-populated these details for a Professional Resume. Should I generate the document now?");
+      
+      assistantState.requiredFields = [];
+      assistantState.waitingForField = false;
+      showChatSuggestionsForType("resume");
+    } else {
+      assistantState.activeCategory = "business";
+      assistantState.activeType = "proposal";
+      assistantState.gatheredVariables = {
+        proposalTitle: "Business Strategy Engagement",
+        targetClient: "Partner Enterprises Ltd",
+        projectScope: `Extracted project blueprints description from file ${file.name}`,
+        timeline: "8",
+        projectCost: "350000"
+      };
+      
+      appendAssistantMessage("ai", `I parsed a general proposal outline from ${file.name} for "Partner Enterprises Ltd" worth ₹3,50,000. Should I proceed and generate the proposal?`);
+      
+      assistantState.requiredFields = [];
+      assistantState.waitingForField = false;
+      showChatSuggestionsForType("proposal");
+    }
+  }, 1200);
+}
+
+function toggleChatMic() {
+  const recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!recognition) {
+    alert("Speech recognition is not supported in this browser. Please try Chrome or Microsoft Edge.");
+    return;
+  }
+
+  const micBtn = document.getElementById("btn-chat-mic");
+  const micIcon = document.getElementById("chat-mic-icon");
+
+  if (assistantState.isRecording) {
+    if (assistantState.recognitionInstance) {
+      assistantState.recognitionInstance.stop();
+    }
+    assistantState.isRecording = false;
+    micBtn.classList.remove("listening-mode");
+    micIcon.innerText = "mic";
+  } else {
+    const rec = new recognition();
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.lang = 'en-US';
+
+    rec.onstart = () => {
+      assistantState.isRecording = true;
+      micBtn.classList.add("listening-mode");
+      micIcon.innerText = "graphic_eq";
+      showNotification("Voice Input Active", "Speak now to direct the AI assistant...");
+    };
+
+    rec.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      const input = document.getElementById("chat-input-text");
+      if (input) {
+        input.value = transcript;
+      }
+      showNotification("Speech Captured", `Parsed: "${transcript}"`);
+    };
+
+    rec.onerror = (e) => {
+      console.warn("Speech recognition error:", e);
+      assistantState.isRecording = false;
+      micBtn.classList.remove("listening-mode");
+      micIcon.innerText = "mic";
+    };
+
+    rec.onend = () => {
+      assistantState.isRecording = false;
+      micBtn.classList.remove("listening-mode");
+      micIcon.innerText = "mic";
+    };
+
+    assistantState.recognitionInstance = rec;
+    rec.start();
+  }
+}
+
+function detectDocumentIntent(text) {
+  const t = text.toLowerCase();
+  
+  if (t.includes("invoice") || t.includes("bill") || t.includes("gst")) {
+    return { category: "business", type: "invoice", label: "Invoice" };
+  }
+  if (t.includes("proposal") || t.includes("business proposal")) {
+    return { category: "business", type: "proposal", label: "Business Proposal" };
+  }
+  if (t.includes("quotation") || t.includes("quote")) {
+    return { category: "business", type: "quotation", label: "Sales Quotation" };
+  }
+  if (t.includes("minutes") || t.includes("meeting minutes")) {
+    return { category: "business", type: "meeting_minutes", label: "Meeting Minutes" };
+  }
+  if (t.includes("contract") || t.includes("agreement")) {
+    return { category: "business", type: "contracts", label: "Mutual Service Agreement" };
+  }
+  if (t.includes("offer letter") || t.includes("appointment")) {
+    return { category: "business", type: "offer_letter", label: "Offer Letter" };
+  }
+  if (t.includes("leave letter") || t.includes("leave approval") || t.includes("leave")) {
+    return { category: "business", type: "leave_approval", label: "Leave Approval" };
+  }
+  if (t.includes("menu") || t.includes("restaurant menu") || t.includes("menu card")) {
+    return { category: "business", type: "menu_card", label: "Traditional Menu Card" };
+  }
+  if (t.includes("question paper") || t.includes("exam")) {
+    return { category: "education", type: "question_paper", label: "Question Paper" };
+  }
+  if (t.includes("assignment") || t.includes("homework")) {
+    return { category: "education", type: "assignment", label: "Assignment" };
+  }
+  if (t.includes("answer key") || t.includes("solutions")) {
+    return { category: "education", type: "answer_key", label: "Answer Key" };
+  }
+  if (t.includes("certificate") || t.includes("merit") || t.includes("internship certificate")) {
+    return { category: "education", type: "certificate", label: "Certificate of Merit" };
+  }
+  if (t.includes("resume") || t.includes("cv")) {
+    return { category: "personal", type: "resume", label: "Professional Resume" };
+  }
+  if (t.includes("cover letter")) {
+    return { category: "personal", type: "cover_letter", label: "Cover Letter" };
+  }
+  return null;
+}
+
+function extractInitialVariables(text, type) {
+  const vars = {};
+  const t = text.toLowerCase();
+  
+  // Extract number values (for cost/marks/salary)
+  const rupeeMatch = text.match(/(?:₹|rs\.?|inr|worth)\s*([\d,]+)/i);
+  let numericValue = "";
+  if (rupeeMatch) {
+    numericValue = rupeeMatch[1].replace(/,/g, '');
+  } else {
+    const numOnlyMatch = text.match(/\b\d+(?:,\d{3})*\b/);
+    if (numOnlyMatch) {
+      numericValue = numOnlyMatch[0].replace(/,/g, '');
+    }
+  }
+
+  // Extract client/company candidate names (capitalized words after "for", "to", "by", "of")
+  const entityMatch = text.match(/(?:for|to|by|name|candidate)\s+([A-Za-z0-9\s&]+?)(?:\s+(?:worth|with|on|of|at|in|date|due)\b|$)/i);
+  let entityName = "";
+  if (entityMatch) {
+    entityName = entityMatch[1].trim();
+  }
+
+  if (type === "invoice") {
+    if (entityName) vars.clientName = entityName;
+    if (numericValue) {
+      vars.billingItems = `Services rendered,1,${numericValue}`;
+    }
+  } else if (type === "proposal") {
+    if (entityName) vars.targetClient = entityName;
+    if (numericValue) vars.projectCost = numericValue;
+  } else if (type === "quotation") {
+    if (entityName) vars.clientContact = entityName;
+    if (numericValue) vars.itemsList = `Quoted Product / Service,${numericValue}`;
+  } else if (type === "contracts") {
+    if (entityName) vars.partyB = entityName;
+  } else if (type === "offer_letter") {
+    if (entityName) vars.candidateName = entityName;
+    if (numericValue) vars.salary = numericValue;
+  } else if (type === "leave_approval") {
+    if (entityName) vars.employeeName = entityName;
+  } else if (type === "certificate") {
+    if (entityName) vars.recipientName = entityName;
+  } else if (type === "resume") {
+    if (entityName) vars.fullName = entityName;
+  } else if (type === "cover_letter") {
+    if (entityName) vars.applicantName = entityName;
+  }
+  
+  return vars;
+}
+
+function processAssistantMessage(text) {
+  const t = text.toLowerCase();
+
+  // If user says "yes" or "proceed" when a doc is pre-populated
+  if (assistantState.activeType && assistantState.requiredFields.length === 0 && (t.includes("yes") || t.includes("proceed") || t.includes("generate") || t.includes("sure") || t.includes("ok"))) {
+    triggerAssistantDocGeneration();
+    return;
+  }
+
+  // 1. Check if we are waiting for a specific question reply
+  if (assistantState.waitingForField) {
+    const activeField = assistantState.requiredFields[assistantState.currentFieldIndex];
+    assistantState.gatheredVariables[activeField.id] = text;
+    assistantState.currentFieldIndex++;
+
+    if (assistantState.currentFieldIndex < assistantState.requiredFields.length) {
+      const nextField = assistantState.requiredFields[assistantState.currentFieldIndex];
+      appendAssistantMessage("ai", `Got it. And what is the ${nextField.label}?`);
+    } else {
+      assistantState.waitingForField = false;
+      appendAssistantMessage("ai", "Perfect! I have collected all the required information.");
+      triggerAssistantDocGeneration();
+    }
+    return;
+  }
+
+  // 2. Identify document intent
+  const intent = detectDocumentIntent(text);
+  if (intent) {
+    assistantState.activeCategory = intent.category;
+    assistantState.activeType = intent.type;
+    assistantState.gatheredVariables = extractInitialVariables(text, intent.type);
+    
+    // Determine required fields
+    const allFields = DocumentDB.categories[intent.category].types[intent.type].fields;
+    assistantState.requiredFields = allFields.filter(f => !assistantState.gatheredVariables[f.id]);
+    assistantState.currentFieldIndex = 0;
+
+    if (assistantState.requiredFields.length > 0) {
+      assistantState.waitingForField = true;
+      const firstField = assistantState.requiredFields[0];
+      appendAssistantMessage("ai", `Sure! I'll help you generate a professional ${intent.label}. Let's gather a few details. \n\nFirst: What is the ${firstField.label}?`);
+    } else {
+      appendAssistantMessage("ai", `Great! I've pre-populated all information for your ${intent.label}. Ready to generate?`);
+    }
+    return;
+  }
+
+  // 3. Handle email sending requests
+  if (t.includes("email") || t.includes("send")) {
+    const clientName = assistantState.gatheredVariables.clientName || assistantState.gatheredVariables.clientContact || assistantState.gatheredVariables.targetClient || "Client";
+    appendAssistantMessage("ai", `Sure! Sending the document PDF draft to ${clientName} via email...`);
+    setTimeout(() => {
+      appendAssistantMessage("ai", "Document email sent successfully! 🚀");
+    }, 1500);
+    return;
+  }
+
+  // 4. Default fallback greeting
+  appendAssistantMessage("ai", "I'm not quite sure which document you'd like to make. Please tell me something like 'Create an invoice', 'Generate a business proposal', or 'Write an internship certificate'.");
+}
+
+function triggerAssistantDocGeneration() {
+  // Add conversational loading indicators
+  const thread = document.getElementById("chat-messages-thread");
+  if (!thread) return;
+
+  const loadingRow = document.createElement("div");
+  loadingRow.className = "chat-msg-row ai-msg";
+  loadingRow.id = "chat-loading-card-row";
+
+  loadingRow.innerHTML = `
+    <div class="chat-bubble-avatar">
+      <span class="material-symbols-outlined" style="font-size: 18px; color: #000;">smart_toy</span>
+    </div>
+    <div class="chat-loading-status-card">
+      <div class="chat-loading-spinner"></div>
+      <div id="chat-loading-status-text">🤖 AI is analyzing your request...</div>
+    </div>
+  `;
+  thread.appendChild(loadingRow);
+  thread.scrollTop = thread.scrollHeight;
+
+  const statusText = document.getElementById("chat-loading-status-text");
+
+  setTimeout(() => {
+    if (statusText) statusText.innerText = "Generating professional document...";
+  }, 1000);
+
+  setTimeout(() => {
+    if (statusText) statusText.innerText = "Almost Done...";
+  }, 2000);
+
+  setTimeout(() => {
+    // Remove loading card
+    const loadingCard = document.getElementById("chat-loading-card-row");
+    if (loadingCard) loadingCard.remove();
+
+    const category = assistantState.activeCategory;
+    const type = assistantState.activeType;
+    const gathered = assistantState.gatheredVariables;
+
+    // Apply defaults for any variables still missing
+    const allFields = DocumentDB.categories[category].types[type].fields;
+    allFields.forEach(f => {
+      if (!gathered[f.id]) {
+        gathered[f.id] = f.default || "";
+      }
+    });
+
+    const docLabel = DocumentDB.categories[category].types[type].label;
+    const varsString = JSON.stringify(gathered).replace(/"/g, '&quot;');
+
+    const htmlContent = `
+      <strong>✨ Your Document is Ready!</strong>
+      <p style="margin: 6px 0 12px 0; font-size: 12.5px; color: var(--on-surface-variant);">
+        I have successfully generated a professional ${docLabel} using your conversational inputs.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <button class="calc-btn" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0;" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}')">View Preview</button>
+        <button class="calc-btn" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}', true)">Download PDF</button>
+      </div>
+    `;
+
+    appendAssistantMessage("ai", htmlContent, true);
+    
+    // Show smart suggestions recommendation chips
+    showChatSuggestionsForType(type);
+  }, 3000);
+}
+
+function loadAssistantGeneratedDoc(category, type, varsString, triggerPdf = false) {
+  let gathered = {};
+  try {
+    gathered = JSON.parse(varsString);
+  } catch (e) {
+    console.error("Failed to parse varsString", e);
+    return;
+  }
+
+  // Pre-fill the standard AI Generator form values
+  const categorySelect = document.getElementById("gen-category");
+  const typeSelect = document.getElementById("gen-type");
+
+  if (categorySelect) {
+    categorySelect.value = category;
+    categorySelect.dispatchEvent(new Event("change"));
+  }
+
+  if (typeSelect) {
+    typeSelect.value = type;
+    typeSelect.dispatchEvent(new Event("change"));
+  }
+
+  // Assign the variables directly to input elements
+  setTimeout(() => {
+    Object.entries(gathered).forEach(([key, value]) => {
+      const fieldInput = document.getElementById(`input-field-${key}`);
+      if (fieldInput) {
+        fieldInput.value = value;
+      }
+    });
+
+    // Switch view to generator
+    switchView("generator");
+
+    // Trigger preview generation
+    const generatedHtml = DocumentDB.generateOfflineMockDoc(category, type, gathered, "", "Professional", "English", appState.brandKit, true);
+    
+    const editor = document.getElementById("document-content-editor");
+    if (editor) {
+      editor.innerHTML = generatedHtml;
+    }
+
+    // Apply visual branding
+    updateBrandingOverlayOnPreview();
+
+    // Enable utilities
+    document.getElementById("assist-utilities-box").style.display = "block";
+    document.getElementById("btn-save-doc").removeAttribute("disabled");
+    document.getElementById("btn-export-pdf").removeAttribute("disabled");
+    document.getElementById("btn-export-word").removeAttribute("disabled");
+
+    showNotification("Document Loaded", "Prefilled AI Generator inputs with assistant parameters.");
+
+    if (triggerPdf) {
+      const exportPdfBtn = document.getElementById("btn-export-pdf");
+      if (exportPdfBtn) exportPdfBtn.click();
+    }
+  }, 100);
+}
+
 // Expose navigation & trigger functions globally for direct HTML compatibility
 window.showAuthScreen = showAuthScreen;
 window.switchView = switchView;
@@ -3391,5 +3888,15 @@ window.submitRechargePayment = submitRechargePayment;
 window.closeRechargeBillingPortal = closeRechargeBillingPortal;
 window.resendRegistrationOTP = resendRegistrationOTP;
 window.closeInfoBox = closeInfoBox;
+
+// AI Assistant Exposures
+window.handleChatSuggestion = handleChatSuggestion;
+window.submitChatMessage = submitChatMessage;
+window.handleChatInputKeyDown = handleChatInputKeyDown;
+window.triggerChatUpload = triggerChatUpload;
+window.handleChatFileUpload = handleChatFileUpload;
+window.toggleChatMic = toggleChatMic;
+window.loadAssistantGeneratedDoc = loadAssistantGeneratedDoc;
+
 
 

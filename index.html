@@ -232,6 +232,11 @@
           <span class="sidebar-label">Dashboard</span>
         </button>
         
+        <button class="sidebar-item" data-target="assistant" id="nav-item-assistant">
+          <span class="material-symbols-outlined">forum</span>
+          <span class="sidebar-label">AI Assistant ⭐</span>
+        </button>
+        
         <button class="sidebar-item" data-target="generator" id="nav-item-generator">
           <span class="material-symbols-outlined">description</span>
           <span class="sidebar-label">AI Generator</span>
@@ -439,6 +444,64 @@
               <span class="material-symbols-outlined" style="font-size: 48px; color: var(--outline);">folder_open</span>
               <p>No documents generated yet. Select a template above or head to the AI Generator to get started!</p>
               <button class="calc-btn" style="width: auto; padding: 10px 20px; margin-top: 12px;" onclick="switchView('generator')">Open Generator</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 1.5: AI ASSISTANT ⭐ ================= -->
+        <section class="page-view" id="view-assistant" style="padding: 24px;">
+          <div class="assistant-chat-container">
+            <!-- Header Banner -->
+            <div class="chat-header-banner">
+              <div class="chat-ai-avatar">
+                <span class="material-symbols-outlined">forum</span>
+              </div>
+              <div class="chat-title-group">
+                <h2>AI Smart Document Assistant</h2>
+                <p>Create professional documents simply by chatting with AI.</p>
+              </div>
+            </div>
+
+            <!-- Chat Messages Thread -->
+            <div class="chat-messages-thread" id="chat-messages-thread">
+              <!-- AI Greeting message -->
+              <div class="chat-msg-row ai-msg">
+                <div class="chat-bubble-avatar">
+                  <span class="material-symbols-outlined" style="font-size: 18px; color: #000;">smart_toy</span>
+                </div>
+                <div class="chat-bubble-content">
+                  Hello! I am your AI Smart Document Assistant. I can help you generate professional invoices, quotations, proposals, meeting minutes, contracts, offer letters, resumes, certificates, and more. 
+                  <br><br>
+                  What kind of document would you like to create today?
+                </div>
+              </div>
+            </div>
+
+            <!-- Suggestions container -->
+            <div class="chat-suggestions-container" id="chat-suggestions-container">
+              <span class="chat-suggestion-chip" onclick="handleChatSuggestion('Create an invoice')">Create Invoice</span>
+              <span class="chat-suggestion-chip" onclick="handleChatSuggestion('Generate a quotation')">Generate Quotation</span>
+              <span class="chat-suggestion-chip" onclick="handleChatSuggestion('Write a proposal')">Write Proposal</span>
+              <span class="chat-suggestion-chip" onclick="handleChatSuggestion('Create an internship certificate')">Internship Certificate</span>
+              <span class="chat-suggestion-chip" onclick="handleChatSuggestion('Write an offer letter')">Offer Letter</span>
+            </div>
+
+            <!-- Chat Input Toolbar -->
+            <div class="chat-input-toolbar">
+              <button class="chat-action-btn" id="btn-chat-upload" onclick="triggerChatUpload()" title="Upload PDF/Word/Excel">
+                <span class="material-symbols-outlined">attach_file</span>
+              </button>
+              <input type="file" id="chat-file-input" style="display: none;" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" onchange="handleChatFileUpload(event)">
+              
+              <input type="text" class="chat-input-field" id="chat-input-text" placeholder="Type your request here..." onkeydown="handleChatInputKeyDown(event)">
+              
+              <button class="chat-action-btn" id="btn-chat-mic" onclick="toggleChatMic()" title="Voice Input">
+                <span class="material-symbols-outlined" id="chat-mic-icon">mic</span>
+              </button>
+              
+              <button class="chat-action-btn send-btn" id="btn-chat-send" onclick="submitChatMessage()" title="Send Message">
+                <span class="material-symbols-outlined">send</span>
+              </button>
             </div>
           </div>
         </section>
@@ -1253,9 +1316,9 @@
   </div>
 
   <!-- Core Mock DB & Auth engine script modules -->
-  <script src="firebase-mock.js?v=6.3"></script>
-  <script src="db.js?v=6.3"></script>
+  <script src="firebase-mock.js?v=6.4"></script>
+  <script src="db.js?v=6.4"></script>
   <!-- Main application script -->
-  <script src="app.js?v=6.3"></script>
+  <script src="app.js?v=6.4"></script>
 </body>
 </html>
