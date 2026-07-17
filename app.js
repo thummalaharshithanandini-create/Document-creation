@@ -2478,7 +2478,6 @@ function setupDocumentUploader() {
 function setupPricingPanel() {
   const btnCatEdu = document.getElementById("btn-cat-edu");
   const btnCatBiz = document.getElementById("btn-cat-biz");
-  const btnReset = document.getElementById("btn-reset-pricing");
   const recBadge = document.getElementById("plan-recommendation-badge");
   const recText = document.getElementById("plan-recommendation-text");
 
@@ -2486,7 +2485,7 @@ function setupPricingPanel() {
   const cardEdu = document.getElementById("card-plan-edu");
   const cardBiz = document.getElementById("card-plan-biz");
 
-  if (!btnCatEdu || !btnCatBiz || !btnReset) return;
+  if (!btnCatEdu || !btnCatBiz) return;
 
   btnCatEdu.addEventListener("click", () => {
     // Style buttons
@@ -2792,14 +2791,23 @@ function setupPricingPanel() {
     recBadge.style.display = "none";
   }
 
-  if (btnReset) {
-    btnReset.addEventListener("click", handleResetPricingTrigger);
-  }
-
-  const cardSmart = document.getElementById("card-plan-smart-fit");
-  if (cardSmart) {
-    cardSmart.style.cursor = "pointer";
-    cardSmart.addEventListener("click", handleResetPricingTrigger);
+  const btnFreeLimit = document.getElementById("btn-current-free-limit");
+  if (btnFreeLimit) {
+    btnFreeLimit.style.cursor = "pointer";
+    btnFreeLimit.addEventListener("click", (e) => {
+      if (e) e.stopPropagation();
+      
+      const user = FirebaseMock.auth.currentUser;
+      const userId = user ? user.id : "u_guest";
+      
+      // Query local storage documents count
+      const docs = JSON.parse(localStorage.getItem("fb_doc_documents") || "[]");
+      const userDocsCount = docs.filter(doc => doc.userId === userId).length;
+      const docsToday = Math.min(userDocsCount, 10);
+      
+      showInfoBox("Daily Usage Status", `You are currently on the Free Plan.\n\nUsage Today: ${docsToday} / 10 documents created.\n\nDaily limits reset automatically every 24 hours. You can upgrade to the Education or Business plans for unlimited access.`, "info");
+      showNotification("Usage Status", `${docsToday} / 10 documents generated today.`);
+    });
   }
 }
 
