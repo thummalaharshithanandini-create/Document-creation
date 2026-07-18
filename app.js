@@ -3680,55 +3680,114 @@ function extractInitialVariables(text, type) {
   return vars;
 }
 
+function parseResponseValues(text, requiredFields) {
+  const extracted = {};
+  const lines = text.split(/[\n,;]+/).map(l => l.trim()).filter(Boolean);
+  
+  // 1. Try key-value matching
+  requiredFields.forEach(field => {
+    const fieldLabelLower = field.label.toLowerCase();
+    const fieldIdLower = field.id.toLowerCase();
+    
+    // Match patterns like "Label: Value" or "Label - Value"
+    const regex = new RegExp(`(?:${fieldLabelLower}|${fieldIdLower}|${field.id})\\s*[:\\-–=]\\s*(.+)`, 'i');
+    const match = text.match(regex);
+    if (match) {
+      extracted[field.id] = match[1].trim();
+    }
+  });
+
+  // 2. Map remaining sequential inputs to remaining empty fields
+  const remainingFields = requiredFields.filter(f => !extracted[f.id]);
+  if (remainingFields.length > 0 && lines.length > 0) {
+    let lineIdx = 0;
+    remainingFields.forEach(field => {
+      // Find a line that is not a key-value pair for a different field
+      while (lineIdx < lines.length) {
+        const line = lines[lineIdx];
+        
+        let isOtherField = false;
+        requiredFields.forEach(otherField => {
+          if (otherField.id !== field.id && (line.toLowerCase().startsWith(otherField.label.toLowerCase()) || line.toLowerCase().startsWith(otherField.id.toLowerCase()))) {
+            if (line.includes(':') || line.includes('-') || line.includes('=')) {
+              isOtherField = true;
+            }
+          }
+        });
+
+        if (!isOtherField) {
+          extracted[field.id] = line;
+          lineIdx++;
+          break;
+        }
+        lineIdx++;
+      }
+    });
+  }
+
+  return extracted;
+}
+
 function processAssistantMessage(text) {
   const t = text.toLowerCase();
 
-  // If user says "yes" or "proceed" when a doc is pre-populated
-  if (assistantState.activeType && assistantState.requiredFields.length === 0 && (t.includes("yes") || t.includes("proceed") || t.includes("generate") || t.includes("sure") || t.includes("ok"))) {
-    triggerAssistantDocGeneration();
-    return;
-  }
-
-  // 1. Check if we are waiting for a specific question reply
-  if (assistantState.waitingForField) {
-    const activeField = assistantState.requiredFields[assistantState.currentFieldIndex];
-    assistantState.gatheredVariables[activeField.id] = text;
-    assistantState.currentFieldIndex++;
-
-    if (assistantState.currentFieldIndex < assistantState.requiredFields.length) {
-      const nextField = assistantState.requiredFields[assistantState.currentFieldIndex];
-      appendAssistantMessage("ai", `Got it. And what is the ${nextField.label}?`);
-    } else {
-      assistantState.waitingForField = false;
-      appendAssistantMessage("ai", "Perfect! I have collected all the required information.");
-      triggerAssistantDocGeneration();
-    }
-    return;
-  }
-
-  // 2. Identify document intent
+  // A. ALWAYS Check for new intent first! (Guideline 1 & 13)
   const intent = detectDocumentIntent(text);
   if (intent) {
+    // Intent override! We reset and switch to the new document flow (Guideline 7 & 13)
     assistantState.activeCategory = intent.category;
     assistantState.activeType = intent.type;
     assistantState.gatheredVariables = extractInitialVariables(text, intent.type);
     
-    // Determine required fields
+    // Get fields
     const allFields = DocumentDB.categories[intent.category].types[intent.type].fields;
     assistantState.requiredFields = allFields.filter(f => !assistantState.gatheredVariables[f.id]);
     assistantState.currentFieldIndex = 0;
 
     if (assistantState.requiredFields.length > 0) {
       assistantState.waitingForField = true;
-      const firstField = assistantState.requiredFields[0];
-      appendAssistantMessage("ai", `Sure! I'll help you generate a professional ${intent.label}. Let's gather a few details. \n\nFirst: What is the ${firstField.label}?`);
+      
+      // Format missing fields as a clean bulleted list (Guideline 10 & 15)
+      const listItems = assistantState.requiredFields.map(f => `• ${f.label}`).join('\n');
+      appendAssistantMessage("ai", `Sure! I'll help you generate a professional ${intent.label}. Please provide:\n\n${listItems}`);
     } else {
-      appendAssistantMessage("ai", `Great! I've pre-populated all information for your ${intent.label}. Ready to generate?`);
+      assistantState.waitingForField = false;
+      appendAssistantMessage("ai", `Perfect! I have all the details for your ${intent.label}. Generating the document now...`);
+      triggerAssistantDocGeneration();
     }
     return;
   }
 
-  // 3. Handle email sending requests
+  // B. Handle confirmation keywords
+  if (assistantState.activeType && assistantState.requiredFields.length === 0 && (t.includes("yes") || t.includes("proceed") || t.includes("generate") || t.includes("sure") || t.includes("ok"))) {
+    triggerAssistantDocGeneration();
+    return;
+  }
+
+  // C. Parse answers for missing fields
+  if (assistantState.waitingForField) {
+    const extracted = parseResponseValues(text, assistantState.requiredFields);
+    
+    // Merge extracted variables
+    Object.assign(assistantState.gatheredVariables, extracted);
+    
+    // Recalculate remaining missing fields
+    const allFields = DocumentDB.categories[assistantState.activeCategory].types[assistantState.activeType].fields;
+    assistantState.requiredFields = allFields.filter(f => !assistantState.gatheredVariables[f.id]);
+
+    if (assistantState.requiredFields.length > 0) {
+      // List remaining missing fields as bullet points (Guideline 12 & 15)
+      const listItems = assistantState.requiredFields.map(f => `• ${f.label}`).join('\n');
+      appendAssistantMessage("ai", `Got it. I still need the following details:\n\n${listItems}`);
+    } else {
+      assistantState.waitingForField = false;
+      appendAssistantMessage("ai", "Perfect! I have collected all the required details.");
+      triggerAssistantDocGeneration();
+    }
+    return;
+  }
+
+  // D. Handle email sending requests
   if (t.includes("email") || t.includes("send")) {
     const clientName = assistantState.gatheredVariables.clientName || assistantState.gatheredVariables.clientContact || assistantState.gatheredVariables.targetClient || "Client";
     appendAssistantMessage("ai", `Sure! Sending the document PDF draft to ${clientName} via email...`);
@@ -3738,8 +3797,8 @@ function processAssistantMessage(text) {
     return;
   }
 
-  // 4. Default fallback greeting
-  appendAssistantMessage("ai", "I'm not quite sure which document you'd like to make. Please tell me something like 'Create an invoice', 'Generate a business proposal', or 'Write an internship certificate'.");
+  // E. Fallback
+  appendAssistantMessage("ai", "Hello! I am your DocGenius AI Assistant. Please let me know what document you'd like to create, for example: 'Create a GST invoice' or 'Write an internship certificate'.");
 }
 
 function triggerAssistantDocGeneration() {
@@ -3757,7 +3816,7 @@ function triggerAssistantDocGeneration() {
     </div>
     <div class="chat-loading-status-card">
       <div class="chat-loading-spinner"></div>
-      <div id="chat-loading-status-text">🤖 AI is analyzing your request...</div>
+      <div id="chat-loading-status-text">Understanding your request...</div>
     </div>
   `;
   thread.appendChild(loadingRow);
@@ -3766,11 +3825,11 @@ function triggerAssistantDocGeneration() {
   const statusText = document.getElementById("chat-loading-status-text");
 
   setTimeout(() => {
-    if (statusText) statusText.innerText = "Generating professional document...";
+    if (statusText) statusText.innerText = "Preparing the document...";
   }, 1000);
 
   setTimeout(() => {
-    if (statusText) statusText.innerText = "Almost Done...";
+    if (statusText) statusText.innerText = "Almost done...";
   }, 2000);
 
   setTimeout(() => {
@@ -3794,13 +3853,20 @@ function triggerAssistantDocGeneration() {
     const varsString = JSON.stringify(gathered).replace(/"/g, '&quot;');
 
     const htmlContent = `
-      <strong>✨ Your Document is Ready!</strong>
-      <p style="margin: 6px 0 12px 0; font-size: 12.5px; color: var(--on-surface-variant);">
+      <strong>✅ Your document is ready!</strong>
+      <p style="margin: 6px 0 10px 0; font-size: 12px; color: var(--on-surface-variant);">
         I have successfully generated a professional ${docLabel} using your conversational inputs.
       </p>
-      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-        <button class="calc-btn" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0;" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}')">View Preview</button>
-        <button class="calc-btn" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}', true)">Download PDF</button>
+      <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 320px;">
+        <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0;" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}')">👁 Preview</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%;">
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}', true)">📥 Download PDF</button>
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="loadFloatWordDoc('${category}', '${type}', '${varsString}')">📄 Download Word</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%;">
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="triggerFloatCloudSave()">☁ Save to Cloud</button>
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="triggerFloatDigitalSignature()">✍ Digital Signature</button>
+        </div>
       </div>
     `;
 
@@ -4112,21 +4178,54 @@ function toggleFloatMic() {
 function processFloatMessage(text) {
   const t = text.toLowerCase();
 
-  // If user says "yes" or "proceed" when a doc is pre-populated
+  // A. ALWAYS Check for new intent first! (Guideline 1 & 13)
+  const intent = detectDocumentIntent(text);
+  if (intent) {
+    // Intent override! Reset and switch to new document flow
+    floatingState.activeCategory = intent.category;
+    floatingState.activeType = intent.type;
+    floatingState.gatheredVariables = extractInitialVariables(text, intent.type);
+    
+    // Get fields
+    const allFields = DocumentDB.categories[intent.category].types[intent.type].fields;
+    floatingState.requiredFields = allFields.filter(f => !floatingState.gatheredVariables[f.id]);
+    floatingState.currentFieldIndex = 0;
+
+    if (floatingState.requiredFields.length > 0) {
+      floatingState.waitingForField = true;
+      
+      // Format missing fields as a clean bulleted list (Guideline 10 & 15)
+      const listItems = floatingState.requiredFields.map(f => `• ${f.label}`).join('\n');
+      appendFloatMessage("ai", `Sure! I'll help you generate a professional ${intent.label}. Please provide:\n\n${listItems}`);
+    } else {
+      floatingState.waitingForField = false;
+      appendFloatMessage("ai", `Perfect! I have all the details for your ${intent.label}. Generating the document now...`);
+      triggerFloatDocGeneration();
+    }
+    return;
+  }
+
+  // B. Handle confirmation keywords
   if (floatingState.activeType && floatingState.requiredFields.length === 0 && (t.includes("yes") || t.includes("proceed") || t.includes("generate") || t.includes("sure") || t.includes("ok"))) {
     triggerFloatDocGeneration();
     return;
   }
 
-  // 1. Check if we are waiting for a specific question reply
+  // C. Parse answers for missing fields
   if (floatingState.waitingForField) {
-    const activeField = floatingState.requiredFields[floatingState.currentFieldIndex];
-    floatingState.gatheredVariables[activeField.id] = text;
-    floatingState.currentFieldIndex++;
+    const extracted = parseResponseValues(text, floatingState.requiredFields);
+    
+    // Merge extracted variables
+    Object.assign(floatingState.gatheredVariables, extracted);
+    
+    // Recalculate remaining missing fields
+    const allFields = DocumentDB.categories[floatingState.activeCategory].types[floatingState.activeType].fields;
+    floatingState.requiredFields = allFields.filter(f => !floatingState.gatheredVariables[f.id]);
 
-    if (floatingState.currentFieldIndex < floatingState.requiredFields.length) {
-      const nextField = floatingState.requiredFields[floatingState.currentFieldIndex];
-      appendFloatMessage("ai", `Got it. And what is the ${nextField.label}?`);
+    if (floatingState.requiredFields.length > 0) {
+      // List remaining missing fields as bullet points (Guideline 12 & 15)
+      const listItems = floatingState.requiredFields.map(f => `• ${f.label}`).join('\n');
+      appendFloatMessage("ai", `Got it. I still need the following details:\n\n${listItems}`);
     } else {
       floatingState.waitingForField = false;
       appendFloatMessage("ai", "Perfect! I have collected all the required details.");
@@ -4135,29 +4234,7 @@ function processFloatMessage(text) {
     return;
   }
 
-  // 2. Identify document intent
-  const intent = detectDocumentIntent(text);
-  if (intent) {
-    floatingState.activeCategory = intent.category;
-    floatingState.activeType = intent.type;
-    floatingState.gatheredVariables = extractInitialVariables(text, intent.type);
-    
-    // Determine required fields
-    const allFields = DocumentDB.categories[intent.category].types[intent.type].fields;
-    floatingState.requiredFields = allFields.filter(f => !floatingState.gatheredVariables[f.id]);
-    floatingState.currentFieldIndex = 0;
-
-    if (floatingState.requiredFields.length > 0) {
-      floatingState.waitingForField = true;
-      const firstField = floatingState.requiredFields[0];
-      appendFloatMessage("ai", `Sure! I'll help you generate a professional ${intent.label}. Please provide:\n\n${firstField.label}`);
-    } else {
-      appendFloatMessage("ai", `Great! I've pre-populated all information for your ${intent.label}. Ready to generate?`);
-    }
-    return;
-  }
-
-  // 3. Handle cloud saves & signatures
+  // D. Handle cloud saves & signatures
   if (t.includes("cloud") || t.includes("save")) {
     appendFloatMessage("ai", "Saving document draft to your cloud storage partition... Success! ☁️");
     return;
@@ -4170,12 +4247,12 @@ function processFloatMessage(text) {
 
   if (t.includes("email") || t.includes("send")) {
     const clientName = floatingState.gatheredVariables.clientName || floatingState.gatheredVariables.clientContact || floatingState.gatheredVariables.targetClient || "Client";
-    appendFloatMessage("ai", `Sure! Dispatching the PDF invoice document draft to ${clientName}... Done!`);
+    appendFloatMessage("ai", `Sure! Dispatching the PDF document draft to ${clientName}... Done!`);
     return;
   }
 
-  // 4. Default fallback greeting
-  appendFloatMessage("ai", "I can help you build invoices, quotation plans, certificates, agreements, proposals, and offer letters. Tell me what you'd like to create!");
+  // E. Fallback
+  appendFloatMessage("ai", "Hello! I am your DocGenius AI Assistant. Please let me know what document you'd like to create, for example: 'Create a GST invoice' or 'Write an internship certificate'.");
 }
 
 function triggerFloatDocGeneration() {
@@ -4230,17 +4307,17 @@ function triggerFloatDocGeneration() {
     const htmlContent = `
       <strong>✅ Your document is ready!</strong>
       <p style="margin: 6px 0 10px 0; font-size: 12px; color: var(--on-surface-variant);">
-        Document "${docLabel}" successfully compiled using your inputs.
+        I have successfully generated a professional ${docLabel} using your conversational inputs.
       </p>
       <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
         <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0;" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}')">👁 Preview</button>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%;">
-          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}', true)">📥 PDF</button>
-          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="loadFloatWordDoc('${category}', '${type}', '${varsString}')">📄 Word</button>
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="loadAssistantGeneratedDoc('${category}', '${type}', '${varsString}', true)">📥 Download PDF</button>
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="loadFloatWordDoc('${category}', '${type}', '${varsString}')">📄 Download Word</button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%;">
-          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="triggerFloatCloudSave()">☁ Cloud</button>
-          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="triggerFloatDigitalSignature()">✍ Sign</button>
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="triggerFloatCloudSave()">☁ Save to Cloud</button>
+          <button class="calc-btn" style="width: 100%; padding: 6px 12px; font-size: 11.5px; margin: 0; background: transparent; border: 1px solid var(--outline);" onclick="triggerFloatDigitalSignature()">✍ Digital Signature</button>
         </div>
       </div>
     `;
