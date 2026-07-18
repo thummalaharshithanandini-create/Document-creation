@@ -751,6 +751,12 @@ Critical Formatting Rules:
         const cost = parseFloat(variables.projectCost || "50000").toLocaleString('en-IN');
 
         let execSummary = `This proposal outlines the strategy, terms, and cost projections prepared by ${brandName} to deploy the "${title}" project for ${client}. Our objective is to deliver a highly optimized, efficient, and robust solution tailored to your operational requirements.`;
+        if (tone === "friendly") {
+          execSummary = `We're so excited to share this project plan for "${title}" with the team at ${client}! At ${brandName}, our goal is to build a fun, responsive, and incredibly polished solution that fits your everyday needs like a glove.`;
+        } else if (tone === "formal") {
+          execSummary = `This document constitutes a formal business proposal outlining the strategic framework, legal provisions, and budgetary estimates compiled by ${brandName} for the benefit of ${client} regarding the execution of the "${title}" project.`;
+        }
+
         const langLower = (language || "").toLowerCase();
         if (langLower === "telugu") {
           execSummary = `ఈ ప్రతిపాదన ${client} కోసం "${title}" ప్రాజెక్ట్‌ను అమలు చేయడానికి ${brandName} సిద్ధం చేసిన వ్యూహం, నిబంధనలు మరియు వ్యయ అంచనాలను వివరిస్తుంది. మీ కార్యాచరణ అవసరాలకు అనుగుణంగా అత్యంత ఆప్టిమైజ్ చేయబడిన, సమర్థమైన మరియు బలమైన పరిష్కారాన్ని అందించడమే మా లక్ష్యం.`;
@@ -967,6 +973,13 @@ ${customClause}
 
         let introText = `On behalf of <strong>${brandName}</strong>, we are pleased to offer you the position of <strong>${role}</strong>. We were highly impressed with your credentials and look forward to welcoming you to our tech engineering division.`;
         let acceptText = `Please review and sign this offer letter within 3 business days to signify your acceptance. We look forward to a mutually rewarding association.`;
+        if (tone === "friendly") {
+          introText = `We are absolutely thrilled to invite you to join the <strong>${brandName}</strong> team as our new <strong>${role}</strong>! Your skills and personality stood out during the interviews, and we can't wait to build great things together.`;
+          acceptText = `If you're as excited as we are, please review and sign this letter within 3 business days. Welcome aboard!`;
+        } else if (tone === "formal") {
+          introText = `On behalf of <strong>${brandName}</strong>, we hereby extend a formal offer of employment for the position of <strong>${role}</strong>. Your professional qualifications satisfy our institutional standards, and we anticipate a productive tenure.`;
+          acceptText = `Execution of your signature on this document within three (3) business days is required to validate this covenant.`;
+        }
         const langLower = (language || "").toLowerCase();
         if (langLower === "telugu") {
           introText = `<strong>${brandName}</strong> తరపున, మీకు <strong>${role}</strong> ఉద్యోగాన్ని ఆఫర్ చేయడానికి మేము సంతోషిస్తున్నాము. మీ ఆధారాలు మమ్మల్ని ఎంతగానో ఆకట్టుకున్నాయి మరియు మా విభాగంలోకి మిమ్మల్ని స్వాగతించడానికి మేము ఎదురుచూస్తున్నాము.`;
@@ -1154,12 +1167,19 @@ ${customClause}
         const exp = variables.experienceYears || "3";
         const skills = variables.coreSkills || "HTML, CSS, JS";
 
+        let summaryText = `Dedicated and results-driven ${role} with ${exp} years of comprehensive industry experience. Passionate about engineering high-performance client solutions, building accessible interfaces, and deploying clean code.`;
+        if (tone === "friendly") {
+          summaryText = `Hi! I'm a passionate and highly collaborative ${role} with a track record of ${exp} years of creating awesome user-centric software. I love tackling complex visual and engineering puzzles, styling interfaces, and writing clean, maintainable code.`;
+        } else if (tone === "formal") {
+          summaryText = `Highly disciplined and analytical ${role} possessing ${exp} years of verified experience in commercial software development. Demonstrated expertise in technical architecture alignment, user interface engineering, and system performance optimizations.`;
+        }
+
         return `<h1>${name}</h1>
 <p><strong>Role Target:</strong> ${role} | <strong>Experience:</strong> ${exp} Years<br><strong>Contact:</strong> ${email} | ${phone}</p>
 <hr style="border-top: 1.5px solid #cbd5e1; margin-bottom: 15px;">
 
 <h2>Professional Summary</h2>
-<p>Dedicated and results-driven ${role} with ${exp} years of comprehensive industry experience. Passionate about engineering high-performance client solutions, building accessible interfaces, and deploying clean code.</p>
+<p>${summaryText}</p>
 
 <h2>Core Competencies & Skills</h2>
 <p>${skills.split(',').map(s => `<span style="display:inline-block; padding:3px 8px; background:#f1f5f9; border-radius:5px; margin:0 5px 5px 0; font-size:11px;">${s.trim()}</span>`).join('')}</p>
@@ -1186,6 +1206,16 @@ ${customClause}
         const role = variables.targetJob || "Designation";
         const achieve = variables.highlightAchievement || "Built custom solutions.";
 
+        let introPara = `I am writing to express my strong interest in the <strong>${role}</strong> opening at <strong>${company}</strong>. With a proven record in software engineering and layout systems design, I am confident in my ability to add significant value to your technology department.`;
+        let conclusionPara = `I look forward to discussing how my experience fits the goals of ${company}. Thank you for your time and consideration.`;
+        if (tone === "friendly") {
+          introPara = `Hey there! I was absolutely thrilled to find the <strong>${role}</strong> opening at <strong>${company}</strong>. I've spent the last few years building cool web stuff and I'd love to bring my energy and layout styling expertise to your team.`;
+          conclusionPara = `I'd love to chat and share more about my design achievements. Thank you so much for checking out my application!`;
+        } else if (tone === "formal") {
+          introPara = `I am writing to formally submit my candidacy for the position of <strong>${role}</strong> currently vacant at <strong>${company}</strong>. Having acquired extensive experience in layout engineering, I am confident in my capacity to satisfy the responsibilities of this office.`;
+          conclusionPara = `I remain at your disposal for a formal interview at your earliest convenience. Thank you for your review and consideration.`;
+        }
+
         return `<h1>COVER LETTER</h1>
 <p><strong>Sender:</strong> ${name}<br><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
 <hr style="border-top: 1.5px solid #cbd5e1; margin-bottom: 15px;">
@@ -1193,11 +1223,11 @@ ${customClause}
 <p><strong>To,</strong><br>Hiring Committee<br>${company}</p>
 
 <p>Dear Hiring Team,</p>
-<p>I am writing to express my strong interest in the <strong>${role}</strong> opening at <strong>${company}</strong>. With a proven record in software engineering and layout systems design, I am confident in my ability to add significant value to your technology department.</p>
+<p>${introPara}</p>
 
 <p>During my career, I have constantly worked to bridge design and engineering gaps. A particular highlight of my experience includes: <em>${achieve}</em>. I thrive in collaborative environments where performance, accessibility, and clean code are prioritized.</p>
 
-<p>I look forward to discussing how my experience fits the goals of ${company}. Thank you for your time and consideration.</p>
+<p>${conclusionPara}</p>
 
 <p>Sincerely,</p>
 <p><strong>${name}</strong></p>`;
