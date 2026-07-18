@@ -363,6 +363,140 @@ Critical Formatting Rules:
     if (!language) return html;
     const langKey = language.toLowerCase();
     
+    const menuTranslations = {
+      telugu: {
+        "Traditional Indian Menu": "సాంప్రదాయ భారతీయ మెనూ",
+        "Traditional Menu": "సాంప్రదాయ మెనూ",
+        "Vegetarian Delights": "శాకాహార వంటకాలు",
+        "Vegetarian Pickles": "శాకాహార పచ్చళ్లు",
+        "Non-Vegetarian Specialties": "మాంసాహార ప్రత్యేకతలు",
+        "Non-Vegetarian Pickles": "మాంసాహార పచ్చళ్లు",
+        "Vegetarian Preserves": "శాకాహార నిల్వలు",
+        "Premium Non-Vegetarian": "ప్రీమియం మాంసాహార పచ్చళ్లు",
+        "Veg Specialties": "శాకాహార ప్రత్యేకతలు",
+        "Non-Veg Specialties": "మాంసాహార ప్రత్యేకతలు",
+        "Thank You...": "ధన్యవాదాలు...",
+        "Mango": "మామిడికాయ",
+        "Lemon": "నిమ్మకాయ",
+        "Tomato": "టమోటా",
+        "Gongura": "గోంగూర",
+        "Amla": "ఉసిరికాయ",
+        "Garlic": "వెల్లుల్లి",
+        "Ginger": "అల్లం",
+        "Chicken": "చికెన్",
+        "Mutton": "మటన్",
+        "Prawns": "రొయ్యలు",
+        "Fish": "చేపలు"
+      },
+      hindi: {
+        "Traditional Indian Menu": "पारंपरिक भारतीय मेनू",
+        "Traditional Menu": "पारंपरिक मेनू",
+        "Vegetarian Delights": "शाकाहारी व्यंजन",
+        "Vegetarian Pickles": "शाकाहारी अचार",
+        "Non-Vegetarian Specialties": "मांसाहारी विशेषताएं",
+        "Non-Vegetarian Pickles": "मांसाहारी अचार",
+        "Vegetarian Preserves": "शाकाहारी अचार विशेष",
+        "Premium Non-Vegetarian": "प्रीमियम मांसाहारी",
+        "Veg Specialties": "शाकाहारी विशेष",
+        "Non-Veg Specialties": "मांसाहारी विशेष",
+        "Thank You...": "धन्यवाद...",
+        "Mango": "आम",
+        "Lemon": "नींबू",
+        "Tomato": "टमाटर",
+        "Gongura": "गोंगूरा",
+        "Amla": "आंवला",
+        "Garlic": "लहसुन",
+        "Ginger": "अदरक",
+        "Chicken": "चिकन",
+        "Mutton": "मटन",
+        "Prawns": "झींगा",
+        "Fish": "मछली"
+      },
+      tamil: {
+        "Traditional Indian Menu": "பாரம்பரிய இந்திய மெனு",
+        "Traditional Menu": "பாரம்பரிய மெனு",
+        "Vegetarian Delights": "சைவ உணவுகள்",
+        "Vegetarian Pickles": "சைவ ஊறுகாய்",
+        "Non-Vegetarian Specialties": "அசைவ சிறப்பு உணவுகள்",
+        "Non-Vegetarian Pickles": "அசைவ ஊறுகாய்",
+        "Vegetarian Preserves": "சைவ ஊறுகாய் வகைகள்",
+        "Premium Non-Vegetarian": "பிரீமியம் அசைவ ஊறுகாய்",
+        "Veg Specialties": "சைவ உணவுகள்",
+        "Non-Veg Specialties": "அசைவ உணவுகள்",
+        "Thank You...": "நன்றி...",
+        "Mango": "மாங்காய்",
+        "Lemon": "எலுமிச்சை",
+        "Tomato": "தக்காளி",
+        "Gongura": "புளிச்சக்கீரை (கோங்குரா)",
+        "Amla": "நெல்லிக்காய்",
+        "Garlic": "பூண்டு",
+        "Ginger": "இஞ்சி",
+        "Chicken": "கோழி (சிக்கன்)",
+        "Mutton": "ஆட்டிறைச்சி (மட்டன்)",
+        "Prawns": "இறால்",
+        "Fish": "மீன்"
+      },
+      spanish: {
+        "Traditional Indian Menu": "Menú Tradicional Indio",
+        "Traditional Menu": "Menú Tradicional",
+        "Vegetarian Delights": "Delicias Vegetarianas",
+        "Vegetarian Pickles": "Pepinillos Vegetarianos",
+        "Non-Vegetarian Specialties": "Especialidades No Vegetarianas",
+        "Non-Vegetarian Pickles": "Pepinillos No Vegetarianos",
+        "Vegetarian Preserves": "Conservas Vegetarianas",
+        "Premium Non-Vegetarian": "No Vegetariano Premium",
+        "Veg Specialties": "Especialidades Vegetarianas",
+        "Non-Veg Specialties": "Especialidades No Veg",
+        "Thank You...": "Gracias...",
+        "Mango": "Mango",
+        "Lemon": "Limón",
+        "Tomato": "Tomate",
+        "Gongura": "Gongura",
+        "Amla": "Amla",
+        "Garlic": "Ajo",
+        "Ginger": "Jengibre",
+        "Chicken": "Pollo",
+        "Mutton": "Cordero",
+        "Prawns": "Langostinos",
+        "Fish": "Pescado"
+      },
+      french: {
+        "Traditional Indian Menu": "Menu Indien Traditionnel",
+        "Traditional Menu": "Menu Traditionnel",
+        "Vegetarian Delights": "Délices Végétariens",
+        "Vegetarian Pickles": "Cornichons Végétariens",
+        "Non-Vegetarian Specialties": "Spécialités Non Végétariennes",
+        "Non-Vegetarian Pickles": "Cornichons Non Végétariens",
+        "Vegetarian Preserves": "Conserves Végétariennes",
+        "Premium Non-Vegetarian": "Non Végétarien Premium",
+        "Veg Specialties": "Spécialités Végétariennes",
+        "Non-Veg Specialties": "Spécialités Non Végétariennes",
+        "Thank You...": "Merci...",
+        "Mango": "Mangue",
+        "Lemon": "Citron",
+        "Tomato": "Tomate",
+        "Gongura": "Gongura",
+        "Amla": "Amla",
+        "Garlic": "Ail",
+        "Ginger": "Gingembre",
+        "Chicken": "Poulet",
+        "Mutton": "Mouton",
+        "Prawns": "Crevettes",
+        "Fish": "Poisson"
+      }
+    };
+
+    let translated = html;
+    
+    // Apply menu specific translations first if they exist
+    if (menuTranslations[langKey]) {
+      for (const [key, value] of Object.entries(menuTranslations[langKey])) {
+        const escapedKey = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp(escapedKey, 'g');
+        translated = translated.replace(regex, value);
+      }
+    }
+    
     const translations = {
       telugu: {
         "TAX INVOICE": "పన్ను ఇన్వాయిస్",
@@ -549,9 +683,8 @@ Critical Formatting Rules:
     };
 
     const dict = translations[langKey];
-    if (!dict) return html;
+    if (!dict) return translated;
 
-    let translated = html;
     for (const [key, value] of Object.entries(dict)) {
       const escapedKey = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
       const regex = new RegExp(escapedKey, 'g');
