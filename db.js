@@ -1239,6 +1239,13 @@ ${customClause}
         const contactPhone = variables.contactPhone || "+91 9652286824";
         const contactEmail = variables.contactEmail || "deepikapickles26@gmail.com";
         
+        // Dynamically rotate menu theme style from localStorage to generate a brand new layout structure every single time
+        const themes = ['theme_royal', 'theme_sage', 'theme_charcoal'];
+        let activeTheme = localStorage.getItem('mock_menu_theme') || 'theme_royal';
+        let currentIdx = themes.indexOf(activeTheme);
+        let nextIdx = (currentIdx + 1) % themes.length;
+        localStorage.setItem('mock_menu_theme', themes[nextIdx]);
+
         let vegRows = "";
         if (variables.vegItems) {
           variables.vegItems.split(';').forEach(itemStr => {
@@ -1248,14 +1255,36 @@ ${customClause}
               const enName = nameParts[0].trim();
               const telName = nameParts[1] ? nameParts[1].trim() : "";
               const price = parts[1].trim();
+              
+              // Apply colors based on theme
+              let textColor = "#ffffff";
+              let nameColor = "#ffffff";
+              let telColor = "#dfa04c";
+              let priceColor = "#f3ba1c";
+              let dottedColor = "rgba(255, 255, 255, 0.25)";
+
+              if (activeTheme === 'theme_sage') {
+                textColor = "#2f4835";
+                nameColor = "#1e2f23";
+                telColor = "#4a7c59";
+                priceColor = "#b87d4b";
+                dottedColor = "rgba(47, 72, 53, 0.25)";
+              } else if (activeTheme === 'theme_charcoal') {
+                textColor = "#e3e3e3";
+                nameColor = "#ffffff";
+                telColor = "#e05a47";
+                priceColor = "#d8b056";
+                dottedColor = "rgba(227, 227, 227, 0.2)";
+              }
+
               vegRows += `
-              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8.5px; font-size: 10px; font-weight: 700; color: #ffffff;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8.5px; font-size: 10px; font-weight: 700; color: ${textColor};">
                 <div style="display: flex; flex-direction: column; max-width: 82%;">
-                  <span style="font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 800; color: #ffffff;">${enName}</span>
-                  ${telName ? `<span style="font-family: 'Noto Serif Telugu', serif; font-size: 9px; color: #dfa04c; margin-top: 0.5px;">${telName}</span>` : ""}
+                  <span style="font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 800; color: ${nameColor};">${enName}</span>
+                  ${telName ? `<span style="font-family: 'Noto Serif Telugu', serif; font-size: 9px; color: ${telColor}; margin-top: 0.5px;">${telName}</span>` : ""}
                 </div>
-                <span style="flex-grow: 1; border-bottom: 1.2px dotted rgba(255, 255, 255, 0.25); margin-bottom: 3.5px; margin-left: 5px; margin-right: 5px;"></span>
-                <span style="font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; color: #f3ba1c;">${price}</span>
+                <span style="flex-grow: 1; border-bottom: 1.2px dotted ${dottedColor}; margin-bottom: 3.5px; margin-left: 5px; margin-right: 5px;"></span>
+                <span style="font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; color: ${priceColor};">${price}</span>
               </div>`;
             }
           });
@@ -1270,176 +1299,253 @@ ${customClause}
               const enName = nameParts[0].trim();
               const telName = nameParts[1] ? nameParts[1].trim() : "";
               const price = parts[1].trim();
+
+              // Apply colors based on theme
+              let textColor = "#ffffff";
+              let nameColor = "#ffffff";
+              let telColor = "#dfa04c";
+              let priceColor = "#f3ba1c";
+              let dottedColor = "rgba(255, 255, 255, 0.25)";
+
+              if (activeTheme === 'theme_sage') {
+                textColor = "#2f4835";
+                nameColor = "#1e2f23";
+                telColor = "#4a7c59";
+                priceColor = "#b87d4b";
+                dottedColor = "rgba(47, 72, 53, 0.25)";
+              } else if (activeTheme === 'theme_charcoal') {
+                textColor = "#e3e3e3";
+                nameColor = "#ffffff";
+                telColor = "#e05a47";
+                priceColor = "#d8b056";
+                dottedColor = "rgba(227, 227, 227, 0.2)";
+              }
+
               nonVegRows += `
-              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8.5px; font-size: 10px; font-weight: 700; color: #ffffff;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8.5px; font-size: 10px; font-weight: 700; color: ${textColor};">
                 <div style="display: flex; flex-direction: column; max-width: 82%;">
-                  <span style="font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 800; color: #ffffff;">${enName}</span>
-                  ${telName ? `<span style="font-family: 'Noto Serif Telugu', serif; font-size: 9px; color: #dfa04c; margin-top: 0.5px;">${telName}</span>` : ""}
+                  <span style="font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 800; color: ${nameColor};">${enName}</span>
+                  ${telName ? `<span style="font-family: 'Noto Serif Telugu', serif; font-size: 9px; color: ${telColor}; margin-top: 0.5px;">${telName}</span>` : ""}
                 </div>
-                <span style="flex-grow: 1; border-bottom: 1.2px dotted rgba(255, 255, 255, 0.25); margin-bottom: 3.5px; margin-left: 5px; margin-right: 5px;"></span>
-                <span style="font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; color: #f3ba1c;">${price}</span>
+                <span style="flex-grow: 1; border-bottom: 1.2px dotted ${dottedColor}; margin-bottom: 3.5px; margin-left: 5px; margin-right: 5px;"></span>
+                <span style="font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; color: ${priceColor};">${price}</span>
               </div>`;
             }
           });
         }
 
-        return `<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Serif+Telugu:wght@500;700&family=Outfit:wght@400;500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
-        
-        <style>
-          /* Override parent A4 sheet padding and backgrounds to match the food point layout exactly */
-          .a4-sheet-paper {
-            padding: 0 !important;
-            background-color: #1a0206 !important;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M40 0 L40 80 M0 40 L80 40' stroke='%23f3ba1c' stroke-opacity='0.03' stroke-width='1.2'/%3E%3C/svg%3E") !important;
-            background-repeat: repeat !important;
-          }
-        </style>
-
-        <div class="food-point-wrapper" style="
-          --primary-yellow: #f3ba1c;
-          --maroon: #58081a;
-          --maroon-dark: #36030e;
-          --gold: #d4af37;
-          --white: #ffffff;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          box-sizing: border-box;
-          overflow: hidden;
-          background-color: var(--maroon);
-          border: 6px solid var(--primary-yellow);
-          position: relative;
-        ">
-          <!-- Top Half Spread -->
-          <div style="height: 350px; display: grid; grid-template-columns: 50% 50%; position: relative; box-sizing: border-box;">
-            <!-- Left Top Panel (Yellow Cover) -->
-            <div style="
-              background-color: var(--primary-yellow);
-              padding: 20px;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              align-items: center;
-              color: var(--maroon-dark);
-              position: relative;
-              box-sizing: border-box;
-            ">
-              <div style="
-                background-color: var(--maroon);
-                color: var(--primary-yellow);
-                width: calc(100% + 40px);
-                margin-top: -20px;
-                padding: 15px 10px;
-                text-align: center;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-              ">
-                <h2 style="font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; line-height: 1.0; margin: 0;">DEEPIKA</h2>
-                <p style="font-family: 'Great Vibes', cursive; font-size: 28px; color: var(--white); margin: -4px 0 0 0; line-height: 1.0;">Food Point</p>
+        // =====================================
+        // LAYOUT 1: ROYAL GOLD & MAROON SPLIT
+        // =====================================
+        if (activeTheme === 'theme_royal') {
+          return `<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Serif+Telugu:wght@500;700&family=Outfit:wght@400;500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
+          <style>
+            .a4-sheet-paper {
+              padding: 0 !important;
+              background-color: #1a0206 !important;
+              background-repeat: repeat !important;
+            }
+          </style>
+          <div class="food-point-wrapper" style="
+            --primary-yellow: #f3ba1c;
+            --maroon: #58081a;
+            --maroon-dark: #36030e;
+            --gold: #d4af37;
+            --white: #ffffff;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background-color: var(--maroon);
+            border: 6px solid var(--primary-yellow);
+            position: relative;
+          ">
+            <div style="height: 350px; display: grid; grid-template-columns: 50% 50%; position: relative; box-sizing: border-box;">
+              <div style="background-color: var(--primary-yellow); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; color: var(--maroon-dark); position: relative; box-sizing: border-box;">
+                <div style="background-color: var(--maroon); color: var(--primary-yellow); width: calc(100% + 40px); margin-top: -20px; padding: 15px 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                  <h2 style="font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; line-height: 1.0; margin: 0;">${restaurantName.split(' ')[0]}</h2>
+                  <p style="font-family: 'Great Vibes', cursive; font-size: 28px; color: var(--white); margin: -4px 0 0 0; line-height: 1.0;">${restaurantName.split(' ').slice(1).join(' ') || 'Food Point'}</p>
+                </div>
+                <div style="width: 155px; height: 155px; border-radius: 50%; border: 4px solid var(--maroon); overflow: hidden; box-shadow: 0 6px 15px rgba(0,0,0,0.25); background: white; margin: 10px 0;">
+                  <img src="mango_pickle.png" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="display: flex; gap: 6px; width: 100%; justify-content: center; margin-top: 5px;">
+                  <span style="background-color: var(--maroon); color: var(--primary-yellow); font-size: 8px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px;">Veg</span>
+                  <span style="background-color: var(--maroon); color: var(--primary-yellow); font-size: 8px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px;">Non-Veg</span>
+                  <span style="background-color: var(--maroon); color: var(--primary-yellow); font-size: 8px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px;">Organic</span>
+                </div>
               </div>
-              
-              <div style="
-                width: 155px;
-                height: 155px;
-                border-radius: 50%;
-                border: 4px solid var(--maroon);
-                overflow: hidden;
-                box-shadow: 0 6px 15px rgba(0,0,0,0.25);
-                background: white;
-                margin: 10px 0;
-              ">
+              <div style="background-color: var(--maroon-dark); padding: 25px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; position: relative; box-sizing: border-box;">
+                <div style="position: relative; width: 260px; height: 160px; margin-top: 15px;">
+                  <div style="width: 80px; height: 80px; border: 3px solid var(--primary-yellow); box-shadow: 0 5px 12px rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; position: absolute; top: 0; left: 10px; transform: rotate(-6deg);"><img src="mango_pickle.png" style="width:100%; height:100%; object-fit:cover;"></div>
+                  <div style="width: 80px; height: 80px; border: 3px solid var(--white); box-shadow: 0 5px 12px rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; position: absolute; top: 30px; left: 90px; transform: rotate(4deg);"><img src="lemon_pickle.png" style="width:100%; height:100%; object-fit:cover;"></div>
+                  <div style="width: 80px; height: 80px; border: 3px solid var(--primary-yellow); box-shadow: 0 5px 12px rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; position: absolute; top: 60px; left: 170px; transform: rotate(-4deg);"><img src="chicken_pickle.png" style="width:100%; height:100%; object-fit:cover;"></div>
+                </div>
+                <div style="font-family: 'Great Vibes', cursive; font-size: 34px; color: var(--primary-yellow); text-align: center; margin-bottom: 5px;">Thank You...</div>
+              </div>
+            </div>
+            <div style="height: 8px; background-color: var(--primary-yellow); width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>
+            <div style="flex: 1; display: grid; grid-template-columns: 46% 54%; gap: 20px; padding: 25px 20px 10px 20px; box-sizing: border-box; overflow: hidden;">
+              <div style="display: flex; flex-direction: column;">
+                <div style="background-color: var(--primary-yellow); color: var(--maroon-dark); font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; padding: 6px 12px; border-radius: 30px; text-align: center; margin-bottom: 15px; box-shadow: 0 3px 8px rgba(0,0,0,0.15);">Vegetarian Pickles</div>
+                <div style="display: flex; flex-direction: column; justify-content: space-evenly; flex: 1;">
+                  ${vegRows}
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                <div style="background-color: var(--primary-yellow); color: var(--maroon-dark); font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; padding: 6px 12px; border-radius: 30px; text-align: center; margin-bottom: 15px; box-shadow: 0 3px 8px rgba(0,0,0,0.15);">Non-Vegetarian Pickles</div>
+                <div style="display: flex; height: 100%; justify-content: space-between; flex: 1;">
+                  <div style="flex: 1; margin-right: 15px; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                    <div style="display: flex; flex-direction: column; justify-content: space-evenly; flex: 1;">
+                      ${nonVegRows}
+                    </div>
+                    <div style="flex-grow: 1;"></div>
+                  </div>
+                  <div style="width: 75px; display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+                    <div style="width: 75px; height: 75px; border: 2px solid var(--primary-yellow); border-radius: 4px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"><img src="mango_pickle.png" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                    <div style="width: 75px; height: 75px; border: 2px solid var(--primary-yellow); border-radius: 4px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"><img src="lemon_pickle.png" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                    <div style="width: 75px; height: 75px; border: 2px solid var(--primary-yellow); border-radius: 4px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"><img src="chicken_pickle.png" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="background-color: var(--primary-yellow); color: var(--maroon-dark); padding: 10px 15px; text-align: center; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;">
+              M. 5th Avenue, Hyderabad, India | ${contactEmail} | Order Now: <span style="color: var(--maroon);">${contactPhone}</span>
+            </div>
+          </div>`;
+        }
+
+        // =====================================
+        // LAYOUT 2: MODERN BOUTIQUE SAGE GREEN
+        // =====================================
+        if (activeTheme === 'theme_sage') {
+          return `<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Noto+Serif+Telugu:wght@500;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,500&display=swap" rel="stylesheet">
+          <style>
+            .a4-sheet-paper {
+              padding: 0 !important;
+              background-color: #111a13 !important;
+            }
+          </style>
+          <div class="food-point-wrapper" style="
+            --sage-dark: #1e2f23;
+            --sage-accent: #b87d4b;
+            --cream: #faf6f0;
+            --cream-dark: #f0e8dc;
+            --text-dark: #2f4835;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background-color: var(--cream);
+            border: 12px double var(--sage-dark);
+            padding: 20px;
+            position: relative;
+          ">
+            <div style="text-align: center; border-bottom: 2px solid var(--sage-dark); padding-bottom: 15px; margin-bottom: 20px; position: relative;">
+              <span style="font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--sage-dark); letter-spacing: 1.5px; text-transform: uppercase;">${restaurantName}</span>
+              <p style="font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--sage-accent); margin: 4px 0 0 0;">${tagline}</p>
+              <div style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--sage-dark); overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.15); background: white; margin: 12px auto -75px auto; z-index: 10; position: relative;">
                 <img src="mango_pickle.png" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
-
-              <div style="display: flex; gap: 6px; width: 100%; justify-content: center; margin-top: 5px;">
-                <span style="background-color: var(--maroon); color: var(--primary-yellow); font-size: 8px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px;">Veg</span>
-                <span style="background-color: var(--maroon); color: var(--primary-yellow); font-size: 8px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px;">Non-Veg</span>
-                <span style="background-color: var(--maroon); color: var(--primary-yellow); font-size: 8px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px;">Organic</span>
-              </div>
             </div>
-
-            <!-- Right Top Panel (Maroon Staggered Stack) -->
+            <div style="height: 60px;"></div>
             <div style="
-              background-color: var(--maroon-dark);
-              padding: 25px;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              align-items: center;
-              position: relative;
+              flex: 1;
+              background: var(--cream-dark);
+              border: 1.5px solid rgba(47, 72, 53, 0.15);
+              border-radius: 12px;
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 24px;
+              padding: 24px 20px;
               box-sizing: border-box;
+              overflow: hidden;
             ">
-              <div style="position: relative; width: 260px; height: 160px; margin-top: 15px;">
-                <div style="width: 80px; height: 80px; border: 3px solid var(--primary-yellow); box-shadow: 0 5px 12px rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; position: absolute; top: 0; left: 10px; transform: rotate(-6deg);"><img src="mango_pickle.png" style="width:100%; height:100%; object-fit:cover;"></div>
-                <div style="width: 80px; height: 80px; border: 3px solid var(--white); box-shadow: 0 5px 12px rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; position: absolute; top: 30px; left: 90px; transform: rotate(4deg);"><img src="lemon_pickle.png" style="width:100%; height:100%; object-fit:cover;"></div>
-                <div style="width: 80px; height: 80px; border: 3px solid var(--primary-yellow); box-shadow: 0 5px 12px rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; position: absolute; top: 60px; left: 170px; transform: rotate(-4deg);"><img src="chicken_pickle.png" style="width:100%; height:100%; object-fit:cover;"></div>
+              <div style="display: flex; flex-direction: column; border-right: 1px dashed rgba(47, 72, 53, 0.2); padding-right: 12px;">
+                <h4 style="font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--sage-dark); letter-spacing: 1px; border-bottom: 1.5px solid var(--sage-accent); padding-bottom: 6px; margin: 0 0 15px 0; text-align: center;">Vegetarian Preserves</h4>
+                <div style="display: flex; flex-direction: column; justify-content: space-evenly; flex: 1;">
+                  ${vegRows}
+                </div>
               </div>
-
-              <div style="font-family: 'Great Vibes', cursive; font-size: 34px; color: var(--primary-yellow); text-align: center; margin-bottom: 5px;">Thank You...</div>
+              <div style="display: flex; flex-direction: column;">
+                <h4 style="font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--sage-dark); letter-spacing: 1px; border-bottom: 1.5px solid var(--sage-accent); padding-bottom: 6px; margin: 0 0 15px 0; text-align: center;">Premium Non-Vegetarian</h4>
+                <div style="display: flex; flex-direction: column; justify-content: space-evenly; flex: 1;">
+                  ${nonVegRows}
+                </div>
+              </div>
             </div>
-          </div>
+            <div style="text-align: center; margin-top: 15px; font-family: 'Outfit', sans-serif; font-size: 10px; color: var(--sage-dark); font-weight: 600; border-top: 1px solid rgba(47, 72, 53, 0.2); padding-top: 12px;">
+              📍 5th Avenue, Hyderabad | 📧 ${contactEmail} | 📞 Place Order: ${contactPhone}
+            </div>
+          </div>`;
+        }
 
-          <!-- Horizontal Separator Bar -->
-          <div style="height: 8px; background-color: var(--primary-yellow); width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>
-
-          <!-- Bottom Menu Content -->
-          <div style="
-            flex: 1;
-            display: grid;
-            grid-template-columns: 46% 54%;
-            gap: 20px;
-            padding: 25px 20px 10px 20px;
+        // =====================================
+        // LAYOUT 3: RETRO CHALKBOARD DARK
+        // =====================================
+        if (activeTheme === 'theme_charcoal') {
+          return `<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Serif+Telugu:wght@500;700&family=Outfit:wght@400;500;600;700;800&family=Fredericka+the+Great&display=swap" rel="stylesheet">
+          <style>
+            .a4-sheet-paper {
+              padding: 0 !important;
+              background-color: #111111 !important;
+            }
+          </style>
+          <div class="food-point-wrapper" style="
+            --chalk-bg: #1c1c1c;
+            --coral: #e05a47;
+            --chalk-gold: #d8b056;
+            --white-chalk: #f2f2f2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
             box-sizing: border-box;
-            overflow: hidden;
+            background-color: var(--chalk-bg);
+            border: 4px solid var(--white-chalk);
+            padding: 24px;
+            position: relative;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 16px 16px;
           ">
-            <!-- Left Column: Vegetarian (12 items) -->
-            <div style="display: flex; flex-direction: column;">
-              <div style="background-color: var(--primary-yellow); color: var(--maroon-dark); font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; padding: 6px 12px; border-radius: 30px; text-align: center; margin-bottom: 15px; box-shadow: 0 3px 8px rgba(0,0,0,0.15);">Vegetarian Pickles</div>
-              <div style="display: flex; flex-direction: column; justify-content: space-evenly; flex: 1;">
-                ${vegRows}
+            <div style="flex: 1; display: grid; grid-template-columns: 35% 65%; gap: 20px; box-sizing: border-box; overflow: hidden;">
+              <div style="border-right: 2px dashed rgba(242, 242, 242, 0.25); padding-right: 16px; display: flex; flex-direction: column; justify-content: space-between; text-align: center;">
+                <div>
+                  <h1 style="font-family: 'Fredericka the Great', serif; font-size: 28px; color: var(--coral); margin: 0 0 4px 0; text-transform: uppercase; line-height: 1.1;">${restaurantName.split(' ')[0]}</h1>
+                  <span style="font-family: 'Montserrat', sans-serif; font-size: 11px; color: var(--chalk-gold); letter-spacing: 1px; text-transform: uppercase;">${restaurantName.split(' ').slice(1).join(' ') || 'PICKLE POINT'}</span>
+                  <p style="font-size: 10px; color: #a3a3a3; margin: 8px 0 0 0; font-style: italic; line-height: 1.3;">"${tagline}"</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; align-items: center; margin: 20px 0;">
+                  <div style="width: 90px; height: 90px; border: 2px solid var(--white-chalk); border-radius: 4px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.5);"><img src="mango_pickle.png" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                  <div style="width: 90px; height: 90px; border: 2px solid var(--chalk-gold); border-radius: 4px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.5);"><img src="chicken_pickle.png" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                </div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 9.5px; color: #a3a3a3; line-height: 1.4; border-top: 1px solid rgba(242,242,242,0.15); padding-top: 10px;">
+                  Orders & Shipping:<br>
+                  <strong style="color: var(--chalk-gold);">${contactPhone}</strong>
+                </div>
               </div>
-            </div>
-
-            <!-- Right Column: Non-Vegetarian + Far Right Photo Stack -->
-            <div style="display: flex; flex-direction: column;">
-              <div style="background-color: var(--primary-yellow); color: var(--maroon-dark); font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; padding: 6px 12px; border-radius: 30px; text-align: center; margin-bottom: 15px; box-shadow: 0 3px 8px rgba(0,0,0,0.15);">Non-Vegetarian Pickles</div>
-              
-              <div style="display: flex; height: 100%; justify-content: space-between; flex: 1;">
-                <!-- Items List area -->
-                <div style="flex: 1; margin-right: 15px; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+              <div style="display: flex; flex-direction: column; justify-content: space-between; padding-left: 4px; box-sizing: border-box; overflow: hidden;">
+                <div style="flex: 1; display: flex; flex-direction: column; margin-bottom: 20px; justify-content: space-evenly;">
+                  <h3 style="font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 800; color: var(--chalk-gold); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1.5px solid var(--coral); padding-bottom: 4px; margin: 0 0 10px 0;">Veg Specialties</h3>
+                  <div style="display: flex; flex-direction: column; justify-content: space-evenly; flex: 1;">
+                    ${vegRows}
+                  </div>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-evenly;">
+                  <h3 style="font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 800; color: var(--coral); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1.5px solid var(--chalk-gold); padding-bottom: 4px; margin: 0 0 10px 0;">Non-Veg Specialties</h3>
                   <div style="display: flex; flex-direction: column; justify-content: space-evenly; flex: 1;">
                     ${nonVegRows}
                   </div>
-                  
-                  <div style="flex-grow: 1;"></div>
-                </div>
-
-                <!-- Far Right Photo Stack -->
-                <div style="width: 75px; display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
-                  <div style="width: 75px; height: 75px; border: 2px solid var(--primary-yellow); border-radius: 4px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"><img src="mango_pickle.png" style="width: 100%; height: 100%; object-fit: cover;"></div>
-                  <div style="width: 75px; height: 75px; border: 2px solid var(--primary-yellow); border-radius: 4px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"><img src="lemon_pickle.png" style="width: 100%; height: 100%; object-fit: cover;"></div>
-                  <div style="width: 75px; height: 75px; border: 2px solid var(--primary-yellow); border-radius: 4px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"><img src="chicken_pickle.png" style="width: 100%; height: 100%; object-fit: cover;"></div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Yellow Address Booking Bar at bottom -->
-          <div style="
-            background-color: var(--primary-yellow);
-            color: var(--maroon-dark);
-            padding: 10px 15px;
-            text-align: center;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-          ">
-            M. 5th Avenue, Hyderabad, India | ${contactEmail} | Order Now: <span style="color: var(--maroon);">${contactPhone}</span>
-          </div>
-        </div>`;
+            <div style="border-top: 1px solid rgba(242, 242, 242, 0.2); text-align: center; margin-top: 15px; padding-top: 10px; font-family: 'Outfit', sans-serif; font-size: 9px; color: #a3a3a3; letter-spacing: 0.5px;">
+              HOUSEMADE PRESERVES • SHIPPED GLOBALLY • CONTACT: ${contactEmail}
+            </div>
+          </div>`;
+        }
       }
 
       default:
