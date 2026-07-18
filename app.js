@@ -3680,6 +3680,72 @@ function extractInitialVariables(text, type) {
   return vars;
 }
 
+const FAQ_DATABASE = {
+  general: {
+    "gst invoice": "A GST Invoice is a tax invoice showing itemized supplies, quantities, prices, and GST tax percentages (e.g. 5%, 12%, 18%). It is legally required in India for claiming input tax credit.",
+    "proposal": "A Business Proposal outlines your project pitch, scope of work, timelines, and costs to help convert prospects into paying clients.",
+    "resume": "A resume is a structured summary of your contact details, target designation, work history, skills, and qualifications designed to win job interviews.",
+    "certificate": "A certificate is an official award document verifying completion of a program, internship achievement, or training course.",
+    "download": "You can download any generated document as a PDF by clicking the '📥 Download PDF' button, or as a Word file by clicking '📄 Download Word' on the ready card.",
+    "save": "Click '☁ Save to Cloud' on the ready card to store your drafts in your profile logs securely.",
+    "sign": "Click '✍ Digital Signature' on the ready card to open the drawing pad and sign your document draft digitally."
+  },
+  fields: {
+    "invoicenumber": "The Invoice Number is a unique serial ID for tracking this bill (e.g. INV-2026-001) in your accounting records.",
+    "invoicedate": "The Invoice Date is when the bill is issued to the client.",
+    "clientname": "The Client Name is the company or individual you are billing for your services.",
+    "clientaddress": "The Client Address is the billing location of your client.",
+    "clientgst": "The GSTIN is the Goods and Services Tax Identification Number of the client, used for tax recording.",
+    "billingitems": "Billing items list the services/goods, quantities, and prices (e.g. 'Software development,1,45000') to build the pricing table.",
+    "taxrate": "The Tax Rate is the GST percentage applied to the invoice items (usually 18% for services).",
+    "discount": "The Discount is the amount deducted from the subtotal price.",
+    "targetrole": "The Target Job Designation is the title of the position you are applying for (e.g. Frontend Developer).",
+    "experienceyears": "The Years of Experience summarizes your professional tenure in this career path.",
+    "coreskills": "Core Skills highlight your primary technical expertise or software competencies on the resume.",
+    "qualification": "Your highest qualification or degree details (e.g. B.Tech in Computer Science).",
+    "timeline": "The project duration estimate in days or weeks (e.g. 6 weeks) for completion.",
+    "projectcost": "The overall budget or pricing estimate for executing the business proposal.",
+    "projectscope": "The primary deliverables or work details you will provide under this project proposal.",
+    "recipientname": "The Full Name of the student or participant receiving the certificate.",
+    "coursename": "The title of the training program or internship (e.g. Full Stack Web Development).",
+    "duration": "The length of the program or internship (e.g. 3 Months).",
+    "completiondate": "The date when the certificate is issued."
+  }
+};
+
+function explainFieldOrAnswerQuestion(text, activeField, activeType) {
+  const t = text.toLowerCase().trim();
+  
+  // Check if it's a clarifying question about the active field
+  if (activeField) {
+    const isClarification = t.includes("why") || t.includes("for what") || t.includes("what is") || t.includes("meaning") || t.includes("explain") || t === "what" || t.endsWith("?");
+    if (isClarification) {
+      const fieldIdLower = activeField.id.toLowerCase();
+      const explanation = FAQ_DATABASE.fields[fieldIdLower];
+      if (explanation) {
+        return `🤖 **Clarification regarding "${activeField.label}":**\n${explanation}\n\n*Please type or speak the value for this field to proceed!*`;
+      }
+    }
+  }
+
+  // Check general FAQs
+  for (const [key, answer] of Object.entries(FAQ_DATABASE.general)) {
+    if (t.includes(key)) {
+      return `🤖 **DocGenius FAQ:**\n${answer}\n\n*If you want to continue your document creation, please answer the last question!*`;
+    }
+  }
+
+  // If user typed "for what" but we couldn't match a specific explanation
+  if (t.includes("for what") || t.includes("why") || t === "what" || t.endsWith("?")) {
+    if (activeField) {
+      return `🤖 **What to write for "${activeField.label}":**\nThis is a detail required to build your document. You can type the appropriate value, or enter a placeholder (like "N/A" or "Today") if you want to update it later.`;
+    }
+    return `🤖 I am here to help you generate documents through chat. Ask me to "Create an invoice", "Generate a resume", or "Write a proposal" to begin!`;
+  }
+
+  return null;
+}
+
 function parseResponseValues(text, requiredFields) {
   const extracted = {};
   const lines = text.split(/[\n,;]+/).map(l => l.trim()).filter(Boolean);
@@ -3766,6 +3832,14 @@ function processAssistantMessage(text) {
 
   // C. Parse answers for missing fields
   if (assistantState.waitingForField) {
+    // Check if user is asking a question instead of answering (e.g. "for what")
+    const activeField = assistantState.requiredFields[assistantState.currentFieldIndex];
+    const explanation = explainFieldOrAnswerQuestion(text, activeField, assistantState.activeType);
+    if (explanation) {
+      appendAssistantMessage("ai", explanation);
+      return;
+    }
+
     const extracted = parseResponseValues(text, assistantState.requiredFields);
     
     // Merge extracted variables
@@ -4213,6 +4287,14 @@ function processFloatMessage(text) {
 
   // C. Parse answers for missing fields
   if (floatingState.waitingForField) {
+    // Check if user is asking a question instead of answering (e.g. "for what")
+    const activeField = floatingState.requiredFields[floatingState.currentFieldIndex];
+    const explanation = explainFieldOrAnswerQuestion(text, activeField, floatingState.activeType);
+    if (explanation) {
+      appendFloatMessage("ai", explanation);
+      return;
+    }
+
     const extracted = parseResponseValues(text, floatingState.requiredFields);
     
     // Merge extracted variables
