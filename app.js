@@ -61,10 +61,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function initUserData() {
   const user = FirebaseMock.auth.currentUser;
   
+  // Set welcome message on dashboard dynamically
+  const welcomeTitle = document.getElementById("home-welcome-name");
+  if (welcomeTitle && user) {
+    welcomeTitle.innerText = `Hello, ${user.fullName || 'Genius'}!`;
+  }
+  
   // Set profile text avatar
   const avatar = document.getElementById("header-user-avatar");
   if (avatar && user) {
-    avatar.innerText = user.fullName ? user.fullName.charAt(0).toUpperCase() : "U";
+    const nameParts = (user.fullName || "").split(' ').filter(Boolean);
+    const initials = nameParts.length > 0 ? nameParts.map(n => n.charAt(0).toUpperCase()).slice(0, 2).join('') : "U";
+    avatar.innerText = initials;
     avatar.title = `${user.fullName} (${user.email})`;
   }
 
