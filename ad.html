@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sree Krishna Fast Food Center – Cinematic Commercial</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Great+Vibes&family=Cinzel+Decorative:wght@700;900&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #070708;
+      --bg-card: rgba(18, 18, 22, 0.75);
+      --primary-gold: #e2b13c;
+      --primary-gold-rgb: 226, 177, 60;
+      --accent-orange: #f95738;
+      --accent-orange-rgb: 249, 87, 56;
+      --text-white: #ffffff;
+      --text-gray: #a1a1aa;
+      --border-color: rgba(226, 177, 60, 0.2);
+      --sidebar-width: 380px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Cinematic Advertisement Container */
+    .ad-container {
+      flex: 1;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Screen Overlay / Vignette */
+    .screen-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: 
+        radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0.85) 100%),
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 100%, 100% 4px, 6px 100%;
+      z-index: 10;
+      opacity: 0.85;
+    }
+
+    /* Slideshow Container */
+    .slideshow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Slide Background Image with Ken Burns animation */
+    .slide-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 110%;
+      height: 110%;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.65) contrast(1.1) saturate(1.15);
+      transform: translate(-2.5%, -2.5%);
+    }
+
+    /* Ken Burns Animation Variations */
+    .slide.active .slide-bg.kb-zoom-in {
+      animation: kenBurnsZoomIn 10s ease-out forwards;
+    }
+    .slide.active .slide-bg.kb-zoom-out {
+      animation: kenBurnsZoomOut 10s ease-out forwards;
+    }
+    .slide.active .slide-bg.kb-pan-left {
+      animation: kenBurnsPanLeft 10s ease-out forwards;
+    }
+    .slide.active .slide-bg.kb-pan-right {
+      animation: kenBurnsPanRight 10s ease-out forwards;
+    }
+
+    @keyframes kenBurnsZoomIn {
+      0% { transform: translate(-2.5%, -2.5%) scale(1); }
+      100% { transform: translate(-2.5%, -2.5%) scale(1.15); }
+    }
+    @keyframes kenBurnsZoomOut {
+      0% { transform: translate(-2.5%, -2.5%) scale(1.15); }
+      100% { transform: translate(-2.5%, -2.5%) scale(1); }
+    }
+    @keyframes kenBurnsPanLeft {
+      0% { transform: translate(2.5%, -2.5%) scale(1.08); }
+      100% { transform: translate(-5%, -2.5%) scale(1.08); }
+    }
+    @keyframes kenBurnsPanRight {
+      0% { transform: translate(-5%, -2.5%) scale(1.08); }
+      100% { transform: translate(2.5%, -2.5%) scale(1.08); }
+    }
+
+    /* Dynamic Visual FX Canvas (Smoke/Embers) */
+    #fx-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Cinematic Text Typography Overlay */
+    .slide-content {
+      position: relative;
+      z-index: 12;
+      width: 80%;
+      max-width: 900px;
+      text-align: center;
+      padding: 30px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+      transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.6s;
+    }
+
+    .slide.active .slide-content {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .scene-number {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary-gold);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: inline-block;
+      border-bottom: 2px solid var(--primary-gold);
+      padding-bottom: 4px;
+    }
+
+    .scene-title {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #fff 0%, #e2b13c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+
+    .scene-desc {
+      font-size: 19px;
+      line-height: 1.6;
+      color: #eaeaea;
+      font-weight: 300;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Title Card Slide (Scene 6) */
+    .slide-content-final {
+      width: 90%;
+      max-width: 850px;
+      border: 2px solid var(--primary-gold);
+      padding: 50px 40px;
+      background: radial-gradient(circle, rgba(20,15,10,0.92) 0%, rgba(7,7,8,0.97) 100%);
+      box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.8),
+        inset 0 0 40px rgba(226, 177, 60, 0.1);
+      position: relative;
+    }
+
+    .slide-content-final::before, .slide-content-final::after {
+      content: '';
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      border: 2px solid var(--primary-gold);
+    }
+    .slide-content-final::before {
+      top: -6px; left: -6px;
+      border-right: none; border-bottom: none;
+    }
+    .slide-content-final::after {
+      bottom: -6px; right: -6px;
+      border-left: none; border-top: none;
+    }
+
+    .final-title {
+      font-family: 'Cinzel Decorative', Georgia, serif;
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--primary-gold);
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 20px rgba(226, 177, 60, 0.4);
+      animation: titleGlow 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      from { text-shadow: 0 0 10px rgba(226, 177, 60, 0.3); }
+      to { text-shadow: 0 0 30px rgba(226, 177, 60, 0.7), 0 0 10px rgba(249, 87, 56, 0.4); }
+    }
+
+    .final-location {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: var(--text-white);
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .final-location span.icon {
+      color: var(--accent-orange);
+    }
+
+    .final-menu {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 25px 0;
+      padding: 15px 0;
+      border-top: 1px solid rgba(226, 177, 60, 0.15);
+      border-bottom: 1px solid rgba(226, 177, 60, 0.15);
+    }
+
+    .menu-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(226, 177, 60, 0.08);
+      padding: 8px 16px;
+      border-radius: 30px;
+      border: 1px solid rgba(226, 177, 60, 0.25);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--primary-gold);
+    }
+
+    .final-usp-row {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 25px;
+    }
+
+    .usp-item {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-gray);
+      position: relative;
+    }
+
+    .usp-item:not(:last-child)::after {
+      content: '•';
+      position: absolute;
+      right: -18px;
+      color: var(--primary-gold);
+    }
+
+    .final-cta-btn {
+      background: linear-gradient(135deg, var(--primary-gold) 0%, #b8860b 100%);
+      color: var(--bg-dark);
+      padding: 14px 45px;
+      border-radius: 50px;
+      border: none;
+      font-size: 17px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(226, 177, 60, 0.4);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .final-cta-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(226, 177, 60, 0.6);
+      background: linear-gradient(135deg, #ffc837 0%, var(--primary-gold) 100%);
+    }
+
+    /* Video Playbar / Controls */
+    .playbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 90px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 80%, transparent 100%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 10px 40px 20px 40px;
+    }
+
+    /* Timeline Slider */
+    .timeline-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 12px;
+    }
+
+    .time-display {
+      font-size: 12px;
+      font-weight: 700;
+      font-family: monospace;
+      color: var(--text-gray);
+      min-width: 45px;
+    }
+
+    .timeline-slider-wrapper {
+      flex: 1;
+      position: relative;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .timeline-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-orange) 0%, var(--primary-gold) 100%);
+      border-radius: 3px;
+      width: 0%;
+      box-shadow: 0 0 10px var(--primary-gold);
+    }
+
+    .timeline-handle {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border: 3px solid var(--primary-gold);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      transition: transform 0.1s ease;
+    }
+
+    .timeline-slider-wrapper:hover .timeline-handle {
+      transform: translate(-50%, -50%) scale(1.25);
+    }
+
+    /* Control Buttons Row */
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .controls-left, .controls-center, .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .controls-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--primary-gold);
+      transform: scale(1.05);
+    }
+
+    .btn-icon.active {
+      color: var(--primary-gold);
+      text-shadow: 0 0 10px var(--primary-gold);
+    }
+
+    .btn-play-pause {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn-play-pause:hover {
+      background: var(--primary-gold);
+      color: var(--bg-dark);
+      box-shadow: 0 0 20px rgba(226, 177, 60, 0.4);
+    }
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .volume-slider {
+      width: 80px;
+      -webkit-appearance: none;
+      background: rgba(255, 255, 255, 0.2);
+      height: 4px;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary-gold);
+      cursor: pointer;
+    }
+
+    /* Gear Button & Back to Dashboard Button */
+    .btn-gear {
+      border: 1px solid var(--border-color);
+      background: rgba(226, 177, 60, 0.05);
+    }
+    
+    .btn-back-dash {
+      font-size: 13.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 8px 18px;
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back-dash:hover {
+      border-color: var(--primary-gold);
+      color: var(--primary-gold);
+      background: rgba(226, 177, 60, 0.08);
+      transform: translateY(-1px);
+    }
+
+    /* Creative Control Dashboard Sidebar */
+    .control-sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--bg-card);
+      border-left: 1px solid var(--border-color);
+      backdrop-filter: blur(20px);
+      z-index: 30;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -10px 0 35px rgba(0, 0, 0, 0.5);
+      transition: margin-right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .control-sidebar.collapsed {
+      margin-right: calc(-1 * var(--sidebar-width));
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--primary-gold);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .sidebar-section {
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--primary-gold);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #fff;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--primary-gold);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #eaeaea;
+    }
+
+    /* Switch styling */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 22px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255,255,255,0.15);
+      transition: .3s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary-gold);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+
+    .scene-editor-item {
+      background: rgba(0,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .scene-editor-item:hover {
+      border-color: rgba(226, 177, 60, 0.3);
+      background: rgba(226, 177, 60, 0.02);
+    }
+
+    .scene-editor-item.active-scene-edit {
+      border-color: var(--primary-gold);
+      background: rgba(226, 177, 60, 0.05);
+    }
+
+    .scene-header-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .scene-badge-mini {
+      color: var(--primary-gold);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    /* Sidebar Footer Button */
+    .sidebar-footer-row {
+      padding: 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 12px;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .btn-sidebar-primary {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary-gold);
+      color: var(--bg-dark);
+      font-weight: 800;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 12.5px;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-sidebar-primary:hover {
+      background: #ffc837;
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(226, 177, 60, 0.25);
+    }
+
+    .btn-sidebar-secondary {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .btn-sidebar-secondary:hover {
+      border-color: #fff;
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* Auto Play Overlay Modal */
+    .autoplay-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    .autoplay-overlay.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .autoplay-logo-box {
+      border: 2px solid var(--primary-gold);
+      padding: 30px;
+      border-radius: 50%;
+      margin-bottom: 25px;
+      background: radial-gradient(circle, rgba(226, 177, 60, 0.1) 0%, transparent 70%);
+      box-shadow: 0 0 30px rgba(226, 177, 60, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .autoplay-logo-box span {
+      font-size: 55px;
+      color: var(--primary-gold);
+    }
+
+    .autoplay-title {
+      font-family: 'Cinzel Decorative', Georgia, serif;
+      font-size: 28px;
+      color: var(--primary-gold);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .autoplay-subtitle {
+      font-size: 14px;
+      color: var(--text-gray);
+      margin-bottom: 40px;
+      letter-spacing: 1px;
+    }
+
+    .btn-autoplay-play {
+      background: var(--primary-gold);
+      color: var(--bg-dark);
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      padding: 18px 45px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-transform: uppercase;
+      box-shadow: 0 10px 30px rgba(226, 177, 60, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .btn-autoplay-play:hover {
+      background: #ffc837;
+      transform: scale(1.05);
+      box-shadow: 0 15px 40px rgba(226, 177, 60, 0.55);
+    }
+
+    /* STORYBOARD EXPORT OVERLAY */
+    .storyboard-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .storyboard-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .storyboard-container {
+      background: #111115;
+      border: 1px solid var(--border-color);
+      width: 90%;
+      max-width: 1000px;
+      max-height: 85vh;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+
+    .storyboard-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .storyboard-grid {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .storyboard-card {
+      background: #18181f;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .storyboard-thumb {
+      height: 150px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .storyboard-number {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--primary-gold);
+      color: var(--bg-dark);
+      font-size: 11px;
+      font-weight: 850;
+      padding: 3px 8px;
+      border-radius: 3px;
+    }
+
+    .storyboard-card-body {
+      padding: 15px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .storyboard-card-title {
+      font-size: 14px;
+      font-weight: 750;
+      color: var(--primary-gold);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .storyboard-card-desc {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-gray);
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(226, 177, 60, 0.2);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-gold);
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .ad-container {
+        height: calc(100vh - 80px);
+      }
+      .control-sidebar {
+        width: 100%;
+        height: 400px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        transition: transform 0.4s ease;
+      }
+      .control-sidebar.collapsed {
+        transform: translateY(400px);
+        margin-right: 0;
+      }
+      .scene-title {
+        font-size: 28px;
+      }
+      .scene-desc {
+        font-size: 15px;
+      }
+      .final-title {
+        font-size: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Autoplay Interactive Gateway Modal -->
+  <div class="autoplay-overlay" id="autoplay-overlay">
+    <div class="autoplay-logo-box">
+      <span class="material-symbols-outlined">restaurant_menu</span>
+    </div>
+    <h1 class="autoplay-title">Sree Krishna Fast Food Center</h1>
+    <p class="autoplay-subtitle">Cinematic Promotional Commercial Presentation</p>
+    <button class="btn-autoplay-play" id="btn-autoplay-play">
+      <span class="material-symbols-outlined" style="font-size: 24px; font-variation-settings: 'FILL' 1;">play_arrow</span>
+      Play Commercial
+    </button>
+  </div>
+
+  <!-- Main Presentation Window -->
+  <div class="ad-container" id="ad-container">
+    <div class="screen-overlay"></div>
+    
+    <!-- Dynamic Visual FX Canvas -->
+    <canvas id="fx-canvas"></canvas>
+
+    <!-- Full Screen Slideshow -->
+    <div class="slideshow" id="slideshow-slides">
+      <!-- Slides will be injected dynamically via JS for live updates -->
+    </div>
+
+    <!-- Timeline & Playback Panel -->
+    <div class="playbar">
+      <!-- Progress Bar Slider -->
+      <div class="timeline-container">
+        <span class="time-display" id="time-current">00:00</span>
+        <div class="timeline-slider-wrapper" id="timeline-slider-bg">
+          <div class="timeline-progress" id="timeline-progress-bar"></div>
+          <div class="timeline-handle" id="timeline-indicator"></div>
+        </div>
+        <span class="time-display" id="time-total">00:40</span>
+      </div>
+
+      <!-- Button Controls -->
+      <div class="controls-row">
+        <div class="controls-left">
+          <a href="index.html" class="btn-back-dash" title="Go back to Dashboard">
+            <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span>
+            Dashboard
+          </a>
+          <button class="btn-icon btn-gear" id="btn-sidebar-toggle" title="Open Customization Dashboard">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+        </div>
+
+        <div class="controls-center">
+          <button class="btn-icon" id="btn-prev" title="Previous Scene">
+            <span class="material-symbols-outlined">skip_previous</span>
+          </button>
+          <button class="btn-icon btn-play-pause" id="btn-play-pause-toggle" title="Play / Pause Commercial">
+            <span class="material-symbols-outlined" id="play-pause-icon" style="font-size: 28px; font-variation-settings: 'FILL' 1;">pause</span>
+          </button>
+          <button class="btn-icon" id="btn-next" title="Next Scene">
+            <span class="material-symbols-outlined">skip_next</span>
+          </button>
+        </div>
+
+        <div class="controls-right">
+          <!-- Audio settings -->
+          <div class="volume-container">
+            <button class="btn-icon" id="btn-mute-toggle" title="Mute / Unmute Audio">
+              <span class="material-symbols-outlined" id="volume-icon">volume_up</span>
+            </button>
+            <input type="range" class="volume-slider" id="volume-slider-field" min="0" max="1" step="0.05" value="0.75">
+          </div>
+          
+          <button class="btn-icon" id="btn-fullscreen-toggle" title="Toggle Fullscreen">
+            <span class="material-symbols-outlined">fullscreen</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar: Creative Control Dashboard -->
+  <div class="control-sidebar collapsed" id="control-sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">
+        <span class="material-symbols-outlined" style="font-size: 20px;">tune</span>
+        Creative Control
+      </h3>
+      <button class="btn-icon" id="btn-sidebar-close" title="Close Panel">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="sidebar-content">
+      
+      <!-- Section 1: Global Settings -->
+      <div class="sidebar-section">
+        <h4 class="section-title">
+          <span class="material-symbols-outlined" style="font-size: 16px;">settings_applications</span>
+          Commercial Properties
+        </h4>
+        <div class="form-group">
+          <label class="form-label">Restaurant Name</label>
+          <input type="text" class="form-input" id="cfg-brand-name" value="Sree Krishna Fast Food Center">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location Address</label>
+          <input type="text" class="form-input" id="cfg-brand-addr" value="Mudigubba – In Front of Society">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Commercial Duration (s)</label>
+          <input type="number" class="form-input" id="cfg-brand-dur" value="40" min="15" max="120" step="5">
+        </div>
+      </div>
+
+      <!-- Section 2: Visual FX Toggles -->
+      <div class="sidebar-section">
+        <h4 class="section-title">
+          <span class="material-symbols-outlined" style="font-size: 16px;">blur_on</span>
+          Cinematic Special FX
+        </h4>
+        <div class="toggle-row">
+          <span class="toggle-label">Active Particle Canvas Overlay</span>
+          <label class="switch">
+            <input type="checkbox" id="cfg-toggle-fx" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Noodle Steam (Scene 2)</span>
+          <label class="switch">
+            <input type="checkbox" id="cfg-toggle-steam" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Charcoal Embers (Scene 3)</span>
+          <label class="switch">
+            <input type="checkbox" id="cfg-toggle-embers" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Golden Dust particles (Scene 6)</span>
+          <label class="switch">
+            <input type="checkbox" id="cfg-toggle-dust" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Section 3: Scene Script Editor -->
+      <div class="sidebar-section">
+        <h4 class="section-title">
+          <span class="material-symbols-outlined" style="font-size: 16px;">movie_filter</span>
+          Script & Scene Timeline
+        </h4>
+        
+        <div id="sidebar-scenes-list">
+          <!-- Scenes list will be generated by JS -->
+        </div>
+      </div>
+
+      <!-- Active Scene Editor Form -->
+      <div class="sidebar-section" id="active-scene-form-box" style="display: none; background: rgba(0,0,0,0.3); border: 1px solid rgba(226,177,60,0.2); padding: 15px; border-radius: 10px;">
+        <h4 class="section-title" style="color: var(--primary-gold); margin-bottom: 10px;" id="edit-scene-label">Edit Scene 1</h4>
+        
+        <div class="form-group">
+          <label class="form-label">Scene Title Text</label>
+          <input type="text" class="form-input" id="edit-scene-title">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Commercial Script / Description</label>
+          <textarea class="form-textarea" id="edit-scene-desc"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Camera Movement</label>
+          <select class="form-input" id="edit-scene-kb" style="background: var(--bg-dark);">
+            <option value="kb-zoom-in">Ken Burns Zoom In</option>
+            <option value="kb-zoom-out">Ken Burns Zoom Out</option>
+            <option value="kb-pan-left">Ken Burns Pan Left</option>
+            <option value="kb-pan-right">Ken Burns Pan Right</option>
+          </select>
+        </div>
+        <button class="btn-sidebar-primary" id="btn-save-scene" style="width: 100%; margin-top: 10px; height: 36px; padding: 0;">
+          Save Scene Configuration
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Sidebar footer Actions -->
+    <div class="sidebar-footer-row">
+      <button class="btn-sidebar-secondary" id="btn-storyboard-open" title="Preview Commercial Storyboard">
+        <span class="material-symbols-outlined">grid_view</span>
+      </button>
+      <button class="btn-sidebar-primary" id="btn-reset-defaults">
+        <span class="material-symbols-outlined" style="font-size: 18px;">restart_alt</span>
+        Reset Script
+      </button>
+    </div>
+  </div>
+
+  <!-- Storyboard Viewer Modal -->
+  <div class="storyboard-modal" id="storyboard-modal">
+    <div class="storyboard-container">
+      <div class="storyboard-header">
+        <h2 class="sidebar-title" style="font-size: 18px;">
+          <span class="material-symbols-outlined" style="font-size: 24px;">auto_stories</span>
+          Commercial Storyboard Grid
+        </h2>
+        <button class="btn-icon" id="btn-storyboard-close" title="Close Storyboard">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      
+      <div class="storyboard-grid" id="storyboard-grid-content">
+        <!-- Storyboard boxes will be generated dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Web Audio & Visual Logic Scripts -->
+  <script>
+    // State management for commercial
+    const appState = {
+      isPlaying: false,
+      currentTime: 0,
+      totalDuration: 40, // default 40 seconds
+      activeSceneIndex: 0,
+      isMuted: false,
+      volume: 0.75,
+      fxEnabled: true,
+      steamEnabled: true,
+      embersEnabled: true,
+      dustEnabled: true,
+      
+      // Default Scenes config mapping exact commercial prompt structure
+      scenes: [
+        {
+          index: 0,
+          title: "Krishna Fast Food Center",
+          desc: "A beautiful evening at Sree Krishna Fast Food Center, Mudigubba. The warm lights glowing as excited food lovers happily arrive.",
+          img: "krishna_evening.png",
+          kbEffect: "kb-zoom-in",
+          durationPercent: 18 // 7.2s
+        },
+        {
+          index: 1,
+          title: "Flames of the Wok",
+          desc: "Witness the art of fast stir-fry. Fresh vegetables chopped finely, eggs cracked over a burning iron wok, and fresh noodles flying high in roaring flames.",
+          img: "chef_wok_fire.png",
+          kbEffect: "kb-pan-right",
+          durationPercent: 18 // 7.2s
+        },
+        {
+          index: 2,
+          title: "Sizzling Charcoal Kababs",
+          desc: "Juicy chicken pieces marinated in rich, traditional Indian spices, cooking over red-hot charcoal as waves of aromatic smoke drift high.",
+          img: "chicken_kabab.png",
+          kbEffect: "kb-zoom-out",
+          durationPercent: 18 // 7.2s
+        },
+        {
+          index: 3,
+          title: "Crispy Golden Perfection",
+          desc: "Golden fried chicken cooked to crispy perfection. Melting butter and falling red spices capture the ultimate mouth-watering crunch.",
+          img: "crispy_chicken.png",
+          kbEffect: "kb-pan-left",
+          durationPercent: 18 // 7.2s
+        },
+        {
+          index: 4,
+          title: "Sharing Delicious Memories",
+          desc: "Smiling friends, laughter, and family dinners. Sharing delicious plates of noodles, hot egg rice, and grilled chicken in a clean, modern atmosphere.",
+          img: "happy_diners.png",
+          kbEffect: "kb-zoom-in",
+          durationPercent: 13 // 5.2s
+        },
+        {
+          index: 5,
+          title: "Visit Us Today!",
+          desc: "", // Final screen relies on structured HTML final-title design
+          img: "krishna_evening.png",
+          kbEffect: "kb-zoom-out",
+          durationPercent: 15 // 6.0s
+        }
+      ]
+    };
+
+    // Keep deep copy of original scenes for reset
+    const DEFAULT_SCENES = JSON.parse(JSON.stringify(appState.scenes));
+
+    // Audio Synthesis Engine
+    class SoundscapeEngine {
+      constructor() {
+        this.ctx = null;
+        this.schedulerIntervalId = null;
+        this.synthNode = null;
+        this.bassNode = null;
+        this.droneOscs = [];
+        this.noiseFilter = null;
+        this.globalGain = null;
+        
+        // Music variables
+        this.tempo = 90; // 90 bpm
+        this.beatTime = 60 / this.tempo; // time of 1 beat (0.66s)
+        this.nextNoteTime = 0.0;
+        this.lastScheduledTime = 0.0;
+      }
+
+      init() {
+        if (this.ctx) return;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioContext();
+        
+        // Master Gain
+        this.globalGain = this.ctx.createGain();
+        this.globalGain.gain.value = appState.isMuted ? 0 : appState.volume;
+        this.globalGain.connect(this.ctx.destination);
+
+        // Start ambient drone background pad
+        this.startDronePad();
+      }
+
+      setVolume(val) {
+        if (!this.globalGain) return;
+        this.globalGain.gain.setValueAtTime(appState.isMuted ? 0 : val, this.ctx.currentTime);
+      }
+
+      start() {
+        this.init();
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+        
+        // Start scheduler loop
+        this.nextNoteTime = this.ctx.currentTime;
+        this.schedulerIntervalId = setInterval(() => this.scheduler(), 50);
+      }
+
+      stop() {
+        if (this.schedulerIntervalId) {
+          clearInterval(this.schedulerIntervalId);
+          this.schedulerIntervalId = null;
+        }
+        // Fade out active oscillator notes if any
+        if (this.droneOscs.length > 0) {
+          this.droneOscs.forEach(o => {
+            try {
+              o.gainNode.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+              setTimeout(() => o.stop(), 400);
+            } catch(e) {}
+          });
+          this.droneOscs = [];
+        }
+      }
+
+      scheduler() {
+        // While there are notes to play before the next interval window
+        while (this.nextNoteTime < this.ctx.currentTime + 0.1) {
+          this.scheduleBeat(this.nextNoteTime);
+          this.nextNoteTime += this.beatTime;
+        }
+      }
+
+      // Generate a cinematic drum beat (low boom)
+      scheduleBeat(time) {
+        if (!this.ctx || appState.currentTime >= appState.totalDuration) return;
+        
+        // Low drum thud
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.globalGain);
+
+        osc.frequency.setValueAtTime(90, time);
+        // Exponential pitch slide downward (typical cinematic drum drop)
+        osc.frequency.exponentialRampToValueAtTime(35, time + 0.4);
+
+        gain.gain.setValueAtTime(0.7, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.8);
+
+        osc.start(time);
+        osc.stop(time + 0.85);
+
+        // Schedule secondary light metallic percussion/shaker on offbeat
+        if (Math.random() > 0.4) {
+          this.scheduleShaker(time + this.beatTime / 2);
+        }
+
+        // Trigger dynamic sizzle sound depending on active slide (Scene 2, 3, 4 are cooking)
+        if (appState.activeSceneIndex >= 1 && appState.activeSceneIndex <= 3) {
+          this.triggerSizzleTick(time, 0.4);
+        }
+      }
+
+      // Generate white noise for sizzle or shaker
+      createNoiseBuffer() {
+        const bufferSize = this.ctx.sampleRate * 2;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        return buffer;
+      }
+
+      scheduleShaker(time) {
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.createNoiseBuffer();
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 6000;
+
+        const gain = this.ctx.createGain();
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.globalGain);
+
+        gain.gain.setValueAtTime(0.04, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+
+        noise.start(time);
+        noise.stop(time + 0.15);
+      }
+
+      // Trigger ambient commercial synth pad chords
+      startDronePad() {
+        // Minor/Major shifting chord progression (C-min to F-maj)
+        const notes = [
+          [130.81, 196.00, 261.63, 311.13], // C-Minor
+          [130.81, 196.00, 261.63, 311.13], 
+          [174.61, 261.63, 349.23, 440.00]  // F-Major
+        ];
+
+        let chordIndex = 0;
+
+        const playChord = () => {
+          if (!this.ctx) return;
+          
+          // Clear old voices
+          this.droneOscs.forEach(o => {
+            try {
+              o.gainNode.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 3.0);
+              setTimeout(() => o.stop(), 3100);
+            } catch(e){}
+          });
+          this.droneOscs = [];
+
+          const currentNotes = notes[chordIndex];
+          chordIndex = (chordIndex + 1) % notes.length;
+
+          currentNotes.forEach(freq => {
+            const osc = this.ctx.createOscillator();
+            const gainNode = this.ctx.createGain();
+            
+            // Warm filter
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 800;
+
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            
+            // Smooth slow-attack gain envelope
+            gainNode.gain.setValueAtTime(0.001, this.ctx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.08, this.ctx.currentTime + 2.0);
+
+            osc.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(this.globalGain);
+
+            osc.start();
+            osc.gainNode = gainNode;
+            this.droneOscs.push(osc);
+          });
+        };
+
+        playChord();
+        this.droneTimer = setInterval(playChord, 8000);
+      }
+
+      // Cooking oil sizzling generator
+      triggerSizzleTick(time, duration) {
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.createNoiseBuffer();
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 3500;
+        filter.Q.value = 2.0;
+
+        const gain = this.ctx.createGain();
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.globalGain);
+
+        gain.gain.setValueAtTime(0.18, time);
+        gain.gain.linearRampToValueAtTime(0.1, time + duration * 0.4);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+        noise.start(time);
+        noise.stop(time + duration + 0.1);
+      }
+
+      // Fire whoosh/sweep effect during transition
+      triggerWhoosh() {
+        if (!this.ctx) return;
+        const time = this.ctx.currentTime;
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = this.createNoiseBuffer();
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(100, time);
+        filter.frequency.exponentialRampToValueAtTime(2200, time + 0.4);
+        filter.frequency.exponentialRampToValueAtTime(80, time + 1.2);
+
+        const gain = this.ctx.createGain();
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.globalGain);
+
+        gain.gain.setValueAtTime(0.01, time);
+        gain.gain.linearRampToValueAtTime(0.35, time + 0.4);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 1.3);
+
+        noise.start(time);
+        noise.stop(time + 1.4);
+      }
+    }
+
+    const soundEngine = new SoundscapeEngine();
+
+    // Canvas FX Overlay (Rising Steam and Burning Charcoal Embers)
+    class FXCanvas {
+      constructor() {
+        this.canvas = document.getElementById("fx-canvas");
+        this.ctx = this.canvas.getContext("2d");
+        this.particles = [];
+        this.animationId = null;
+        this.resize();
+        window.addEventListener("resize", () => this.resize());
+      }
+
+      resize() {
+        this.canvas.width = this.canvas.offsetWidth;
+        this.canvas.height = this.canvas.offsetHeight;
+      }
+
+      start() {
+        if (this.animationId) return;
+        const loop = () => {
+          this.update();
+          this.draw();
+          this.animationId = requestAnimationFrame(loop);
+        };
+        this.animationId = requestAnimationFrame(loop);
+      }
+
+      stop() {
+        if (this.animationId) {
+          cancelAnimationFrame(this.animationId);
+          this.animationId = null;
+        }
+      }
+
+      update() {
+        if (!appState.fxEnabled) {
+          this.particles = [];
+          return;
+        }
+
+        // 1. Spawning logic based on current slide
+        const scene = appState.scenes[appState.activeSceneIndex];
+        
+        // Slide 2 is Chef cooking (needs steam)
+        if (appState.activeSceneIndex === 1 && appState.steamEnabled && Math.random() < 0.22) {
+          this.spawnSteam();
+        }
+
+        // Slide 3 is Kababs over charcoal (needs burning embers/sparks)
+        if (appState.activeSceneIndex === 2 && appState.embersEnabled && Math.random() < 0.35) {
+          this.spawnEmber();
+        }
+
+        // Slide 6 is Golden CTA (needs slow golden dust)
+        if (appState.activeSceneIndex === 5 && appState.dustEnabled && Math.random() < 0.08) {
+          this.spawnGoldenDust();
+        }
+
+        // 2. Physics & Life simulation
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life -= 1;
+          
+          if (p.type === 'ember') {
+            // Embers drift upwards and weave side to side
+            p.vx += Math.sin(p.life * 0.05) * 0.15;
+            p.vy -= 0.03; // Accelerate upward slightly
+          } else if (p.type === 'steam') {
+            // Steam expands and slows down
+            p.size += 0.25;
+            p.vx *= 0.98;
+          }
+
+          if (p.life <= 0) {
+            this.particles.splice(i, 1);
+          }
+        }
+      }
+
+      spawnSteam() {
+        this.particles.push({
+          x: Math.random() * this.canvas.width * 0.7 + (this.canvas.width * 0.15),
+          y: this.canvas.height + 40,
+          vx: Math.random() * 2 - 1,
+          vy: Math.random() * -1.5 - 1.5,
+          size: Math.random() * 20 + 15,
+          alpha: Math.random() * 0.15 + 0.05,
+          life: Math.random() * 120 + 80,
+          type: 'steam',
+          color: '200, 200, 210'
+        });
+      }
+
+      spawnEmber() {
+        this.particles.push({
+          x: Math.random() * this.canvas.width * 0.8 + (this.canvas.width * 0.1),
+          y: this.canvas.height + 10,
+          vx: Math.random() * 4 - 2,
+          vy: Math.random() * -3 - 2.5,
+          size: Math.random() * 3 + 1,
+          alpha: Math.random() * 0.8 + 0.2,
+          life: Math.random() * 90 + 50,
+          type: 'ember',
+          color: `249, ${Math.floor(Math.random() * 120 + 80)}, 56` // Ember orange range
+        });
+      }
+
+      spawnGoldenDust() {
+        this.particles.push({
+          x: Math.random() * this.canvas.width,
+          y: Math.random() * this.canvas.height,
+          vx: Math.random() * 0.6 - 0.3,
+          vy: Math.random() * -0.4 - 0.2,
+          size: Math.random() * 2 + 0.5,
+          alpha: Math.random() * 0.4 + 0.1,
+          life: Math.random() * 200 + 150,
+          type: 'dust',
+          color: '226, 177, 60' // Gold color
+        });
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          const currentAlpha = (p.life < 30) ? p.alpha * (p.life / 30) : p.alpha;
+          
+          this.ctx.beginPath();
+          if (p.type === 'steam') {
+            const grad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+            grad.addColorStop(0, `rgba(${p.color}, ${currentAlpha})`);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            this.ctx.fillStyle = grad;
+            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            this.ctx.fill();
+          } else if (p.type === 'ember') {
+            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            this.ctx.fillStyle = `rgba(${p.color}, ${currentAlpha})`;
+            this.ctx.shadowBlur = 10;
+            this.ctx.shadowColor = `rgba(${p.color}, 0.8)`;
+            this.ctx.fill();
+            this.ctx.shadowBlur = 0; // reset shadow
+          } else {
+            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            this.ctx.fillStyle = `rgba(${p.color}, ${currentAlpha})`;
+            this.ctx.fill();
+          }
+        }
+      }
+    }
+
+    const fxEngine = new FXCanvas();
+
+    // DOM Elements
+    const playPauseBtn = document.getElementById("btn-play-pause-toggle");
+    const playPauseIcon = document.getElementById("play-pause-icon");
+    const prevBtn = document.getElementById("btn-prev");
+    const nextBtn = document.getElementById("btn-next");
+    const muteBtn = document.getElementById("btn-mute-toggle");
+    const volumeIcon = document.getElementById("volume-icon");
+    const volumeSlider = document.getElementById("volume-slider-field");
+    const fullscreenBtn = document.getElementById("btn-fullscreen-toggle");
+    const sidebarToggleBtn = document.getElementById("btn-sidebar-toggle");
+    const sidebarCloseBtn = document.getElementById("btn-sidebar-close");
+    const sidebar = document.getElementById("control-sidebar");
+    
+    // Timeline elements
+    const timelineBg = document.getElementById("timeline-slider-bg");
+    const timelineProgress = document.getElementById("timeline-progress-bar");
+    const timelineIndicator = document.getElementById("timeline-indicator");
+    const timeCurrentLabel = document.getElementById("time-current");
+    const timeTotalLabel = document.getElementById("time-total");
+
+    // Config form elements
+    const configBrandName = document.getElementById("cfg-brand-name");
+    const configBrandAddr = document.getElementById("cfg-brand-addr");
+    const configBrandDur = document.getElementById("cfg-brand-dur");
+    const configToggleFX = document.getElementById("cfg-toggle-fx");
+    const configToggleSteam = document.getElementById("cfg-toggle-steam");
+    const configToggleEmbers = document.getElementById("cfg-toggle-embers");
+    const configToggleDust = document.getElementById("cfg-toggle-dust");
+    
+    // Storyboard Modal
+    const storyboardModal = document.getElementById("storyboard-modal");
+    const storyboardOpenBtn = document.getElementById("btn-storyboard-open");
+    const storyboardCloseBtn = document.querySelector(".storyboard-container #btn-storyboard-close");
+    const storyboardGrid = document.getElementById("storyboard-grid-content");
+    
+    const resetDefaultsBtn = document.getElementById("btn-reset-defaults");
+    const saveSceneBtn = document.getElementById("btn-save-scene");
+
+    // Dynamic injection of slides
+    function renderSlideshow() {
+      const slidesContainer = document.getElementById("slideshow-slides");
+      slidesContainer.innerHTML = "";
+      
+      const brandName = configBrandName.value;
+      const brandAddr = configBrandAddr.value;
+      
+      appState.scenes.forEach((scene, index) => {
+        const isFinal = (index === appState.scenes.length - 1);
+        const isActive = (index === appState.activeSceneIndex) ? "active" : "";
+        
+        let contentHtml = "";
+        
+        if (isFinal) {
+          contentHtml = `
+            <div class="slide-content slide-content-final">
+              <h1 class="final-title">${brandName.toUpperCase()}</h1>
+              <p class="final-location">
+                <span class="icon material-symbols-outlined">location_on</span>
+                ${brandAddr}
+              </p>
+              
+              <div class="final-menu">
+                <div class="menu-badge">🍗 CHICKEN</div>
+                <div class="menu-badge">🍜 NOODLES</div>
+                <div class="menu-badge">🍚 EGG RICE</div>
+                <div class="menu-badge">🔥 KABABS</div>
+              </div>
+              
+              <div class="final-usp-row">
+                <div class="usp-item">Fresh</div>
+                <div class="usp-item">Delicious</div>
+                <div class="usp-item">Hygienic</div>
+              </div>
+              
+              <button class="final-cta-btn" onclick="soundEngine.triggerWhoosh()">Visit Today!</button>
+            </div>
+          `;
+        } else {
+          contentHtml = `
+            <div class="slide-content">
+              <span class="scene-number">Scene 0${index + 1}</span>
+              <h2 class="scene-title">${scene.title}</h2>
+              <p class="scene-desc">${scene.desc}</p>
+            </div>
+          `;
+        }
+        
+        const slideDiv = document.createElement("div");
+        slideDiv.className = `slide ${isActive}`;
+        slideDiv.id = `slide-${index}`;
+        
+        // Assign Ken Burns effect
+        slideDiv.innerHTML = `
+          <div class="slide-bg ${scene.kbEffect}" style="background-image: url('${scene.img}');"></div>
+          ${contentHtml}
+        `;
+        
+        slidesContainer.appendChild(slideDiv);
+      });
+    }
+
+    // Playback loop controller
+    let playbackInterval = null;
+    
+    function startPlayback() {
+      if (appState.isPlaying) return;
+      appState.isPlaying = true;
+      playPauseIcon.textContent = "pause";
+      playPauseIcon.setAttribute("font-variation-settings", "'FILL' 1");
+      
+      soundEngine.start();
+      fxEngine.start();
+      
+      const framesPerSec = 30;
+      const stepSize = 1 / framesPerSec;
+      
+      playbackInterval = setInterval(() => {
+        appState.currentTime += stepSize;
+        
+        if (appState.currentTime >= appState.totalDuration) {
+          // Loop back or stop
+          appState.currentTime = 0;
+          setActiveScene(0);
+        } else {
+          // Determine active scene based on percentages
+          let accumulatedTime = 0;
+          let targetScene = 0;
+          for (let i = 0; i < appState.scenes.length; i++) {
+            const sceneTime = (appState.scenes[i].durationPercent / 100) * appState.totalDuration;
+            accumulatedTime += sceneTime;
+            if (appState.currentTime <= accumulatedTime) {
+              targetScene = i;
+              break;
+            }
+          }
+          if (targetScene !== appState.activeSceneIndex) {
+            setActiveScene(targetScene);
+          }
+        }
+        updateTimelineUI();
+      }, 1000 / framesPerSec);
+    }
+
+    function pausePlayback() {
+      if (!appState.isPlaying) return;
+      appState.isPlaying = false;
+      playPauseIcon.textContent = "play_arrow";
+      playPauseIcon.setAttribute("font-variation-settings", "'FILL' 1");
+      
+      clearInterval(playbackInterval);
+      playbackInterval = null;
+      soundEngine.stop();
+      fxEngine.stop();
+    }
+
+    function setActiveScene(index) {
+      if (index === appState.activeSceneIndex) return;
+      
+      // Trigger sound whoosh during transitions
+      soundEngine.triggerWhoosh();
+      
+      // Remove active from current slide
+      const currentSlide = document.getElementById(`slide-${appState.activeSceneIndex}`);
+      if (currentSlide) currentSlide.classList.remove("active");
+      
+      appState.activeSceneIndex = index;
+      
+      // Add active to new slide
+      const newSlide = document.getElementById(`slide-${index}`);
+      if (newSlide) newSlide.classList.add("active");
+      
+      // Sync Sidebar active scene highlight
+      document.querySelectorAll(".scene-editor-item").forEach((el, idx) => {
+        if (idx === index) el.classList.add("active-scene-edit");
+        else el.classList.remove("active-scene-edit");
+      });
+      
+      // Update script editor active scene panel
+      openSceneEditor(index);
+    }
+
+    function updateTimelineUI() {
+      // Calculate progress percentage
+      const percent = (appState.currentTime / appState.totalDuration) * 100;
+      timelineProgress.style.width = `${percent}%`;
+      timelineIndicator.style.left = `${percent}%`;
+      
+      // Update timers
+      timeCurrentLabel.textContent = formatTime(appState.currentTime);
+      timeTotalLabel.textContent = formatTime(appState.totalDuration);
+    }
+
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    // Handle user seeking on timeline
+    function handleTimelineSeek(event) {
+      const rect = timelineBg.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const width = rect.width;
+      let percent = clickX / width;
+      if (percent < 0) percent = 0;
+      if (percent > 1) percent = 1;
+      
+      appState.currentTime = percent * appState.totalDuration;
+      
+      // Find corresponding scene
+      let accumulatedTime = 0;
+      let targetScene = 0;
+      for (let i = 0; i < appState.scenes.length; i++) {
+        const sceneTime = (appState.scenes[i].durationPercent / 100) * appState.totalDuration;
+        accumulatedTime += sceneTime;
+        if (appState.currentTime <= accumulatedTime) {
+          targetScene = i;
+          break;
+        }
+      }
+      setActiveScene(targetScene);
+      updateTimelineUI();
+    }
+
+    // Creative Dashboard configuration builders
+    function buildSidebarScenesList() {
+      const listContainer = document.getElementById("sidebar-scenes-list");
+      listContainer.innerHTML = "";
+      
+      appState.scenes.forEach((scene, index) => {
+        const activeClass = (index === appState.activeSceneIndex) ? "active-scene-edit" : "";
+        const sceneItem = document.createElement("div");
+        sceneItem.className = `scene-editor-item ${activeClass}`;
+        sceneItem.onclick = () => {
+          // Seek playhead to start of this scene
+          let accumulatedPercent = 0;
+          for (let i = 0; i < index; i++) {
+            accumulatedPercent += appState.scenes[i].durationPercent;
+          }
+          appState.currentTime = (accumulatedPercent / 100) * appState.totalDuration;
+          setActiveScene(index);
+          updateTimelineUI();
+        };
+        
+        sceneItem.innerHTML = `
+          <div class="scene-header-title">
+            <span>Scene 0${index + 1}: ${scene.title}</span>
+            <span class="scene-badge-mini">${scene.durationPercent}% duration</span>
+          </div>
+        `;
+        listContainer.appendChild(sceneItem);
+      });
+    }
+
+    let editingIndex = 0;
+    function openSceneEditor(index) {
+      editingIndex = index;
+      const scene = appState.scenes[index];
+      
+      document.getElementById("active-scene-form-box").style.display = "block";
+      document.getElementById("edit-scene-label").textContent = `Edit Scene ${index + 1}`;
+      
+      document.getElementById("edit-scene-title").value = scene.title;
+      document.getElementById("edit-scene-desc").value = scene.desc;
+      document.getElementById("edit-scene-kb").value = scene.kbEffect;
+      
+      // Hide title text editing for the final slide since it's hardcoded to branding settings
+      if (index === appState.scenes.length - 1) {
+        document.getElementById("edit-scene-title").closest(".form-group").style.display = "none";
+        document.getElementById("edit-scene-desc").closest(".form-group").style.display = "none";
+      } else {
+        document.getElementById("edit-scene-title").closest(".form-group").style.display = "block";
+        document.getElementById("edit-scene-desc").closest(".form-group").style.display = "block";
+      }
+    }
+
+    // Storyboard grid HTML builder
+    function renderStoryboardGrid() {
+      storyboardGrid.innerHTML = "";
+      
+      const brandName = configBrandName.value;
+      const brandAddr = configBrandAddr.value;
+      
+      appState.scenes.forEach((scene, index) => {
+        const isFinal = (index === appState.scenes.length - 1);
+        const card = document.createElement("div");
+        card.className = "storyboard-card";
+        
+        let titleText = scene.title;
+        let descText = scene.desc;
+        
+        if (isFinal) {
+          titleText = brandName;
+          descText = `${brandAddr} | Fresh • Delicious • Hygienic. Visit Today!`;
+        }
+        
+        card.innerHTML = `
+          <div class="storyboard-thumb" style="background-image: url('${scene.img}');">
+            <div class="storyboard-number">SCENE 0${index + 1}</div>
+          </div>
+          <div class="storyboard-card-body">
+            <h4 class="storyboard-card-title">${titleText}</h4>
+            <p class="storyboard-card-desc">${descText}</p>
+          </div>
+        `;
+        
+        storyboardGrid.appendChild(card);
+      });
+    }
+
+    // Set up user Event Listeners
+    function setupEventListeners() {
+      // Gateway screen Play
+      document.getElementById("btn-autoplay-play").addEventListener("click", () => {
+        document.getElementById("autoplay-overlay").classList.add("fade-out");
+        soundEngine.init();
+        setTimeout(() => {
+          document.getElementById("autoplay-overlay").style.display = "none";
+          startPlayback();
+        }, 800);
+      });
+
+      // Controls
+      playPauseBtn.addEventListener("click", () => {
+        if (appState.isPlaying) pausePlayback();
+        else startPlayback();
+      });
+
+      prevBtn.addEventListener("click", () => {
+        let prev = appState.activeSceneIndex - 1;
+        if (prev < 0) prev = appState.scenes.length - 1;
+        
+        // Find time offset
+        let accumulatedPercent = 0;
+        for (let i = 0; i < prev; i++) {
+          accumulatedPercent += appState.scenes[i].durationPercent;
+        }
+        appState.currentTime = (accumulatedPercent / 100) * appState.totalDuration;
+        
+        setActiveScene(prev);
+        updateTimelineUI();
+      });
+
+      nextBtn.addEventListener("click", () => {
+        let next = appState.activeSceneIndex + 1;
+        if (next >= appState.scenes.length) next = 0;
+        
+        let accumulatedPercent = 0;
+        for (let i = 0; i < next; i++) {
+          accumulatedPercent += appState.scenes[i].durationPercent;
+        }
+        appState.currentTime = (accumulatedPercent / 100) * appState.totalDuration;
+        
+        setActiveScene(next);
+        updateTimelineUI();
+      });
+
+      muteBtn.addEventListener("click", () => {
+        appState.isMuted = !appState.isMuted;
+        if (appState.isMuted) {
+          volumeIcon.textContent = "volume_off";
+          muteBtn.classList.add("active");
+        } else {
+          volumeIcon.textContent = "volume_up";
+          muteBtn.classList.remove("active");
+        }
+        soundEngine.setVolume(appState.isMuted ? 0 : appState.volume);
+      });
+
+      volumeSlider.addEventListener("input", (e) => {
+        appState.volume = parseFloat(e.target.value);
+        if (appState.volume === 0) {
+          appState.isMuted = true;
+          volumeIcon.textContent = "volume_off";
+          muteBtn.classList.add("active");
+        } else {
+          appState.isMuted = false;
+          volumeIcon.textContent = "volume_up";
+          muteBtn.classList.remove("active");
+        }
+        soundEngine.setVolume(appState.isMuted ? 0 : appState.volume);
+      });
+
+      fullscreenBtn.addEventListener("click", () => {
+        const adContainer = document.getElementById("ad-container");
+        if (!document.fullscreenElement) {
+          adContainer.requestFullscreen().catch(err => {
+            alert(`Error entering fullscreen: ${err.message}`);
+          });
+          fullscreenBtn.classList.add("active");
+        } else {
+          document.exitFullscreen();
+          fullscreenBtn.classList.remove("active");
+        }
+      });
+
+      // Timeline dragging
+      timelineBg.addEventListener("mousedown", (e) => {
+        handleTimelineSeek(e);
+        const dragHandler = (ev) => handleTimelineSeek(ev);
+        document.addEventListener("mousemove", dragHandler);
+        document.addEventListener("mouseup", () => {
+          document.removeEventListener("mousemove", dragHandler);
+        }, { once: true });
+      });
+
+      // Sidebar Toggle
+      sidebarToggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("collapsed");
+        sidebarToggleBtn.classList.toggle("active");
+      });
+      sidebarCloseBtn.addEventListener("click", () => {
+        sidebar.classList.add("collapsed");
+        sidebarToggleBtn.classList.remove("active");
+      });
+
+      // Live updates from Config panels
+      configBrandName.addEventListener("input", () => renderSlideshow());
+      configBrandAddr.addEventListener("input", () => renderSlideshow());
+      
+      configBrandDur.addEventListener("change", (e) => {
+        let val = parseInt(e.target.value);
+        if (isNaN(val) || val < 10) val = 10;
+        appState.totalDuration = val;
+        updateTimelineUI();
+      });
+
+      configToggleFX.addEventListener("change", (e) => {
+        appState.fxEnabled = e.target.checked;
+      });
+      configToggleSteam.addEventListener("change", (e) => {
+        appState.steamEnabled = e.target.checked;
+      });
+      configToggleEmbers.addEventListener("change", (e) => {
+        appState.embersEnabled = e.target.checked;
+      });
+      configToggleDust.addEventListener("change", (e) => {
+        appState.dustEnabled = e.target.checked;
+      });
+
+      // Save Edited Scene settings
+      saveSceneBtn.addEventListener("click", () => {
+        const newTitle = document.getElementById("edit-scene-title").value;
+        const newDesc = document.getElementById("edit-scene-desc").value;
+        const newKb = document.getElementById("edit-scene-kb").value;
+        
+        appState.scenes[editingIndex].title = newTitle;
+        appState.scenes[editingIndex].desc = newDesc;
+        appState.scenes[editingIndex].kbEffect = newKb;
+        
+        renderSlideshow();
+        buildSidebarScenesList();
+        
+        // Symmetrical save effect feedback
+        saveSceneBtn.textContent = "Saved Successfully!";
+        saveSceneBtn.style.background = "#2e7d32";
+        setTimeout(() => {
+          saveSceneBtn.textContent = "Save Scene Configuration";
+          saveSceneBtn.style.background = "var(--primary-gold)";
+        }, 1500);
+      });
+
+      // Reset Defaults
+      resetDefaultsBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to restore default commercial script settings?")) {
+          appState.scenes = JSON.parse(JSON.stringify(DEFAULT_SCENES));
+          configBrandName.value = "Sree Krishna Fast Food Center";
+          configBrandAddr.value = "Mudigubba – In Front of Society";
+          configBrandDur.value = 40;
+          appState.totalDuration = 40;
+          
+          renderSlideshow();
+          buildSidebarScenesList();
+          openSceneEditor(appState.activeSceneIndex);
+        }
+      });
+
+      // Storyboard modal triggers
+      storyboardOpenBtn.addEventListener("click", () => {
+        renderStoryboardGrid();
+        storyboardModal.classList.add("active");
+      });
+      storyboardCloseBtn.addEventListener("click", () => {
+        storyboardModal.classList.remove("active");
+      });
+      storyboardModal.addEventListener("click", (e) => {
+        if (e.target === storyboardModal) storyboardModal.classList.remove("active");
+      });
+    }
+
+    // App Initialization bootstrap
+    function init() {
+      renderSlideshow();
+      buildSidebarScenesList();
+      openSceneEditor(0);
+      setupEventListeners();
+      updateTimelineUI();
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

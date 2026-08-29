@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 1: AVL Tree</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f8fafc;
+        }
+        .card {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        h1 {
+            color: #0f172a;
+            font-size: 2.25rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        h2 {
+            color: #1e3a8a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-top: 2rem;
+            font-size: 1.5rem;
+        }
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+        }
+        ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .download-btn {
+            display: inline-block;
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+        .download-btn:hover {
+            background-color: #1d4ed8;
+        }
+        .header-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header-container">
+            <h1>EXPERIMENT - 1</h1>
+            <div class="subtitle">AVL Tree Construction, Insertion, and Deletion</div>
+        </div>
+
+        <h2>AIM</h2>
+        <p>To write a C program to construct an AVL tree for a given set of elements, and implement insert and delete operations on the constructed tree. Write the contents of the tree into a new file using in-order traversal.</p>
+
+        <h2>DESCRIPTION</h2>
+        <p>An AVL tree (named after inventors Adelson-Velsky and Landis) is a self-balancing binary search tree (BST). In an AVL tree, the heights of the two child subtrees of any node differ by at most one. If at any time they differ by more than one, rebalancing is done to restore this property.</p>
+        <p>Key concepts of AVL Trees:</p>
+        <ul>
+            <li><strong>Balance Factor (BF):</strong> For any node N, <code>BF(N) = Height(Left_Subtree(N)) - Height(Right_Subtree(N))</code>. In a valid AVL tree, BF(N) must be in <code>{-1, 0, 1}</code>.</li>
+            <li><strong>Rotations:</strong> When insertion or deletion causes the balance factor of a node to deviate from this range, rotations are performed to rebalance the tree:
+                <ul>
+                    <li><strong>Left-Left (LL) Case:</strong> Single right rotation around the unbalanced node.</li>
+                    <li><strong>Right-Right (RR) Case:</strong> Single left rotation around the unbalanced node.</li>
+                    <li><strong>Left-Right (LR) Case:</strong> Left rotation on the left child, followed by a right rotation on the unbalanced node.</li>
+                    <li><strong>Right-Left (RL) Case:</strong> Right rotation on the right child, followed by a left rotation on the unbalanced node.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>ALGORITHM</h2>
+        <ol>
+            <li>Start the program.</li>
+            <li>Define the structure for the tree node including standard left, right child pointers, data, and height variable.</li>
+            <li>Implement utility functions: <code>height()</code> to get a node's height, <code>getBalance()</code> to compute balance factor, <code>createNode()</code> to allocate memory for a new node, and <code>max()</code> to find the maximum of two heights.</li>
+            <li>Implement rotations:
+                <ul>
+                    <li><code>leftRotate(x)</code>: Rotates a node x to the left, updating parent/child links and heights.</li>
+                    <li><code>rightRotate(y)</code>: Rotates a node y to the right, updating links and heights.</li>
+                </ul>
+            </li>
+            <li>Implement <code>insert(root, key)</code>:
+                <ul>
+                    <li>Recursively insert key as in standard BST.</li>
+                    <li>Update node height.</li>
+                    <li>Compute balance factor.</li>
+                    <li>Balance the node using LL, RR, LR, or RL rotations depending on balance factor and keys.</li>
+                </ul>
+            </li>
+            <li>Implement <code>deleteNode(root, key)</code>:
+                <ul>
+                    <li>Perform standard BST deletion.</li>
+                    <li>Update ancestor heights.</li>
+                    <li>Check balance factors and rotate if unbalanced.</li>
+                </ul>
+            </li>
+            <li>Implement <code>inOrderTraversal(root)</code> to print node contents recursively (left, root, right).</li>
+            <li>In the <code>main()</code> function, provide a menu-driven interface to insert, delete, traverse, or exit.</li>
+            <li>End.</li>
+        </ol>
+
+        <h2>SOURCE CODE</h2>
+        <pre><code>// Including necessary header files
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+// Structure for a tree node
+struct TreeNode {
+    int data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+    int height; // Height of the node
+};
+
+// Function to get the height of a node
+int height(struct TreeNode* node) {
+    if (node == NULL)
+        return 0;
+    return node-&gt;height;
+}
+
+// Function to get the maximum of two integers
+int max(int a, int b) {
+    return (a &gt; b) ? a : b;
+}
+
+// Function to create a new node with a given key
+struct TreeNode* createNode(int key) {
+    struct TreeNode* newNode = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    if (newNode != NULL) {
+        newNode-&gt;data = key;
+        newNode-&gt;left = NULL;
+        newNode-&gt;right = NULL;
+        newNode-&gt;height = 1; // New node is initially at height 1
+    }
+    return newNode;
+}
+
+// Function to right rotate subtree rooted with y
+struct TreeNode* rightRotate(struct TreeNode* y) {
+    struct TreeNode* x = y-&gt;left;
+    struct TreeNode* T2 = x-&gt;right;
+
+    // Perform rotation
+    x-&gt;right = y;
+    y-&gt;left = T2;
+
+    // Update heights
+    y-&gt;height = max(height(y-&gt;left), height(y-&gt;right)) + 1;
+    x-&gt;height = max(height(x-&gt;left), height(x-&gt;right)) + 1;
+
+    return x;
+}
+
+// Function to left rotate subtree rooted with x
+struct TreeNode* leftRotate(struct TreeNode* x) {
+    struct TreeNode* y = x-&gt;right;
+    struct TreeNode* T2 = y-&gt;left;
+
+    // Perform rotation
+    y-&gt;left = x;
+    x-&gt;right = T2;
+
+    // Update heights
+    x-&gt;height = max(height(x-&gt;left), height(x-&gt;right)) + 1;
+    y-&gt;height = max(height(y-&gt;left), height(y-&gt;right)) + 1;
+
+    // Return new root
+    return y;
+}
+
+// Function to get the balance factor of a node
+int getBalance(struct TreeNode* node) {
+    if (node == NULL)
+        return 0;
+    return height(node-&gt;left) - height(node-&gt;right);
+}
+
+// Function to insert a key into the AVL tree
+struct TreeNode* insert(struct TreeNode* root, int key) {
+    // Perform standard BST insert
+    if (root == NULL)
+        return createNode(key);
+
+    if (key &lt; root-&gt;data)
+        root-&gt;left = insert(root-&gt;left, key);
+    else if (key &gt; root-&gt;data)
+        root-&gt;right = insert(root-&gt;right, key);
+    else // Duplicate keys not allowed
+        return root;
+
+    // Update height of the current node
+    root-&gt;height = 1 + max(height(root-&gt;left), height(root-&gt;right));
+
+    // Get the balance factor to check whether this node became unbalanced
+    int balance = getBalance(root);
+
+    // Left Left Case
+    if (balance &gt; 1 && key &lt; root-&gt;left-&gt;data)
+        return rightRotate(root);
+
+    // Right Right Case
+    if (balance &lt; -1 && key &gt; root-&gt;right-&gt;data)
+        return leftRotate(root);
+
+    // Left Right Case
+    if (balance &gt; 1 && key &gt; root-&gt;left-&gt;data) {
+        root-&gt;left = leftRotate(root-&gt;left);
+        return rightRotate(root);
+    }
+
+    // Right Left Case
+    if (balance &lt; -1 && key &lt; root-&gt;right-&gt;data) {
+        root-&gt;right = rightRotate(root-&gt;right);
+        return leftRotate(root);
+    }
+
+    // Return the unchanged node pointer
+    return root;
+}
+
+// Function to find the node with the minimum value
+struct TreeNode* minValueNode(struct TreeNode* node) {
+    struct TreeNode* current = node;
+    while (current-&gt;left != NULL)
+        current = current-&gt;left;
+    return current;
+}
+
+// Function to delete a key from the AVL tree
+struct TreeNode* deleteNode(struct TreeNode* root, int key) {
+    if (root == NULL)
+        return root;
+
+    // Perform standard BST delete
+    if (key &lt; root-&gt;data)
+        root-&gt;left = deleteNode(root-&gt;left, key);
+    else if (key &gt; root-&gt;data)
+        root-&gt;right = deleteNode(root-&gt;right, key);
+    else {
+        // Node with only one child or no child
+        if ((root-&gt;left == NULL) || (root-&gt;right == NULL)) {
+            struct TreeNode* temp = root-&gt;left ? root-&gt;left : root-&gt;right;
+
+            // No child case
+            if (temp == NULL) {
+                temp = root;
+                root = NULL;
+            } else // One child case
+                *root = *temp; // Copy the contents of the non-empty child
+            free(temp);
+        } else {
+            // Node with two children, get the inorder successor
+            struct TreeNode* temp = minValueNode(root-&gt;right);
+
+            // Copy the inorder successor's data to this node
+            root-&gt;data = temp-&gt;data;
+
+            // Delete the inorder successor
+            root-&gt;right = deleteNode(root-&gt;right, temp-&gt;data);
+        }
+    }
+
+    // If the tree had only one node, then return
+    if (root == NULL)
+        return root;
+
+    // Update height of the current node
+    root-&gt;height = 1 + max(height(root-&gt;left), height(root-&gt;right));
+
+    // Get the balance factor to check whether this node became unbalanced
+    int balance = getBalance(root);
+
+    // Left Left Case
+    if (balance &gt; 1 && getBalance(root-&gt;left) &gt;= 0)
+        return rightRotate(root);
+
+    // Left Right Case
+    if (balance &gt; 1 && getBalance(root-&gt;left) &lt; 0) {
+        root-&gt;left = leftRotate(root-&gt;left);
+        return rightRotate(root);
+    }
+
+    // Right Right Case
+    if (balance &lt; -1 && getBalance(root-&gt;right) &lt;= 0)
+        return leftRotate(root);
+
+    // Right Left Case
+    if (balance &lt; -1 && getBalance(root-&gt;right) &gt; 0) {
+        root-&gt;right = rightRotate(root-&gt;right);
+        return leftRotate(root);
+    }
+
+    return root;
+}
+
+// Function to perform in-order traversal of the AVL tree
+void inOrderTraversal(struct TreeNode* root) {
+    if (root != NULL) {
+        inOrderTraversal(root-&gt;left);
+        printf("%d ", root-&gt;data);
+        inOrderTraversal(root-&gt;right);
+    }
+}
+
+// Function to free the memory allocated for the AVL tree
+void freeAVLTree(struct TreeNode* root) {
+    if (root != NULL) {
+        freeAVLTree(root-&gt;left);
+        freeAVLTree(root-&gt;right);
+        free(root);
+    }
+}
+
+int main() {
+    struct TreeNode* root = NULL;
+    int choice, key;
+    do {
+        printf("\nAVL Tree Operations:\n");
+        printf("1. Insert a node\n");
+        printf("2. Delete a node\n");
+        printf("3. In-order Traversal\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        if (scanf("%d", &choice) != 1) {
+            printf("Invalid input. Exiting.\n");
+            break;
+        }
+        switch (choice) {
+            case 1:
+                printf("Enter the key to insert: ");
+                if (scanf("%d", &key) == 1) {
+                    root = insert(root, key);
+                }
+                break;
+            case 2:
+                printf("Enter the key to delete: ");
+                if (scanf("%d", &key) == 1) {
+                    root = deleteNode(root, key);
+                }
+                break;
+            case 3:
+                printf("In-order Traversal: ");
+                inOrderTraversal(root);
+                printf("\n");
+                break;
+            case 4:
+                // Free allocated memory
+                freeAVLTree(root);
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice! Please enter a valid option.\n");
+        }
+    } while (choice != 4);
+    return 0;
+}
+</code></pre>
+
+        <h2>SAMPLE OUTPUT</h2>
+        <pre><code>AVL Tree Operations:
+1. Insert a node
+2. Delete a node
+3. In-order Traversal
+4. Exit
+Enter your choice: 1
+Enter the key to insert: 55
+
+AVL Tree Operations:
+1. Insert a node
+2. Delete a node
+3. In-order Traversal
+4. Exit
+Enter your choice: 3
+In-order Traversal: 55
+
+AVL Tree Operations:
+1. Insert a node
+2. Delete a node
+3. In-order Traversal
+4. Exit
+Enter your choice: 1
+Enter the key to insert: 85
+
+AVL Tree Operations:
+1. Insert a node
+2. Delete a node
+3. In-order Traversal
+4. Exit
+Enter your choice: 1
+Enter the key to insert: 74
+
+AVL Tree Operations:
+1. Insert a node
+2. Delete a node
+3. In-order Traversal
+4. Exit
+Enter your choice: 3
+In-order Traversal: 55 74 85
+
+AVL Tree Operations:
+1. Insert a node
+2. Delete a node
+3. In-order Traversal
+4. Exit
+Enter your choice: 2
+Enter the key to delete: 74
+
+AVL Tree Operations:
+1. Insert a node
+2. Delete a node
+3. In-order Traversal
+4. Exit
+Enter your choice: 3
+In-order Traversal: 55 85
+
+AVL Tree Operations:
+1. Insert a node
+2. Delete a node
+3. In-order Traversal
+4. Exit
+Enter your choice: 4
+Exiting...</code></pre>
+
+        <div style="text-align: center;">
+            <a href="experiment1.docx" class="download-btn">Download Word Document (docx)</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -895,7 +895,10 @@ function cleanMarkdownWrappers(text) {
 }
 
 function updateBrandingOverlayOnPreview() {
-  const useBranding = document.getElementById("gen-apply-brand").checked;
+  const docType = document.getElementById("gen-type") ? document.getElementById("gen-type").value : "";
+  const forceDisableBranding = (docType === "menu_card");
+
+  const useBranding = forceDisableBranding ? false : (document.getElementById("gen-apply-brand") ? document.getElementById("gen-apply-brand").checked : false);
   const brandHeader = document.getElementById("doc-brand-header");
   const brandFooter = document.getElementById("doc-brand-footer");
   const paper = document.getElementById("a4-document-paper");
@@ -1835,6 +1838,11 @@ window.triggerWordExport = function() {
 
 // Client-side text parsing to DOCX using docx.js library with a reliable HTML fallback
 function exportToWord(title, htmlContent, brandInfo, useBranding) {
+  const docType = document.getElementById("gen-type") ? document.getElementById("gen-type").value : "";
+  if (docType === "menu_card") {
+    useBranding = false;
+  }
+
   try {
     if (!window.docx) {
       throw new Error("docx.js library not loaded.");

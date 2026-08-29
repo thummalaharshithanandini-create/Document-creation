@@ -266,6 +266,11 @@
           <span class="material-symbols-outlined">qr_code</span>
           <span class="sidebar-label">QR Generator</span>
         </button>
+
+        <button class="sidebar-item" onclick="event.stopPropagation(); window.location.href='ad.html';" id="nav-item-cinematic-ad" style="border: 1px solid rgba(226, 177, 60, 0.2); background: rgba(226, 177, 60, 0.03);">
+          <span class="material-symbols-outlined" style="color: #FFC107;">videocam</span>
+          <span class="sidebar-label" style="color: #FFC107; font-weight: 600;">Cinematic Ad ⭐</span>
+        </button>
       </nav>
       
       <div class="sidebar-footer">
@@ -411,6 +416,12 @@
               <span class="material-symbols-outlined template-icon" style="color: #FF5722;">restaurant_menu</span>
               <h4>Traditional Menu</h4>
               <p>Ornate Indian menu with veg & non-veg sections</p>
+            </div>
+            
+            <div class="template-card-ad" onclick="window.location.href='ad.html';">
+              <span class="material-symbols-outlined template-icon" style="color: #FFC107;">videocam</span>
+              <h4>Cinematic Ad Commercial</h4>
+              <p>Ultra-realistic premium video commercial player with audio score & VFX</p>
             </div>
             <div class="template-card" id="btn-dashboard-upload" style="border: 1px dashed var(--primary); background: rgba(255, 193, 7, 0.02);">
               <span class="material-symbols-outlined template-icon" style="color: #FFC107;">upload_file</span>
@@ -1386,9 +1397,9 @@
   </div>
 
   <!-- Core Mock DB & Auth engine script modules -->
-  <script src="firebase-mock.js?v=11.1"></script>
-  <script src="db.js?v=11.1"></script>
+  <script src="firebase-mock.js?v=11.2"></script>
+  <script src="db.js?v=11.2"></script>
   <!-- Main application script -->
-  <script src="app.js?v=11.1"></script>
+  <script src="app.js?v=11.2"></script>
 </body>
 </html>
