@@ -186,8 +186,8 @@ def create_docx():
     run.font.name = 'Consolas'
     run.font.size = Pt(9.5)
     
-    doc.save("experiment1.docx")
-    print("experiment1.docx generated successfully!")
+    doc.save("adsa1.docx")
+    print("adsa1.docx generated successfully!")
 
 def create_html():
     with open('avl_tree.c', 'r') as f:
@@ -401,15 +401,15 @@ Enter your choice: 4
 Exiting...</code></pre>
 
         <div style="text-align: center;">
-            <a href="experiment1.docx" class="download-btn">Download Word Document (docx)</a>
+            <a href="adsa1.docx" class="download-btn">Download Word Document (docx)</a>
         </div>
     </div>
 </body>
 </html>
 """
-    with open("experiment1.html", "w") as f:
+    with open("adsa1.html", "w") as f:
         f.write(html_content)
-    print("experiment1.html generated successfully!")
+    print("adsa1.html generated successfully!")
 
 if __name__ == "__main__":
     create_docx()

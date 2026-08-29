@@ -9,8 +9,8 @@ A C program to construct an AVL tree for a given set of elements, and implement 
 ### 📁 Files and Resources
 
 - **C Implementation Code:** [`avl_tree.c`](avl_tree.c)
-- **Microsoft Word Document:** [`experiment1.docx`](experiment1.docx) (Downloadable report)
-- **HTML Web View:** [experiment1.html](https://thummalaharshithanandini-create.github.io/Document-creation/experiment1.html) (View directly on Chrome via GitHub Pages)
+- **Microsoft Word Document:** [`adsa1.docx`](adsa1.docx) (Downloadable report)
+- **HTML Web View:** [adsa1.html](https://thummalaharshithanandini-create.github.io/Document-creation/adsa1.html) (View directly on Chrome via GitHub Pages)
 
 ---
 
